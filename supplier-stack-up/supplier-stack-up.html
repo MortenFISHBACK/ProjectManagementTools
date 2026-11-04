@@ -346,17 +346,18 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   <div class="db">
     <div class="eyebrow">Final ranking</div>
     <div class="small">The current ranking as an image for slides and minutes, or as a print-ready page you can save as PDF.</div>
-    <div class="row"><button class="primary" id="btnPng">Download ranking .png</button><button id="btnPrint">Print / save as PDF</button><label class="chk"><input type="checkbox" id="prMap" checked> Include segmentation map in PDF</label></div>
+    <div class="row"><button class="primary" id="btnPng">Download ranking .png</button><button id="btnPdf">Download ranking .pdf</button><button id="btnPrint">Print</button><label class="chk"><input type="checkbox" id="prMap" checked> Include segmentation map when printing</label></div>
     <div class="row"><span id="pngMsg" class="ok small"></span></div>
     <div class="sect eyebrow">Data</div>
     <div class="small">Current criteria, weights and scores as CSV. Paste into a spreadsheet, or fill it with the real suppliers and import it back.</div>
     <textarea id="exportText" readonly></textarea>
-    <div class="row"><button class="primary" id="btnCopy">Copy</button><a id="dl" download="supplier-stack-up.csv"><button>Download .csv</button></a><span id="exportMsg" class="ok"></span></div>
+    <div class="row"><button class="primary" id="btnCopy">Copy</button><button id="btnCsv">Download .csv</button><span id="exportMsg" class="ok"></span></div>
   </div>
 </dialog>
 
 <div class="tip" id="tip"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -713,7 +714,7 @@ document.getElementById('btnDoImport').addEventListener('click',()=>{
 });
 document.getElementById('btnExport').addEventListener('click',()=>{
   document.getElementById('pngMsg').textContent='';const csv=toCSV();document.getElementById('exportText').value=csv;document.getElementById('exportMsg').textContent='';
-  document.getElementById('dl').href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);dlgE.showModal();
+  dlgE.showModal();
 });
 document.getElementById('btnCopy').addEventListener('click',()=>{
   const ta=document.getElementById('exportText');const msg=document.getElementById('exportMsg');
@@ -808,16 +809,43 @@ function rankingSVG(){
 }
 function fileBase(){const sc=S.scenarios.find(x=>x.id===S.activeScn);const slug=(sc?sc.name:'custom').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   return `supplier-ranking-${slug||'custom'}-${new Date().toISOString().slice(0,10)}`;}
-function downloadPNG(){
-  const msg=document.getElementById('pngMsg');msg.className='ok small';msg.textContent='';
-  const {svg,w,h}=rankingSVG();const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));const img=new Image();
-  img.onload=()=>{try{const cv=document.createElement('canvas');cv.width=w*2;cv.height=h*2;const g=cv.getContext('2d');g.scale(2,2);g.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
-    cv.toBlob(b=>{if(!b){msg.className='err small';msg.textContent='Could not make the image in this browser.';return;}
-      const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fileBase()+'.png';document.body.appendChild(a);a.click();a.remove();
-      setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg.textContent='Saved '+a.download;},'image/png');}
-    catch(err){msg.className='err small';msg.textContent='Could not make the image in this browser.';}};
-  img.onerror=()=>{URL.revokeObjectURL(url);msg.className='err small';msg.textContent='Could not make the image in this browser.';};
-  img.src=url;
+// Save a file: inside the Claude artifact viewer go through its downloads capability, otherwise a normal browser download.
+let dlNs;
+async function saveFile(filename,data){
+  if(window.claude&&typeof window.claude.use==='function'){
+    if(dlNs===undefined)dlNs=await window.claude.use('downloads');
+    if(dlNs){try{await dlNs.save({filename,data});return 'saved';}catch(e){if(e&&e.code==='declined')return 'declined';throw e;}}
+  }
+  const blob=data instanceof Blob?data:new Blob([data]);const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);return 'saved';
+}
+function rankingCanvas(){
+  return new Promise((resolve,reject)=>{
+    const {svg,w,h}=rankingSVG();const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));const img=new Image();
+    img.onload=()=>{try{const cv=document.createElement('canvas');cv.width=w*2;cv.height=h*2;const g=cv.getContext('2d');g.scale(2,2);g.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve({cv,w,h});}catch(e){reject(e);}};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('render'));};
+    img.src=url;
+  });
+}
+function expMsg(t,err){const m=document.getElementById('pngMsg');m.className=(err?'err':'ok')+' small';m.textContent=t;}
+async function finishSave(name,data){
+  try{const r=await saveFile(name,data);expMsg(r==='saved'?'Saved '+name:'Download cancelled.');}
+  catch(e){expMsg('Could not save the file here.',true);}
+}
+async function downloadPNG(){
+  expMsg('');
+  try{const {cv}=await rankingCanvas();const blob=await new Promise(r=>cv.toBlob(r,'image/png'));if(!blob)throw new Error('png');await finishSave(fileBase()+'.png',blob);}
+  catch(e){expMsg('Could not make the image in this browser.',true);}
+}
+async function downloadPDF(){
+  expMsg('');
+  if(!window.jspdf){expMsg('PDF export needs an internet connection the first time. Use Print instead.',true);return;}
+  try{const {cv,w,h}=await rankingCanvas();
+    const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=12;
+    const k=Math.min((pw-2*m)/w,(ph-2*m)/h);pdf.addImage(cv.toDataURL('image/png'),'PNG',m,m,w*k,h*k);
+    await finishSave(fileBase()+'.pdf',pdf.output('blob'));}
+  catch(e){expMsg('Could not make the PDF in this browser.',true);}
 }
 function printRanking(){
   document.getElementById('printMeta').textContent=`${scnLabel()} · ${new Date().toLocaleDateString()}`;
@@ -828,6 +856,8 @@ function printRanking(){
   setTimeout(()=>{window.print();},60);
 }
 document.getElementById('btnPng').addEventListener('click',downloadPNG);
+document.getElementById('btnPdf').addEventListener('click',downloadPDF);
+document.getElementById('btnCsv').addEventListener('click',()=>{const n='supplier-stack-up.csv';saveFile(n,toCSV()).then(r=>{document.getElementById('exportMsg').textContent=r==='saved'?'Saved '+n:'';}).catch(()=>{document.getElementById('exportMsg').textContent='Could not save here. Use Copy instead.';});});
 document.getElementById('btnPrint').addEventListener('click',printRanking);
 
 /* ---------- render ---------- */
