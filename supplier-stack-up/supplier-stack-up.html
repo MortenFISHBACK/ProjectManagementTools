@@ -293,7 +293,7 @@ button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-l
 .srow .nm{font-weight:600;display:flex;align-items:center;gap:6px;min-width:0;padding:2px 0}
 .srow .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .srow .nm i{width:10px;height:10px;border-radius:50%;flex:none}
-.srow .lvb{border:1px dashed var(--line);background:transparent;border-radius:6px;font-weight:700;color:var(--muted);padding:6px 0;min-height:34px}
+.srow .lvb{border:1px dashed var(--line);background:transparent;border-radius:6px;font-weight:700;color:var(--muted);padding:4px 0;min-height:30px}
 .srow .lvb:hover{border-style:solid;border-color:var(--hl);color:var(--hl)}
 .srow .lvb[aria-pressed=true]{background:var(--hl);border:1px solid var(--hl);color:var(--hl-fg)}
 .srow .lvb.ko{box-shadow:inset 0 -3px 0 var(--critical)}
@@ -308,6 +308,25 @@ button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-l
 .cmp-row .c{grid-column:1/-1;font-size:.8rem;color:var(--fg-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cmp-stats{font-size:.82rem;color:var(--fg-2);margin-bottom:6px}
 .cmp-lv{font-size:.78rem;color:var(--muted);margin-top:8px}
+
+body[data-page=scoring] header.top .sub{display:none}
+body[data-page=scoring] .sc-wrap{margin-top:10px}
+/* stakeholders per criterion */
+.stk{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--surface)}
+.stk-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:6px}
+.stk-h h3{font-size:.92rem}
+.stk-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.stk-item{display:inline-flex;align-items:center;gap:6px;padding:3px 4px 3px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);font-size:.85rem;max-width:100%}
+.stk-item.done{background:var(--hl-soft);border-color:var(--hl)}
+.stk-item .who{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:22ch}
+.stk-item select{font-size:.78rem;padding:1px 2px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.stk-item label{display:inline-flex;align-items:center;gap:3px;font-size:.78rem;color:var(--fg-2);cursor:pointer}
+.stk-item button{border:0;background:transparent;padding:0 6px;color:var(--muted);font-size:1rem;line-height:1}
+.stk-item button:hover{color:var(--critical)}
+.stk-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.stk-add input{flex:1 1 200px;min-width:0;padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:.88rem}
+.stk-add input:focus{outline:0;border-color:var(--hl)}
+.stk-add select{padding:5px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:.88rem}
 
 /* export + print */
 .print-only{display:none}
@@ -487,7 +506,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <dialog id="dlgImport">
   <div class="dh"><h3>Import data</h3><button class="small ghost" data-close>Close</button></div>
   <div class="db">
-    <div class="small">Paste CSV (or pick a file). First row: <code>Supplier</code> then one column per criterion. Optional rows: <code>Perspective</code>, <code>Weight</code> (0-10), <code>Knock-out</code> (minimum score), <code>Definition</code>, <code>Score 1 means</code> … <code>Score 5 means</code>. Optional columns: <code>Comment: &lt;criterion&gt;</code> and <code>Overall note</code>. Every other row is a supplier with scores 1-5. Export first to get a template with the current criteria.</div>
+    <div class="small">Paste CSV (or pick a file). First row: <code>Supplier</code> then one column per criterion. Optional rows: <code>Perspective</code>, <code>Weight</code> (0-10), <code>Knock-out</code> (minimum score), <code>Definition</code>, <code>Score 1 means</code> … <code>Score 5 means</code>, <code>Stakeholders</code> (e.g. <code>Head of Quality [Validate]; Site planner [Provide input, done]</code>). Optional columns: <code>Comment: &lt;criterion&gt;</code> and <code>Overall note</code>. Every other row is a supplier with scores 1-5. Export first to get a template with the current criteria.</div>
     <div class="row"><input type="file" id="file" accept=".csv,text/csv,.txt" aria-label="Choose a CSV file"></div>
     <textarea id="importText" placeholder="Supplier,Spend and future volume,Supply risk and criticality&#10;Perspective,Business importance,Resilience &amp; dependency&#10;Weight,8,7&#10;Acme Ltd,4,3"></textarea>
     <div class="row"><button class="primary" id="btnDoImport">Load</button><span id="importMsg" class="err"></span></div>
@@ -571,6 +590,9 @@ function exampleState(){
     {id:nid(),name:'Resilience first',weights:w([6,5,10,9,4,3,5,4,5])},
     {id:nid(),name:'Value creation',weights:w([5,7,5,6,10,8,8,6,6])}
   ];
+  const stk=(n,arr)=>{const d=dims.find(x=>x.name===n);if(d)d.stake=arr.map(a=>({name:a[0],role:a[1],done:!!a[2]}));};
+  stk('Spend and future volume',[['Category manager','Provide input',1],['Finance business partner','Validate']]);
+  stk('Supply risk and criticality',[['Site supply planning','Provide input'],['Quality & regulatory','Consult'],['Head of procurement','Validate']]);
   const notes={},supNotes={};const byName=n=>suppliers.find(x=>x.name===n).id;const dimBy=n=>dims.find(x=>x.name===n).id;
   supNotes[byName('Atlas Fermentation Systems')]='Example note: sole qualified source for our fermentation vessels; 40-week lead time.';
   notes[byName('Atlas Fermentation Systems')]={[dimBy('Preferred-customer position, reciprocity and mutual dependence')]:'Example: we are under 3% of their revenue.'};
@@ -872,6 +894,34 @@ document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('cli
   ['map','h2h','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
 }));
 
+/* ---------- stakeholders per criterion ---------- */
+const ROLES=['Provide input','Consult','Validate','Inform'];
+function stakeHTML(d){
+  const list=(d.stake||[]).map((x,i)=>`<span class="stk-item${x.done?' done':''}" data-i="${i}"><span class="who" title="${esc(x.name)}">${esc(x.name)}</span>`+
+    `<select aria-label="Role of ${esc(x.name)}">${ROLES.map(r=>`<option${r===x.role?' selected':''}>${r}</option>`).join('')}</select>`+
+    `<label title="Tick when their input or validation is in"><input type="checkbox"${x.done?' checked':''}> done</label><button aria-label="Remove ${esc(x.name)}" title="Remove">×</button></span>`).join('');
+  const done=(d.stake||[]).filter(x=>x.done).length,n=(d.stake||[]).length;
+  return `<div class="stk"><div class="stk-h"><h3>Stakeholders for this criterion</h3><span class="small muted">${n?`${done} of ${n} done`:'Who should give input, be consulted or validate the scores?'}</span></div>`+
+    (n?`<div class="stk-list">${list}</div>`:'')+
+    `<div class="stk-add"><input placeholder="Name or role, e.g. Head of Quality" aria-label="Stakeholder name"><select aria-label="Stakeholder role">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select><button class="small">+ Add</button></div></div>`;
+}
+function wireStake(host,d){
+  const box=host.querySelector('.stk');if(!box)return;
+  const redraw=()=>{const nb=document.createElement('div');nb.innerHTML=stakeHTML(d);box.replaceWith(nb.firstChild);wireStake(host,d);save();};
+  box.querySelectorAll('.stk-item').forEach(el=>{const x=d.stake[+el.dataset.i];
+    el.querySelector('select').addEventListener('change',e=>{x.role=e.target.value;save();});
+    el.querySelector('input[type=checkbox]').addEventListener('change',e=>{x.done=e.target.checked;redraw();});
+    el.querySelector('button').addEventListener('click',()=>{d.stake.splice(+el.dataset.i,1);redraw();});});
+  const inp=box.querySelector('.stk-add input'),sel=box.querySelector('.stk-add select');
+  const add=()=>{const v=inp.value.trim();if(!v)return;d.stake=d.stake||[];d.stake.push({name:v,role:sel.value,done:false});redraw();const ni=host.querySelector('.stk-add input');if(ni)ni.focus();};
+  box.querySelector('.stk-add button').addEventListener('click',add);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add();}});
+}
+function stakeToText(d){return (d.stake||[]).map(x=>`${x.name} [${x.role}${x.done?', done':''}]`).join('; ');}
+function stakeFromText(t){return String(t||'').split(/\s*[;\n]\s*/).filter(Boolean).map(part=>{const m=/^(.*?)\s*\[([^\]]*)\]\s*$/.exec(part);
+  if(!m)return {name:part,role:ROLES[0],done:false};const bits=m[2].split(',').map(b=>b.trim());const role=ROLES.find(r=>r.toLowerCase()===(bits[0]||'').toLowerCase())||ROLES[0];
+  return {name:m[1],role,done:bits.slice(1).some(b=>/^done$/i.test(b))};});}
+
 /* ---------- scoring: one criterion per screen ---------- */
 function orderedDims(){const o=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>o.push(d)));return o;}
 function curDim(){const o=orderedDims();if(!S.curDim||!o.some(d=>d.id===S.curDim))S.curDim=o[0]&&o[0].id;return o.find(d=>d.id===S.curDim);}
@@ -894,8 +944,9 @@ function renderScoring(){
     h+=`<div class="srow${scFocusSid===s.id?' hl':''}" data-sid="${s.id}"><div class="nm"><i style="background:${col(si)}"></i><span title="${esc(s.name)}">${esc(s.name)}</span></div>`+
       [1,2,3,4,5].map(n=>`<button class="lvb${d.min&&n<d.min?' ko':''}" data-v="${n}" aria-pressed="${v===n}" aria-label="${esc(s.name)}: score ${n}" title="${esc(d[LVK[n-1]]||'Score '+n)}">${n}</button>`).join('')+
       `<input class="cm" value="${esc(noteOf(s.id,d.id))}" placeholder="Evidence, examples…" aria-label="Comment on ${esc(s.name)}"></div>`;});
-  h+=`</div>`;
+  h+=`</div>`+stakeHTML(d);
   host.innerHTML=h;
+  wireStake(host,d);
   host.querySelectorAll('textarea[data-k]').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();});});
   host.querySelectorAll('.srow').forEach(r=>{const sid=r.dataset.sid;
     r.querySelectorAll('.lvb').forEach(b=>b.addEventListener('click',()=>{S.scores[sid][d.id]=+b.dataset.v;scFocusSid=sid;
@@ -931,6 +982,7 @@ function showPage(pg){
   if(pg!=='results'&&pg!=='scoring')pg='input';S.page=pg;
   document.querySelectorAll('[data-pagebody]').forEach(el=>el.hidden=el.dataset.pagebody!==pg);
   document.querySelectorAll('nav.pages [data-page]').forEach(b=>{if(b.dataset.page===pg)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  document.body.dataset.page=pg;
   if(pg==='scoring'){renderScoring();sizeScoring();}
   save();
 }
@@ -955,7 +1007,7 @@ function toCSV(){
   const lines=[['Supplier',...ordered.map(d=>d.name)].map(q).join(','),['Perspective',...ordered.map(d=>S.persp.find(p=>p.id===d.pid).name)].map(q).join(','),['Weight',...ordered.map(d=>d.weight)].join(','),['Knock-out',...ordered.map(d=>d.min||0)].join(',')];
   lines[0]+=','+[...ordered.map(d=>'Comment: '+d.name),'Overall note'].map(q).join(',');
   const pad=','.repeat(ordered.length+1);for(let i=1;i<4;i++)lines[i]+=pad;
-  [['Definition','desc'],['Score 1 means','low'],['Score 2 means','lv2'],['Score 3 means','lv3'],['Score 4 means','lv4'],['Score 5 means','high']].forEach(([lab,k])=>lines.push([lab,...ordered.map(d=>d[k]||'')].map(q).join(',')+pad));
+  [['Definition','desc'],['Score 1 means','low'],['Score 2 means','lv2'],['Score 3 means','lv3'],['Score 4 means','lv4'],['Score 5 means','high'],['Stakeholders','__stake']].forEach(([lab,k])=>lines.push([lab,...ordered.map(d=>k==='__stake'?stakeToText(d):(d[k]||''))].map(q).join(',')+pad));
   S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id]),...ordered.map(d=>q(noteOf(s.id,d.id))),q(supNoteOf(s.id))].join(',')));
   return lines.join('\n');
 }
@@ -984,6 +1036,7 @@ function importCSV(text){
     if(key==='perspective'||key==='group'||key==='category'){dims.forEach(d=>{d.pid=perspByName(r[d.col]||'Other').id;});return;}
     const defKey={'definition':'desc','description':'desc','score 1 means':'low','1 means':'low','low':'low','score 5 means':'high','5 means':'high','high':'high','score 2 means':'lv2','score 3 means':'lv3','score 4 means':'lv4'}[key];
     if(defKey){dims.forEach(d=>{d[defKey]=r[d.col]||'';});return;}
+    if(key==='stakeholders'||key==='stakeholder'){dims.forEach(d=>{d.stake=stakeFromText(r[d.col]);});return;}
     if(key==='weight'||key==='weights'){dims.forEach(d=>{const v=Math.round(+r[d.col]);d.weight=isFinite(v)?Math.max(0,Math.min(10,v)):5;});return;}
     if(key==='knock-out'||key==='knockout'||key==='min'||key==='minimum'){dims.forEach(d=>{const v=Math.round(+r[d.col]);d.min=(v>=2&&v<=5)?v:0;});return;}
     if(!r[0])return;
