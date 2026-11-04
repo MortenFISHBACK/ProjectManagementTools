@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Supplier Stack-Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: weights rail on the left grouped by perspective; results on the right: ranking first, then the segmentation map and detail tabs. */
+:root{
+  --bg:#f4f7f5; --surface:#ffffff; --surface-2:#e9efec; --fg:#15231f; --fg-2:#4a5a55; --muted:#7b8a85;
+  --line:#d1dbd6; --line-2:#e3eae6; --accent:#1b4d41; --accent-fg:#ffffff; --accent-soft:#d8efe2; --accent-ink:#1b4d41;
+  --good:#0ca30c; --critical:#d03b3b; --warn:#fab219;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948; --s0:#8a9490;
+  --seq:27,77,65;
+  --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --radius:6px; --shadow:0 1px 2px rgba(21,35,31,.06),0 4px 14px rgba(21,35,31,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111917; --surface:#192320; --surface-2:#222e2a; --fg:#eaf1ee; --fg-2:#b3c1bb; --muted:#7f8e89;
+    --line:#2f3c37; --line-2:#28342f; --accent:#6fcfa3; --accent-fg:#0f1f19; --accent-soft:#1d3a30; --accent-ink:#8fdcb8;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s0:#6f7c77;
+    --seq:111,207,163; --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111917; --surface:#192320; --surface-2:#222e2a; --fg:#eaf1ee; --fg-2:#b3c1bb; --muted:#7f8e89;
+  --line:#2f3c37; --line-2:#28342f; --accent:#6fcfa3; --accent-fg:#0f1f19; --accent-soft:#1d3a30; --accent-ink:#8fdcb8;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s0:#6f7c77;
+  --seq:111,207,163; --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.55rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:600}
+h3{font-size:.95rem;font-weight:600}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:6px 12px;line-height:1.2}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.small{padding:3px 8px;font-size:.85rem}
+button.ghost{border-color:transparent;background:transparent;color:var(--fg-2)}
+button.ghost:hover{color:var(--critical);border-color:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+code{font-size:.85em;background:var(--surface-2);padding:1px 4px;border-radius:3px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding:20px 0 14px;border-bottom:1px solid var(--line)}
+header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
+.badge{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn);color:#2b2000;vertical-align:middle;margin-left:8px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar label{font-size:.85rem;color:var(--fg-2)}
+.toolbar select{padding:6px 8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);max-width:200px}
+
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;margin-top:20px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:0}
+.panel>.head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+.panel>.body{padding:14px 16px}
+.stack{display:grid;gap:20px;min-width:0;align-content:start}
+
+/* weights rail */
+.pgroup{margin-bottom:14px}
+.phead{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;padding:6px 8px;border-radius:4px;background:var(--surface-2);border-left:4px solid var(--s1)}
+.phead .pname{font-family:var(--font-display);font-weight:600;font-size:.9rem}
+.phead .pdesc{grid-column:1/-1;font-size:.78rem;color:var(--muted);line-height:1.3}
+.phead .share{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right}
+.phead .axis{grid-column:1/-1;display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);margin-top:2px}
+.phead .axis button{padding:1px 7px;font-size:.72rem;border-radius:999px}
+.phead .axis button[aria-pressed=true]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.wrow{display:grid;grid-template-columns:1fr auto;gap:0 8px;align-items:center;padding:6px 0 4px 8px;border-bottom:1px solid var(--line-2)}
+.wrow .name{grid-column:1/-1}
+.wrow .name{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0;font-size:.92rem}
+.wrow .name input{border:0;background:transparent;font-weight:600;width:100%;min-width:0;padding:0}
+.wrow .name input:focus{outline:1px solid var(--accent);border-radius:3px}
+.wrow .pct{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right;min-width:3.5ch}
+.wrow input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0;min-width:0}
+.wrow .min{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
+.wrow .min select{font-size:.78rem;padding:1px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.wrow .min button{margin-left:auto}
+
+/* ranking */
+.rank{display:grid;gap:8px}
+.rrow{display:grid;grid-template-columns:2.2ch minmax(120px,190px) minmax(0,1fr) 5.5ch;gap:10px;align-items:center}
+@media (max-width:520px){.rrow{grid-template-columns:2.2ch minmax(0,1fr) 5.5ch}.rrow .track{grid-column:1/-1}}
+.rrow .pos{font-family:var(--font-display);font-weight:700;color:var(--muted);text-align:right}
+.rrow .sname{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .track{height:22px;display:flex;align-items:stretch;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.rrow .seg{height:100%;margin-right:2px;transition:width .25s ease}
+.rrow .seg.pend{margin-right:4px}
+.rrow .seg:last-child{margin-right:0;border-radius:0 4px 4px 0}
+.rrow .score{font-family:var(--font-display);font-weight:700;text-align:right}
+.rrow.out{opacity:.55}
+.rrow.out .track{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,transparent 6px 10px)}
+.rrow.out .score{color:var(--critical);font-size:.8rem;font-weight:600}
+.rank-foot{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:.85rem;color:var(--fg-2)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--fg-2)}
+.legend span.i{display:inline-flex;align-items:center;gap:5px}
+.legend span.i i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.legend span.i i.round{border-radius:50%}
+.insight{margin-top:10px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 4px 4px 0;font-size:.9rem}
+
+/* tabs */
+.tabs{display:flex;gap:2px;padding:6px 10px 0;border-bottom:1px solid var(--line-2);overflow-x:auto}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--fg-2);padding:8px 12px;font-weight:600;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--accent)}
+
+/* segmentation map */
+.map-wrap{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:16px;align-items:start}
+@media (max-width:760px){.map-wrap{grid-template-columns:1fr}}
+.map-wrap svg{width:100%;max-width:640px;height:auto;display:block}
+.map-wrap svg text{font-family:var(--font-body);font-size:12px;fill:var(--fg-2)}
+.map-wrap svg .q{fill:var(--surface-2)}
+.map-wrap svg .qlab{font-family:var(--font-display);font-weight:600;font-size:12px;fill:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.map-wrap svg .ax{stroke:var(--line);stroke-width:1}
+.map-wrap svg .mid{stroke:var(--fg-2);stroke-width:1;stroke-dasharray:4 4}
+.map-wrap svg .axt{font-family:var(--font-display);font-weight:600;fill:var(--fg)}
+.map-wrap svg .pl{font-weight:600;fill:var(--fg);font-size:12px}
+.map-side{display:grid;gap:10px;font-size:.88rem}
+.map-side .thr{display:grid;gap:4px}
+.map-side input[type=range]{width:100%;accent-color:var(--accent)}
+.seglist{display:grid;gap:6px}
+.seglist div{display:grid;gap:1px}
+.seglist b{font-family:var(--font-display);font-weight:600;font-size:.8rem;letter-spacing:.03em;text-transform:uppercase;color:var(--fg-2)}
+
+/* matrix */
+.scroll{overflow-x:auto}
+table.matrix{border-collapse:separate;border-spacing:0;width:100%;min-width:760px}
+table.matrix th,table.matrix td{padding:6px 6px;text-align:center;border-bottom:1px solid var(--line-2);vertical-align:middle}
+table.matrix th{font-family:var(--font-display);font-weight:600;font-size:.8rem;color:var(--fg-2)}
+table.matrix th.pg{border-bottom:3px solid;padding-bottom:4px;font-size:.78rem;letter-spacing:.03em}
+table.matrix th.dim{vertical-align:bottom;max-width:105px;font-weight:600}
+table.matrix th.dim .w{display:block;font-weight:400;color:var(--muted)}
+table.matrix td.sup{text-align:left;font-weight:600;white-space:nowrap}
+table.matrix td.sup input{border:0;background:transparent;font-weight:600;width:100%;min-width:150px;padding:2px 4px;border-radius:3px}
+table.matrix td.sup input:focus{outline:1px solid var(--accent)}
+table.matrix td.cell input{width:3.2em;text-align:center;border:1px solid transparent;border-radius:4px;padding:3px 0;background:transparent;font-weight:600}
+table.matrix td.cell input:hover{border-color:var(--line)}
+table.matrix td.cell input:focus{border-color:var(--accent);outline:0}
+table.matrix td.cell.fail input{box-shadow:inset 0 0 0 2px var(--critical)}
+table.matrix td.total{font-family:var(--font-display);font-weight:700}
+.scale-note{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.85rem;color:var(--fg-2)}
+
+/* radar */
+.radar-wrap{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:16px;align-items:start}
+@media (max-width:700px){.radar-wrap{grid-template-columns:1fr}}
+.radar-wrap svg{width:100%;max-width:600px;height:auto;display:block;margin:0 auto}
+.radar-wrap svg text{font-family:var(--font-body);font-size:11px;fill:var(--fg-2)}
+.radar-wrap svg .ring{fill:none;stroke:var(--line);stroke-width:1}
+.radar-wrap svg .spoke{stroke:var(--line);stroke-width:1}
+.picks{display:grid;gap:6px}
+.picks label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.picks label i{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+
+/* scenarios */
+table.cmp{border-collapse:collapse;width:100%;min-width:420px}
+table.cmp th,table.cmp td{padding:6px 10px;border-bottom:1px solid var(--line-2);text-align:center}
+table.cmp th{font-family:var(--font-display);font-weight:600;font-size:.82rem;color:var(--fg-2)}
+table.cmp td.sup,table.cmp th.sup{text-align:left;font-weight:600}
+table.cmp td .r{font-family:var(--font-display);font-weight:700}
+table.cmp td .r.top{color:var(--accent-ink)}
+table.cmp td .sc{display:block;font-size:.78rem;color:var(--muted)}
+.scn-list{display:grid;gap:6px;margin-top:12px}
+.scn-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line-2)}
+.scn-row .nm{font-weight:600;flex:1;min-width:120px}
+.scn-row .w{font-size:.8rem;color:var(--muted);flex:1 1 100%}
+.saveas{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.saveas input{padding:6px 8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);min-width:0;flex:1 1 180px}
+
+/* dialogs */
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);padding:0;max-width:min(680px,calc(100vw - 32px));width:100%;box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(10,14,20,.45)}
+dialog .dh{padding:14px 18px;border-bottom:1px solid var(--line-2);display:flex;justify-content:space-between;align-items:center}
+dialog .db{padding:14px 18px;display:grid;gap:10px}
+dialog textarea{width:100%;min-height:200px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;padding:8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-2);resize:vertical}
+dialog .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+dialog .err{color:var(--critical);font-size:.9rem}
+dialog .ok{color:var(--good);font-size:.9rem}
+.tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font-size:.8rem;padding:4px 8px;border-radius:4px;z-index:20;max-width:280px;opacity:0;transition:opacity .1s}
+.tip.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h1>Supplier Stack-Up <span class="badge" id="badge">Example data</span></h1>
+    <div class="sub">Supplier partnership segmentation across four perspectives. Weight the criteria, adjust the scores, and watch the ranking and the segmentation map move. Everything stays in this browser; nothing is sent anywhere.</div>
+  </div>
+  <div class="toolbar">
+    <label for="scnSel">Scenario</label>
+    <select id="scnSel" aria-label="Scenario"></select>
+    <button id="btnImport">Import data</button>
+    <button id="btnExport">Export</button>
+    <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="panel" aria-label="Weights">
+    <div class="head"><h2>Criteria weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
+    <div class="body">
+      <div class="small muted" style="margin-bottom:10px">0 = ignore, 10 = critical. The share shows how much of the final score each criterion carries. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
+      <div id="weights"></div>
+    </div>
+  </aside>
+
+  <main class="stack">
+    <section class="panel" aria-label="Ranking">
+      <div class="head"><h2>Overall ranking</h2><span class="small muted" id="scnTag"></span></div>
+      <div class="body">
+        <div class="rank" id="rank"></div>
+        <div class="rank-foot"><span class="eyebrow" style="align-self:center">Bar segments by perspective</span><div class="legend" id="dimLegend"></div></div>
+        <div class="insight" id="insight"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Detail">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="map">Segmentation map</button>
+        <button role="tab" aria-selected="false" data-tab="scores">Scores</button>
+        <button role="tab" aria-selected="false" data-tab="profile">Profiles</button>
+        <button role="tab" aria-selected="false" data-tab="scn">Scenarios</button>
+      </div>
+      <div class="body" id="pane-map" role="tabpanel">
+        <div class="map-wrap">
+          <svg id="map" viewBox="0 0 640 520" role="img" aria-label="Segmentation map of suppliers"></svg>
+          <div class="map-side">
+            <div><div class="eyebrow">Axes</div><div id="axesNote" class="small" style="margin-top:4px"></div></div>
+            <div class="thr"><label for="thr"><span class="eyebrow">Segment line</span> <span class="num" id="thrVal"></span></label><input type="range" id="thr" min="2" max="4" step="0.1" aria-label="Threshold between low and high"></div>
+            <div><div class="eyebrow" style="margin-bottom:4px">Segments</div><div class="seglist" id="seglist"></div></div>
+            <div class="small muted">Each axis is the weighted average (1 to 5) of the criteria in the perspectives assigned to it. Knocked-out suppliers are drawn hollow.</div>
+          </div>
+        </div>
+      </div>
+      <div class="body" id="pane-scores" role="tabpanel" hidden>
+        <div class="scroll"><table class="matrix" id="matrix"></table></div>
+        <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it. Higher always means more of the criterion: more spend, more risk, more capability, more willingness.</span></div>
+        <div style="margin-top:12px"><button class="small" id="btnAddSup">+ Supplier</button></div>
+      </div>
+      <div class="body" id="pane-profile" role="tabpanel" hidden>
+        <div class="radar-wrap">
+          <svg id="radar" viewBox="0 0 600 520" role="img" aria-label="Radar chart of supplier scores per criterion"></svg>
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px">Show</div>
+            <div class="picks" id="picks"></div>
+            <div class="small muted" style="margin-top:10px">Raw scores, no weights. Rings mark 1 to 5.</div>
+          </div>
+        </div>
+      </div>
+      <div class="body" id="pane-scn" role="tabpanel" hidden>
+        <div class="small muted" style="margin-bottom:10px">Rank and segment of each supplier under each saved set of weights. Scores are shared; only the weights differ.</div>
+        <div class="scroll"><table class="cmp" id="cmp"></table></div>
+        <div class="saveas">
+          <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
+          <button class="primary" id="btnSaveScn">Save current weights</button>
+        </div>
+        <div class="scn-list" id="scnList"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="dlgImport">
+  <div class="dh"><h3>Import data</h3><button class="small ghost" data-close>Close</button></div>
+  <div class="db">
+    <div class="small">Paste CSV (or pick a file). First row: <code>Supplier</code> then one column per criterion. Optional rows: <code>Perspective</code> (which perspective each criterion belongs to), <code>Weight</code> (0-10) and <code>Knock-out</code> (minimum score). Every other row is a supplier with scores 1-5. Export first to get a template with the current criteria.</div>
+    <div class="row"><input type="file" id="file" accept=".csv,text/csv,.txt" aria-label="Choose a CSV file"></div>
+    <textarea id="importText" placeholder="Supplier,Spend and future volume,Supply risk and criticality&#10;Perspective,Business importance,Resilience &amp; dependency&#10;Weight,8,7&#10;Acme Ltd,4,3"></textarea>
+    <div class="row"><button class="primary" id="btnDoImport">Load</button><span id="importMsg" class="err"></span></div>
+  </div>
+</dialog>
+
+<dialog id="dlgExport">
+  <div class="dh"><h3>Export</h3><button class="small ghost" data-close>Close</button></div>
+  <div class="db">
+    <div class="small">Current criteria, weights and scores as CSV. Paste into a spreadsheet, or fill it with the real suppliers and import it back.</div>
+    <textarea id="exportText" readonly></textarea>
+    <div class="row"><button class="primary" id="btnCopy">Copy</button><a id="dl" download="supplier-stack-up.csv"><button>Download .csv</button></a><span id="exportMsg" class="ok"></span></div>
+  </div>
+</dialog>
+
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+'use strict';
+const STORE='supplier-stack-up-v2';
+const SLOTS=['--s1','--s2','--s3','--s4','--s5','--s6','--s7','--s8'];
+const col=i=>i<SLOTS.length?`var(${SLOTS[i]})`:'var(--s0)';
+let uid=1; const nid=()=>'id'+(uid++)+'_'+Math.random().toString(36).slice(2,6);
+const SEGMENTS={hh:'Strategic partner',lh:'Develop',hl:'Secure & manage',ll:'Transactional'};
+
+function exampleState(){
+  const persp=[
+    {id:nid(),name:'Business importance',desc:'Why the supplier matters to us',axis:'x'},
+    {id:nid(),name:'Resilience & dependency',desc:'What continuity and substitution exposure exists',axis:'x'},
+    {id:nid(),name:'Joint value potential',desc:'Where collaboration can create new value',axis:'y'},
+    {id:nid(),name:'Partnership feasibility',desc:'Whether both parties can and will engage',axis:'y'}
+  ];
+  const P=persp.map(p=>p.id);
+  const dims=[
+    [P[0],'Spend and future volume','Spend & volume',8],
+    [P[0],'Future growth dependency','Growth dependency',7],
+    [P[1],'Supply risk and criticality','Supply risk',8],
+    [P[1],'Technical differentiation and unique capabilities','Technical differentiation',7],
+    [P[2],'Supplier innovation capability','Innovation capability',6],
+    [P[2],'Sustainability and Scope 3 contribution','Sustainability / Scope 3',5],
+    [P[3],'Willingness to invest alongside us','Willingness to invest',6],
+    [P[3],'Relationship quality and executive engagement','Relationship quality',5],
+    [P[3],'Preferred-customer position, reciprocity and mutual dependence','Reciprocity',5]
+  ].map(d=>({id:nid(),pid:d[0],name:d[1],short:d[2],weight:d[3],min:0}));
+  const sups=[
+    ['Northwind Chemicals',[5,4,4,3,3,3,4,4,3]],
+    ['Atlas Fermentation Systems',[3,5,5,5,5,4,4,3,2]],
+    ['Meridian Packaging',[4,2,2,1,2,3,2,3,4]],
+    ['Halden Logistics',[2,3,3,2,2,2,3,4,3]],
+    ['Corvex Bioprocess',[2,4,3,4,5,5,5,4,4]]
+  ];
+  const suppliers=[],scores={};
+  sups.forEach(s=>{const id=nid();suppliers.push({id,name:s[0]});scores[id]={};dims.forEach((d,i)=>scores[id][d.id]=s[1][i]);});
+  const w=arr=>{const o={};dims.forEach((d,i)=>o[d.id]=arr[i]);return o;};
+  const scenarios=[
+    {id:nid(),name:'Balanced',weights:w([8,7,8,7,6,5,6,5,5])},
+    {id:nid(),name:'Resilience first',weights:w([6,5,10,9,4,3,5,4,5])},
+    {id:nid(),name:'Value creation',weights:w([5,7,5,6,10,8,8,6,6])}
+  ];
+  return {example:true,persp,dims,suppliers,scores,scenarios,activeScn:scenarios[0].id,picks:null,thr:3};
+}
+function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slice(0,24);const sp=cut.lastIndexOf(' ');return (sp>10?cut.slice(0,sp):cut)+'…';}
+
+let S;
+function load(){
+  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&o.suppliers&&o.persp)return o;}}catch(e){}
+  return exampleState();
+}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
+const pIndex=pid=>S.persp.findIndex(p=>p.id===pid);
+const dimsOf=pid=>S.dims.filter(d=>d.pid===pid);
+
+/* ---------- compute ---------- */
+function axisScore(sid,axis,weights){
+  let w=0,t=0;S.dims.forEach(d=>{const p=S.persp.find(x=>x.id===d.pid);if(!p||p.axis!==axis)return;const ww=+weights[d.id]||0;w+=ww;t+=ww*(+(S.scores[sid]||{})[d.id]||0);});
+  return w>0?t/w:null;
+}
+function segmentOf(x,y){if(x===null||y===null)return null;const hx=x>=S.thr,hy=y>=S.thr;return hx?(hy?'hh':'hl'):(hy?'lh':'ll');}
+function weightsNow(){const o={};S.dims.forEach(d=>o[d.id]=+d.weight||0);return o;}
+function evaluate(weights){
+  const sumW=S.dims.reduce((a,d)=>a+(+weights[d.id]||0),0);
+  const rows=S.suppliers.map(s=>{
+    const parts={};let total=0;const failed=[];
+    S.dims.forEach(d=>{const sc=+(S.scores[s.id]||{})[d.id]||0;const nw=sumW>0?(+weights[d.id]||0)/sumW:0;parts[d.id]=nw*sc;total+=nw*sc;if(d.min>0&&sc<d.min)failed.push(d.name);});
+    const x=axisScore(s.id,'x',weights),y=axisScore(s.id,'y',weights);
+    return {s,total,parts,failed,out:failed.length>0,x,y,seg:segmentOf(x,y)};
+  });
+  const sorted=rows.slice().sort((a,b)=>(a.out-b.out)||(b.total-a.total)||a.s.name.localeCompare(b.s.name));
+  sorted.forEach((r,i)=>r.rank=r.out?null:i+1);
+  return {rows,sorted,sumW};
+}
+const compute=()=>evaluate(weightsNow());
+const f2=n=>n.toFixed(2);const f1=n=>n.toFixed(1);
+const pct=n=>Math.round(n*100)+'%';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- weights rail ---------- */
+function buildWeights(){
+  const host=document.getElementById('weights');host.innerHTML='';
+  S.persp.forEach((p,pi)=>{
+    const g=document.createElement('div');g.className='pgroup';g.dataset.pid=p.id;
+    const head=document.createElement('div');head.className='phead';head.style.borderLeftColor=col(pi);
+    head.innerHTML=`<span class="pname">${pi+1}. ${esc(p.name)}</span><span class="share num" data-share></span><span class="pdesc">${esc(p.desc||'')}</span>
+      <span class="axis">Map axis <button data-ax="x" aria-pressed="${p.axis==='x'}">X</button><button data-ax="y" aria-pressed="${p.axis==='y'}">Y</button><button data-ax="" aria-pressed="${!p.axis}">none</button></span>`;
+    head.querySelectorAll('[data-ax]').forEach(b=>b.addEventListener('click',()=>{p.axis=b.dataset.ax;head.querySelectorAll('[data-ax]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();save();}));
+    g.appendChild(head);
+    dimsOf(p.id).forEach(d=>{
+      const row=document.createElement('div');row.className='wrow';row.dataset.id=d.id;
+      row.innerHTML=`<div class="name"><input value="${esc(d.name)}" title="${esc(d.name)}" aria-label="Criterion name"></div>
+        <input type="range" min="0" max="10" step="1" value="${d.weight}" aria-label="Weight for ${esc(d.name)}">
+        <div class="pct num" data-pct></div>
+        <div class="min"><span>Knock-out below</span><select aria-label="Knock-out threshold for ${esc(d.name)}"><option value="0">none</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select><button class="small ghost" title="Remove this criterion" aria-label="Remove ${esc(d.name)}">remove</button></div>`;
+      row.querySelector('select').value=String(d.min||0);
+      row.querySelector('input[type=range]').addEventListener('input',e=>{d.weight=+e.target.value;markScnDirty();renderResults();save();});
+      row.querySelector('.name input').addEventListener('change',e=>{d.name=e.target.value.trim()||d.name;d.short=shorten(d.name);e.target.value=d.name;renderAll();save();});
+      row.querySelector('select').addEventListener('change',e=>{d.min=+e.target.value;renderResults();buildMatrix();save();});
+      row.querySelector('button').addEventListener('click',()=>{if(S.dims.length<=2)return;S.dims=S.dims.filter(x=>x!==d);S.scenarios.forEach(sc=>delete sc.weights[d.id]);renderAll();save();});
+      g.appendChild(row);
+    });
+    host.appendChild(g);
+  });
+}
+function updateWeightLabels(sumW){
+  document.querySelectorAll('#weights .wrow').forEach(row=>{
+    const d=S.dims.find(x=>x.id===row.dataset.id);if(!d)return;
+    row.querySelector('[data-pct]').textContent=sumW>0?pct((+d.weight||0)/sumW):'0%';
+    const r=row.querySelector('input[type=range]');if(+r.value!==+d.weight)r.value=d.weight;
+  });
+  document.querySelectorAll('#weights .pgroup').forEach(g=>{const w=dimsOf(g.dataset.pid).reduce((a,d)=>a+(+d.weight||0),0);g.querySelector('[data-share]').textContent=sumW>0?pct(w/sumW):'0%';});
+}
+
+/* ---------- tooltip ---------- */
+const tip=document.getElementById('tip');
+function showTip(e,html){tip.innerHTML=html;tip.classList.add('on');moveTip(e);}
+function moveTip(e){const x=Math.min(e.clientX+14,window.innerWidth-tip.offsetWidth-8);tip.style.left=x+'px';tip.style.top=(e.clientY+14)+'px';}
+function hideTip(){tip.classList.remove('on');}
+function attachTip(el,html){el.addEventListener('mouseenter',e=>showTip(e,html));el.addEventListener('mousemove',moveTip);el.addEventListener('mouseleave',hideTip);}
+
+/* ---------- ranking ---------- */
+function renderRanking(c){
+  const host=document.getElementById('rank');host.innerHTML='';
+  c.sorted.forEach(r=>{
+    const row=document.createElement('div');row.className='rrow'+(r.out?' out':'');
+    let segs='';
+    S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);ds.forEach((d,k)=>{const v=r.parts[d.id];if(v<=0)return;segs+=`<div class="seg${k===ds.length-1?' pend':''}" style="width:${(v/5*100).toFixed(2)}%;background:${col(pi)}" data-dim="${d.id}"></div>`;});});
+    row.innerHTML=`<div class="pos num">${r.rank?r.rank:'–'}</div><div class="sname" title="${esc(r.s.name)}">${esc(r.s.name)}</div>
+      <div class="track" role="img" aria-label="${esc(r.s.name)}: ${f2(r.total)} of 5">${segs}</div>
+      <div class="score num">${r.out?'knocked out':f2(r.total)}</div>`;
+    row.querySelectorAll('.seg').forEach(seg=>{
+      const d=S.dims.find(x=>x.id===seg.dataset.dim);const sc=S.scores[r.s.id][d.id];const nw=c.sumW>0?(+d.weight||0)/c.sumW:0;
+      attachTip(seg,`<strong>${esc(r.s.name)}</strong><br>${esc(d.name)}: score ${sc} × weight ${pct(nw)} = ${f2(r.parts[d.id])}`);
+    });
+    if(r.out){row.querySelector('.score').title='Below the knock-out on: '+r.failed.join(', ');attachTip(row.querySelector('.score'),'Below the knock-out on: '+esc(r.failed.join(', ')));}
+    host.appendChild(row);
+  });
+  document.getElementById('dimLegend').innerHTML=S.persp.map((p,i)=>`<span class="i"><i style="background:${col(i)}"></i>${esc(p.name)}</span>`).join('');
+  const inRun=c.sorted.filter(r=>!r.out);const ins=document.getElementById('insight');
+  if(inRun.length<2){ins.textContent=inRun.length?`Only ${inRun[0].s.name} clears every knock-out.`:'No supplier clears every knock-out.';return;}
+  const a=inRun[0],b=inRun[1];const gap=a.total-b.total;
+  let bestD=null,bestV=-Infinity;S.dims.forEach(d=>{const v=a.parts[d.id]-b.parts[d.id];if(v>bestV){bestV=v;bestD=d;}});
+  let flip=null;
+  S.dims.forEach(d=>{
+    const base=+d.weight;
+    for(let dist=1;dist<=10&&!flip;dist++){for(const w of [base-dist,base+dist]){if(w<0||w>10)continue;const ws=weightsNow();ws[d.id]=w;const ev=evaluate(ws);const top=ev.sorted.find(r=>!r.out);
+      if(top&&top.s.id===b.s.id){if(!flip||dist<flip.dist)flip={d,w,dist};break;}}}
+  });
+  const out=c.sorted.filter(r=>r.out).length;
+  ins.innerHTML=`<strong>${esc(a.s.name)}</strong> leads <strong>${esc(b.s.name)}</strong> by ${f2(gap)} points, mostly on ${esc(bestD.name)} (+${f2(bestV)}). `+
+    (flip?`Moving <em>${esc(flip.d.name)}</em> from ${flip.d.weight} to ${flip.w} would put ${esc(b.s.name)} first.`:`No single weight change flips the top two.`)+
+    (out?` ${out} supplier${out>1?'s':''} knocked out.`:'');
+}
+
+/* ---------- segmentation map ---------- */
+function renderMap(c){
+  const svg=document.getElementById('map');
+  const xs=S.persp.filter(p=>p.axis==='x'),ys=S.persp.filter(p=>p.axis==='y');
+  document.getElementById('axesNote').innerHTML=`<div><b>X</b> ${xs.length?xs.map(p=>esc(p.name)).join(' + '):'<span class="muted">nothing assigned</span>'}</div><div><b>Y</b> ${ys.length?ys.map(p=>esc(p.name)).join(' + '):'<span class="muted">nothing assigned</span>'}</div>`;
+  document.getElementById('thrVal').textContent=f1(S.thr);const thr=document.getElementById('thr');if(+thr.value!==S.thr)thr.value=S.thr;
+  const L=70,R=620,T=40,B=440;const sx=v=>L+(v-1)/4*(R-L);const sy=v=>B-(v-1)/4*(B-T);
+  const tx=sx(S.thr),ty=sy(S.thr);
+  const xl=xs.length?xs.map(p=>p.name).join(' + '):'X axis: assign a perspective';const yl=ys.length?ys.map(p=>p.name).join(' + '):'Y axis: assign a perspective';
+  let o=`<rect x="${L}" y="${T}" width="${R-L}" height="${B-T}" fill="var(--surface)" stroke="var(--line)"/>`;
+  o+=`<rect class="q" x="${tx}" y="${T}" width="${R-tx}" height="${ty-T}" opacity=".55"/>`;
+  o+=`<text class="qlab" x="${R-8}" y="${T+16}" text-anchor="end">${esc(SEGMENTS.hh)}</text><text class="qlab" x="${L+8}" y="${T+16}">${esc(SEGMENTS.lh)}</text><text class="qlab" x="${R-8}" y="${B-8}" text-anchor="end">${esc(SEGMENTS.hl)}</text><text class="qlab" x="${L+8}" y="${B-8}">${esc(SEGMENTS.ll)}</text>`;
+  for(let k=1;k<=5;k++){o+=`<line class="ax" x1="${sx(k)}" y1="${B}" x2="${sx(k)}" y2="${B+5}"/><text x="${sx(k)}" y="${B+20}" text-anchor="middle">${k}</text><line class="ax" x1="${L-5}" y1="${sy(k)}" x2="${L}" y2="${sy(k)}"/><text x="${L-9}" y="${sy(k)+4}" text-anchor="end">${k}</text>`;}
+  o+=`<line class="mid" x1="${tx}" y1="${T}" x2="${tx}" y2="${B}"/><line class="mid" x1="${L}" y1="${ty}" x2="${R}" y2="${ty}"/>`;
+  o+=`<text class="axt" x="${(L+R)/2}" y="${B+48}" text-anchor="middle">${esc(xl)} →</text>`;
+  o+=`<text class="axt" transform="translate(22 ${(T+B)/2}) rotate(-90)" text-anchor="middle">${esc(yl)} →</text>`;
+  // points, with simple label collision avoidance
+  const pts=c.rows.filter(r=>r.x!==null&&r.y!==null).map(r=>({r,px:sx(r.x),py:sy(r.y)}));
+  const boxes=pts.map(p=>({x1:p.px-9,x2:p.px+9,y1:p.py-9,y2:p.py+9}));
+  const hit=(a,b)=>a.x1<b.x2&&a.x2>b.x1&&a.y1<b.y2&&a.y2>b.y1;
+  pts.forEach(p=>{const si=S.suppliers.indexOf(p.r.s);
+    o+=`<circle cx="${p.px.toFixed(1)}" cy="${p.py.toFixed(1)}" r="8" fill="${p.r.out?'var(--surface)':col(si)}" stroke="${col(si)}" stroke-width="2.5" data-sid="${p.r.s.id}" style="cursor:default"/>`;
+    const w=p.r.s.name.length*6.6,h=14;
+    const cands=[['start',13,4],['end',-13,4],['middle',0,-14],['middle',0,22],['start',13,-12],['start',13,20],['end',-13,-12],['end',-13,20],['start',13,34],['end',-13,34]];
+    let best=null;
+    for(const [anchor,dx,dy] of cands){const lx=p.px+dx,ly=p.py+dy;const x1=anchor==='start'?lx:anchor==='end'?lx-w:lx-w/2;const box={x1,x2:x1+w,y1:ly-h+3,y2:ly+3};
+      if(box.x1<L+2||box.x2>R-2||box.y1<T+2||box.y2>B-2)continue;
+      if(boxes.some(b=>hit(box,b)))continue;best={anchor,lx,ly,box};break;}
+    if(!best){const lx=p.px+13,ly=p.py+4;best={anchor:'start',lx,ly,box:{x1:lx,x2:lx+w,y1:ly-h+3,y2:ly+3}};}
+    boxes.push(best.box);
+    o+=`<text class="pl" x="${best.lx.toFixed(1)}" y="${best.ly.toFixed(1)}" text-anchor="${best.anchor}">${esc(p.r.s.name)}</text>`;
+  });
+  svg.innerHTML=o;
+  svg.querySelectorAll('circle[data-sid]').forEach(ci=>{const r=c.rows.find(x=>x.s.id===ci.dataset.sid);attachTip(ci,`<strong>${esc(r.s.name)}</strong><br>X ${f2(r.x)} · Y ${f2(r.y)}<br>${r.seg?SEGMENTS[r.seg]:''}${r.out?' · knocked out':''}`);});
+  const sl=document.getElementById('seglist');
+  sl.innerHTML=['hh','lh','hl','ll'].map(k=>{const names=c.sorted.filter(r=>r.seg===k).map(r=>esc(r.s.name)+(r.out?' (out)':''));return `<div><b>${SEGMENTS[k]}</b><span class="small">${names.length?names.join(', '):'<span class="muted">none</span>'}</span></div>`;}).join('');
+}
+document.getElementById('thr').addEventListener('input',e=>{S.thr=+e.target.value;renderResults();save();});
+
+/* ---------- matrix ---------- */
+function buildMatrix(){
+  const c=compute();const t=document.getElementById('matrix');
+  const h1=`<tr><th class="sup" rowspan="2" style="text-align:left;vertical-align:bottom">Supplier</th>${S.persp.map((p,i)=>{const n=dimsOf(p.id).length;return n?`<th class="pg" colspan="${n}" style="border-bottom-color:${col(i)}">${esc(p.name)}</th>`:'';}).join('')}<th rowspan="2" style="vertical-align:bottom">Weighted</th><th rowspan="2" style="vertical-align:bottom">Rank</th><th rowspan="2" style="vertical-align:bottom">Segment</th><th rowspan="2"></th></tr>`;
+  const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
+  const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name)}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${d.weight}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
+  const body=`<tbody>${S.suppliers.map(s=>{const r=c.rows.find(x=>x.s===s);return `<tr data-sup="${s.id}"><td class="sup"><input value="${esc(s.name)}" aria-label="Supplier name"></td>`+
+    ordered.map(d=>{const v=S.scores[s.id][d.id];const fail=d.min>0&&v<d.min;return `<td class="cell${fail?' fail':''}" data-dim="${d.id}" style="background:rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})"><input type="number" min="1" max="5" step="1" value="${v}" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
+    `<td class="total num" data-total>${r.out?'–':f2(r.total)}</td><td class="num" data-rank>${r.rank||'out'}</td><td class="small" data-seg>${r.seg?SEGMENTS[r.seg]:'–'}</td><td><button class="small ghost" title="Remove supplier" aria-label="Remove ${esc(s.name)}">remove</button></td></tr>`;}).join('')}</tbody>`;
+  t.innerHTML=`<thead>${h1}${h2}</thead>${body}`;
+  t.querySelectorAll('tbody tr').forEach(tr=>{
+    const s=S.suppliers.find(x=>x.id===tr.dataset.sup);
+    tr.querySelector('td.sup input').addEventListener('change',e=>{s.name=e.target.value.trim()||s.name;e.target.value=s.name;renderAll();save();});
+    tr.querySelectorAll('td.cell').forEach(td=>{
+      const inp=td.querySelector('input');const d=S.dims.find(x=>x.id===td.dataset.dim);
+      const apply=()=>{let v=Math.round(+inp.value);if(!(v>=1))v=1;if(v>5)v=5;inp.value=v;S.scores[s.id][d.id]=v;
+        td.style.background=`rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})`;td.classList.toggle('fail',d.min>0&&v<d.min);renderResults();save();};
+      inp.addEventListener('input',apply);inp.addEventListener('change',apply);
+    });
+    tr.querySelector('button').addEventListener('click',()=>{if(S.suppliers.length<=2)return;S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();});
+  });
+}
+function updateMatrixTotals(c){
+  document.querySelectorAll('#matrix tbody tr').forEach(tr=>{const r=c.rows.find(x=>x.s.id===tr.dataset.sup);if(!r)return;
+    tr.querySelector('[data-total]').textContent=r.out?'–':f2(r.total);tr.querySelector('[data-rank]').textContent=r.rank||'out';tr.querySelector('[data-seg]').textContent=r.seg?SEGMENTS[r.seg]:'–';});
+  document.querySelectorAll('#matrix [data-w]').forEach(el=>{const d=S.dims.find(x=>x.id===el.dataset.w);if(d)el.textContent=`weight ${d.weight}${d.min?' · min '+d.min:''}`;});
+}
+
+/* ---------- radar ---------- */
+function currentPicks(){
+  if(!S.picks){const c=compute();S.picks=c.sorted.filter(r=>!r.out).slice(0,3).map(r=>r.s.id);}
+  S.picks=S.picks.filter(id=>S.suppliers.some(s=>s.id===id));return S.picks;
+}
+function renderRadar(){
+  const picks=currentPicks();
+  const ph=document.getElementById('picks');ph.innerHTML='';
+  S.suppliers.forEach((s,i)=>{const l=document.createElement('label');l.innerHTML=`<input type="checkbox" ${picks.includes(s.id)?'checked':''}><i style="background:${col(i)}"></i><span>${esc(s.name)}</span>`;
+    l.querySelector('input').addEventListener('change',e=>{if(e.target.checked){if(!S.picks.includes(s.id))S.picks.push(s.id);}else S.picks=S.picks.filter(id=>id!==s.id);renderRadar();save();});ph.appendChild(l);});
+  const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
+  const svg=document.getElementById('radar');const cx=300,cy=260,R=170,n=ordered.length;const ang=i=>-Math.PI/2+i*2*Math.PI/n;
+  const pt=(i,v)=>[cx+Math.cos(ang(i))*R*v/5,cy+Math.sin(ang(i))*R*v/5];
+  let out='';
+  for(let k=1;k<=5;k++){out+=`<polygon class="ring" points="${ordered.map((d,i)=>pt(i,k).map(v=>v.toFixed(1)).join(',')).join(' ')}"/>`;}
+  ordered.forEach((d,i)=>{const [x,y]=pt(i,5);const pi=pIndex(d.pid);out+=`<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" style="stroke:${col(pi)};stroke-opacity:.6"/>`;
+    const [lx,ly]=pt(i,5.6);const a=Math.cos(ang(i));const anchor=a>0.2?'start':a<-0.2?'end':'middle';
+    out+=`<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="${anchor}">${esc(d.short||shorten(d.name))}</text>`;});
+  for(let k=1;k<=5;k++){const [x,y]=pt(0,k);out+=`<text x="${(x+5).toFixed(1)}" y="${(y+4).toFixed(1)}" style="font-size:10px;fill:var(--muted)">${k}</text>`;}
+  picks.forEach(id=>{const si=S.suppliers.findIndex(s=>s.id===id);if(si<0)return;const s=S.suppliers[si];
+    const pts=ordered.map((d,i)=>pt(i,S.scores[s.id][d.id]||0));
+    out+=`<polygon points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${col(si)}" fill-opacity="0.12" stroke="${col(si)}" stroke-width="2" stroke-linejoin="round"/>`;
+    pts.forEach((p,i)=>{out+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col(si)}" stroke="var(--surface)" stroke-width="2"><title>${esc(s.name)} · ${esc(ordered[i].name)}: ${S.scores[s.id][ordered[i].id]}</title></circle>`;});
+  });
+  svg.innerHTML=out;
+}
+
+/* ---------- scenarios ---------- */
+function scnMatches(sc){return S.dims.every(d=>(+sc.weights[d.id]||0)===(+d.weight||0));}
+function markScnDirty(){const sc=S.scenarios.find(x=>x.id===S.activeScn);if(sc&&!scnMatches(sc))S.activeScn=null;}
+function renderScnSelect(){
+  const sel=document.getElementById('scnSel');
+  sel.innerHTML=`<option value="">Custom weights</option>`+S.scenarios.map(sc=>`<option value="${sc.id}">${esc(sc.name)}</option>`).join('');
+  sel.value=S.activeScn||'';
+  const sc=S.scenarios.find(x=>x.id===S.activeScn);document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:'Weights: custom (not saved)';
+}
+function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;S.dims.forEach(d=>{if(sc.weights[d.id]!==undefined)d.weight=+sc.weights[d.id];});S.activeScn=id;renderResults();save();}
+function renderScenarios(){
+  const t=document.getElementById('cmp');
+  const cols=S.scenarios.map(sc=>({name:sc.name,ev:evaluate(sc.weights),id:sc.id}));
+  if(!S.activeScn)cols.unshift({name:'Current',ev:evaluate(weightsNow()),id:''});
+  t.innerHTML=`<thead><tr><th class="sup">Supplier</th>${cols.map(c=>`<th>${esc(c.name)}${c.id===S.activeScn?' ●':''}</th>`).join('')}</tr></thead><tbody>`+
+    S.suppliers.map(s=>`<tr><td class="sup">${esc(s.name)}</td>${cols.map(c=>{const r=c.ev.rows.find(x=>x.s===s);return `<td><span class="r num${r.rank===1?' top':''}">${r.rank?'#'+r.rank:'out'}</span><span class="sc num">${f2(r.total)}${r.seg?' · '+SEGMENTS[r.seg]:''}</span></td>`;}).join('')}</tr>`).join('')+`</tbody>`;
+  const list=document.getElementById('scnList');list.innerHTML='';
+  S.scenarios.forEach(sc=>{const row=document.createElement('div');row.className='scn-row';
+    row.innerHTML=`<span class="nm">${esc(sc.name)}</span><button class="small">Apply</button><button class="small ghost">Delete</button><span class="w">${S.dims.map(d=>`${esc(d.short||shorten(d.name))} ${+sc.weights[d.id]||0}`).join(' · ')}</span>`;
+    const b=row.querySelectorAll('button');b[0].addEventListener('click',()=>applyScn(sc.id));b[1].addEventListener('click',()=>{S.scenarios=S.scenarios.filter(x=>x!==sc);if(S.activeScn===sc.id)S.activeScn=null;renderResults();save();});
+    list.appendChild(row);});
+}
+document.getElementById('btnSaveScn').addEventListener('click',()=>{
+  const inp=document.getElementById('scnName');const name=inp.value.trim()||('Scenario '+(S.scenarios.length+1));
+  const existing=S.scenarios.find(x=>x.name.toLowerCase()===name.toLowerCase());
+  if(existing){existing.weights=weightsNow();S.activeScn=existing.id;}else{const sc={id:nid(),name,weights:weightsNow()};S.scenarios.push(sc);S.activeScn=sc.id;}
+  inp.value='';renderResults();save();
+});
+document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.value)applyScn(e.target.value);else{S.activeScn=null;renderResults();save();}});
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+  ['map','scores','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
+}));
+
+/* ---------- add / reset ---------- */
+document.getElementById('btnAddDim').addEventListener('click',()=>{
+  if(S.dims.length>=12)return;const p=S.persp[S.persp.length-1];const d={id:nid(),pid:p.id,name:'New criterion',short:'New criterion',weight:5,min:0};S.dims.push(d);
+  S.suppliers.forEach(s=>S.scores[s.id][d.id]=3);S.scenarios.forEach(sc=>sc.weights[d.id]=5);renderAll();save();
+  const last=document.querySelector('#weights .pgroup:last-child .wrow:last-child .name input');if(last){last.focus();last.select();}
+});
+document.getElementById('btnAddSup').addEventListener('click',()=>{
+  const s={id:nid(),name:'New supplier'};S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
+  const last=document.querySelector('#matrix tbody tr:last-child td.sup input');if(last){last.focus();last.select();}
+});
+document.getElementById('btnReset').addEventListener('click',()=>{S=exampleState();renderAll();save();});
+
+/* ---------- import / export ---------- */
+function toCSV(){
+  const q=v=>/[",\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
+  const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
+  const lines=[['Supplier',...ordered.map(d=>d.name)].map(q).join(','),['Perspective',...ordered.map(d=>S.persp.find(p=>p.id===d.pid).name)].map(q).join(','),['Weight',...ordered.map(d=>d.weight)].join(','),['Knock-out',...ordered.map(d=>d.min||0)].join(',')];
+  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id])].join(',')));
+  return lines.join('\n');
+}
+function parseCSV(text){
+  const rows=[];let row=[],cell='',inQ=false;const t=text.replace(/\r\n?/g,'\n');
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(inQ){if(ch==='"'){if(t[i+1]==='"'){cell+='"';i++;}else inQ=false;}else cell+=ch;}
+    else if(ch==='"')inQ=true;else if(ch===','||ch===';'||ch==='\t'){row.push(cell);cell='';}
+    else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}else cell+=ch;}
+  row.push(cell);rows.push(row);
+  return rows.map(r=>r.map(c=>c.trim())).filter(r=>r.some(c=>c!==''));
+}
+function importCSV(text){
+  const rows=parseCSV(text);if(rows.length<2)throw new Error('Need a header row and at least one supplier row.');
+  const header=rows[0];const dimNames=header.slice(1).filter(h=>h!=='');if(dimNames.length<2)throw new Error('Need at least two criterion columns.');
+  if(dimNames.length>12)throw new Error('At most 12 criteria.');
+  const dims=dimNames.map(n=>({id:nid(),pid:null,name:n,short:shorten(n),weight:5,min:0}));
+  const persp=[];const perspByName=n=>{let p=persp.find(x=>x.name.toLowerCase()===n.toLowerCase());if(!p){p={id:nid(),name:n,desc:'',axis:persp.length<2?'x':'y'};persp.push(p);}return p;};
+  const suppliers=[],scores={};
+  rows.slice(1).forEach(r=>{
+    const key=(r[0]||'').toLowerCase();
+    if(key==='perspective'||key==='group'||key==='category'){dims.forEach((d,i)=>{d.pid=perspByName(r[i+1]||'Other').id;});return;}
+    if(key==='weight'||key==='weights'){dims.forEach((d,i)=>{const v=Math.round(+r[i+1]);d.weight=isFinite(v)?Math.max(0,Math.min(10,v)):5;});return;}
+    if(key==='knock-out'||key==='knockout'||key==='min'||key==='minimum'){dims.forEach((d,i)=>{const v=Math.round(+r[i+1]);d.min=(v>=2&&v<=5)?v:0;});return;}
+    if(!r[0])return;
+    const id=nid();suppliers.push({id,name:r[0]});scores[id]={};
+    dims.forEach((d,i)=>{let v=Math.round(+r[i+1]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
+  });
+  if(suppliers.length<2)throw new Error('Need at least two suppliers.');
+  if(!persp.length){const p={id:nid(),name:'All criteria',desc:'',axis:'x'};persp.push(p);}
+  dims.forEach(d=>{if(!d.pid)d.pid=perspByName('Other').id;});
+  if(persp.length>8)throw new Error('At most 8 perspectives.');
+  const w={};dims.forEach(d=>w[d.id]=d.weight);
+  S={example:false,persp,dims,suppliers,scores,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=S.scenarios[0].id;
+}
+const dlgI=document.getElementById('dlgImport'),dlgE=document.getElementById('dlgExport');
+document.querySelectorAll('dialog [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
+document.getElementById('btnImport').addEventListener('click',()=>{document.getElementById('importMsg').textContent='';dlgI.showModal();});
+document.getElementById('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{document.getElementById('importText').value=fr.result;};fr.readAsText(f);});
+document.getElementById('btnDoImport').addEventListener('click',()=>{
+  const msg=document.getElementById('importMsg');
+  try{importCSV(document.getElementById('importText').value);renderAll();save();dlgI.close();}catch(err){msg.textContent=err.message;}
+});
+document.getElementById('btnExport').addEventListener('click',()=>{
+  const csv=toCSV();document.getElementById('exportText').value=csv;document.getElementById('exportMsg').textContent='';
+  document.getElementById('dl').href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);dlgE.showModal();
+});
+document.getElementById('btnCopy').addEventListener('click',()=>{
+  const ta=document.getElementById('exportText');const msg=document.getElementById('exportMsg');
+  const fallback=()=>{ta.focus();ta.select();msg.textContent='Select all and copy (Ctrl+C).';};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(()=>{msg.textContent='Copied.';}).catch(fallback);}else fallback();
+});
+
+/* ---------- render ---------- */
+function renderResults(){
+  const c=compute();updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderScnSelect();renderScenarios();
+  document.getElementById('badge').hidden=!S.example;
+}
+function renderAll(){buildWeights();buildMatrix();renderResults();}
+S=load();renderAll();
+})();
+</script>
+</body>
+</html>
