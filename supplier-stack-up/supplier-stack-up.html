@@ -8,29 +8,38 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
 <style>
 /* Layout: weights rail on the left grouped by perspective; results on the right: ranking first, then the segmentation map and detail tabs. */
+/* Novonesis palette: greens carry the page, blue marks highlights (selection, focus, the leader). */
 :root{
-  --bg:#f4f7f5; --surface:#ffffff; --surface-2:#e9efec; --fg:#15231f; --fg-2:#4a5a55; --muted:#7b8a85;
-  --line:#d1dbd6; --line-2:#e3eae6; --accent:#1b4d41; --accent-fg:#ffffff; --accent-soft:#d8efe2; --accent-ink:#1b4d41;
-  --good:#0ca30c; --critical:#d03b3b; --warn:#fab219;
-  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948; --s0:#8a9490;
-  --seq:27,77,65;
+  --bg:#f2fff3; --surface:#ffffff; --surface-2:#e0f2ee; --fg:#173630; --fg-2:#3d5a52; --muted:#6b8079;
+  --line:#b3ded6; --line-2:#e0f2ee; --accent:#173630; --accent-fg:#ffffff; --accent-soft:#e0f2ee; --accent-ink:#173630;
+  --brand:#173630; --brand-fg:#ffffff; --brand-soft:#bfe6c4;
+  --hl:#3958fe; --hl-strong:#0021d0; --hl-soft:#dee3ff; --hl-fg:#ffffff;
+  --good:#3b9746; --critical:#c0503e; --warn:#fff4ad;
+  --s1:#173630; --s2:#3b9746; --s3:#67bead; --s4:#a1b0ff; --s5:#3958fe; --s6:#d47969; --s7:#7a600f; --s8:#73c87e; --s0:#8a9a94;
+  --seq:59,151,70;
   --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
   --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
-  --radius:6px; --shadow:0 1px 2px rgba(21,35,31,.06),0 4px 14px rgba(21,35,31,.05);
+  --radius:6px; --shadow:0 1px 2px rgba(23,54,48,.06),0 4px 14px rgba(23,54,48,.06);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#111917; --surface:#192320; --surface-2:#222e2a; --fg:#eaf1ee; --fg-2:#b3c1bb; --muted:#7f8e89;
-    --line:#2f3c37; --line-2:#28342f; --accent:#6fcfa3; --accent-fg:#0f1f19; --accent-soft:#1d3a30; --accent-ink:#8fdcb8;
-    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s0:#6f7c77;
-    --seq:111,207,163; --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+    --bg:#0e211d; --surface:#173630; --surface-2:#1f4239; --fg:#f2fff3; --fg-2:#b3ded6; --muted:#7fa59b;
+    --line:#2d5a4f; --line-2:#23493f; --accent:#bfe6c4; --accent-fg:#173630; --accent-soft:#23493f; --accent-ink:#bfe6c4;
+    --brand:#0b1a17; --brand-fg:#f2fff3; --brand-soft:#bfe6c4;
+    --hl:#a1b0ff; --hl-strong:#aebaff; --hl-soft:#26305c; --hl-fg:#0b1a17;
+    --good:#73c87e; --critical:#e08a7a;
+    --s1:#bfe6c4; --s2:#73c87e; --s3:#67bead; --s4:#a1b0ff; --s5:#667dff; --s6:#d47969; --s7:#c9a53a; --s8:#3b9746; --s0:#7f948d;
+    --seq:115,200,126; --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#111917; --surface:#192320; --surface-2:#222e2a; --fg:#eaf1ee; --fg-2:#b3c1bb; --muted:#7f8e89;
-  --line:#2f3c37; --line-2:#28342f; --accent:#6fcfa3; --accent-fg:#0f1f19; --accent-soft:#1d3a30; --accent-ink:#8fdcb8;
-  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767; --s0:#6f7c77;
-  --seq:111,207,163; --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+  --bg:#0e211d; --surface:#173630; --surface-2:#1f4239; --fg:#f2fff3; --fg-2:#b3ded6; --muted:#7fa59b;
+  --line:#2d5a4f; --line-2:#23493f; --accent:#bfe6c4; --accent-fg:#173630; --accent-soft:#23493f; --accent-ink:#bfe6c4;
+  --brand:#0b1a17; --brand-fg:#f2fff3; --brand-soft:#bfe6c4;
+  --hl:#a1b0ff; --hl-strong:#aebaff; --hl-soft:#26305c; --hl-fg:#0b1a17;
+  --good:#73c87e; --critical:#e08a7a;
+  --s1:#bfe6c4; --s2:#73c87e; --s3:#67bead; --s4:#a1b0ff; --s5:#667dff; --s6:#d47969; --s7:#c9a53a; --s8:#3b9746; --s0:#7f948d;
+  --seq:115,200,126; --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -42,26 +51,41 @@ h2{font-size:1.05rem;font-weight:600}
 h3{font-size:.95rem;font-weight:600}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:6px 12px;line-height:1.2}
-button:hover{border-color:var(--accent)}
+button:hover{border-color:var(--hl)}
 button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 button.small{padding:3px 8px;font-size:.85rem}
 button.ghost{border-color:transparent;background:transparent;color:var(--fg-2)}
 button.ghost:hover{color:var(--critical);border-color:transparent}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
 .eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .muted{color:var(--muted)}
 .small{font-size:.85rem}
 code{font-size:.85em;background:var(--surface-2);padding:1px 4px;border-radius:3px}
 
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding:20px 0 14px;border-bottom:1px solid var(--line)}
-header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
-.badge{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn);color:#2b2000;vertical-align:middle;margin-left:8px}
+header.top{background:var(--brand);color:var(--brand-fg);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px))) 0 calc(-1*max(16px,env(safe-area-inset-right,0px)));padding:12px max(16px,env(safe-area-inset-left,0px)) 0;}
+header.top .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px}
+header.top h1{color:var(--brand-fg)}
+header.top .sub{color:var(--brand-soft);margin-top:2px;max-width:70ch;font-size:.9rem}
+header.top button{background:transparent;color:var(--brand-fg);border-color:rgba(191,230,196,.45)}
+header.top button:hover{border-color:var(--brand-soft)}
+header.top button.ghost{border-color:transparent;color:var(--brand-soft)}
+.badge{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn);color:#3a2f00;vertical-align:middle;margin-left:8px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.toolbar label{font-size:.85rem;color:var(--fg-2)}
-.toolbar select{padding:6px 8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);max-width:200px}
-
-.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;margin-top:20px}
+.toolbar label{font-size:.85rem;color:var(--brand-soft)}
+.toolbar select{padding:6px 8px;border:1px solid rgba(191,230,196,.45);border-radius:var(--radius);background:var(--brand);color:var(--brand-fg);max-width:200px}
+nav.pages{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+nav.pages button{border:0;border-radius:6px 6px 0 0;background:transparent;color:var(--brand-soft);padding:10px 18px;font-family:var(--font-display);font-weight:600;font-size:.95rem;white-space:nowrap;border-bottom:3px solid transparent}
+nav.pages button:hover{color:var(--brand-fg)}
+nav.pages button[aria-current=page]{background:var(--bg);color:var(--fg);border-bottom-color:var(--hl)}
+nav.pages .n{display:inline-grid;place-items:center;width:1.4em;height:1.4em;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:.78rem;margin-right:6px}
+nav.pages button[aria-current=page] .n{background:var(--hl);color:#fff}
+.page-intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;margin-top:18px}
+.page-intro p{margin:0;color:var(--fg-2);max-width:75ch}
+.mini .rrow{grid-template-columns:2.2ch minmax(90px,150px) minmax(0,1fr) 4.5ch 3.4ch;gap:8px}
+.mini .rrow .track{height:14px}
+.layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;margin-top:16px}
+.results{display:grid;gap:20px;margin-top:16px;min-width:0}
 @media (max-width:900px){.layout{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:0}
 .panel>.head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
@@ -76,14 +100,14 @@ header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
 .phead .share{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right}
 .phead .axis{grid-column:1/-1;display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);margin-top:2px}
 .phead .axis button{padding:1px 7px;font-size:.72rem;border-radius:999px}
-.phead .axis button[aria-pressed=true]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.phead .axis button[aria-pressed=true]{background:var(--hl);color:var(--hl-fg);border-color:var(--hl)}
 .wrow{display:grid;grid-template-columns:1fr auto;gap:0 8px;align-items:center;padding:6px 0 4px 8px;border-bottom:1px solid var(--line-2)}
 .wrow .name{grid-column:1/-1}
 .wrow .name{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0;font-size:.92rem}
 .wrow .name input{border:0;background:transparent;font-weight:600;width:100%;min-width:0;padding:0}
 .wrow .name input:focus{outline:1px solid var(--accent);border-radius:3px}
 .wrow .pct{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right;min-width:3.5ch}
-.wrow input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0;min-width:0}
+.wrow input[type=range]{width:100%;accent-color:var(--hl);margin:2px 0;min-width:0}
 .wrow .min{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
 .wrow .min select{font-size:.78rem;padding:1px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
 .wrow .min button{margin-left:auto}
@@ -96,6 +120,7 @@ header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
 .rrow .mv.up{color:var(--good)}
 .rrow .mv.down{color:var(--critical)}
 .rrow .pos{font-family:var(--font-display);font-weight:700;color:var(--muted);text-align:right}
+.rrow:first-child:not(.out) .pos,.rrow:first-child:not(.out) .score{color:var(--hl-strong)}
 .rrow .sname{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rrow .track{height:22px;display:flex;align-items:stretch;background:var(--surface-2);border-radius:4px;overflow:hidden}
 .rrow .seg{height:100%;margin-right:2px;transition:width .25s ease}
@@ -110,12 +135,12 @@ header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
 .legend span.i{display:inline-flex;align-items:center;gap:5px}
 .legend span.i i{width:10px;height:10px;border-radius:2px;display:inline-block}
 .legend span.i i.round{border-radius:50%}
-.insight{margin-top:10px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 4px 4px 0;font-size:.9rem}
+.insight{margin-top:10px;padding:8px 12px;border-left:3px solid var(--hl);background:var(--hl-soft);border-radius:0 4px 4px 0;font-size:.9rem}
 
 /* tabs */
 .tabs{display:flex;gap:2px;padding:6px 10px 0;border-bottom:1px solid var(--line-2);overflow-x:auto}
 .tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--fg-2);padding:8px 12px;font-weight:600;white-space:nowrap}
-.tabs button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--hl)}
 
 /* segmentation map */
 .map-wrap{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:16px;align-items:start}
@@ -130,7 +155,7 @@ header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
 .map-wrap svg .pl{font-weight:600;fill:var(--fg);font-size:12px}
 .map-side{display:grid;gap:10px;font-size:.88rem}
 .map-side .thr{display:grid;gap:4px}
-.map-side input[type=range]{width:100%;accent-color:var(--accent)}
+.map-side input[type=range]{width:100%;accent-color:var(--hl)}
 .seglist{display:grid;gap:6px}
 .seglist div{display:grid;gap:1px}
 .seglist b{font-family:var(--font-display);font-weight:600;font-size:.8rem;letter-spacing:.03em;text-transform:uppercase;color:var(--fg-2)}
@@ -148,7 +173,7 @@ table.matrix td.sup input{border:0;background:transparent;font-weight:600;width:
 table.matrix td.sup input:focus{outline:1px solid var(--accent)}
 table.matrix td.cell input{width:3.2em;text-align:center;border:1px solid transparent;border-radius:4px;padding:3px 0;background:transparent;font-weight:600}
 table.matrix td.cell input:hover{border-color:var(--line)}
-table.matrix td.cell input:focus{border-color:var(--accent);outline:0}
+table.matrix td.cell input:focus{border-color:var(--hl);outline:0}
 table.matrix td.cell.fail input{box-shadow:inset 0 0 0 2px var(--critical)}
 table.matrix td.total{font-family:var(--font-display);font-weight:700}
 .scale-note{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.85rem;color:var(--fg-2)}
@@ -170,7 +195,7 @@ table.cmp th,table.cmp td{padding:6px 10px;border-bottom:1px solid var(--line-2)
 table.cmp th{font-family:var(--font-display);font-weight:600;font-size:.82rem;color:var(--fg-2)}
 table.cmp td.sup,table.cmp th.sup{text-align:left;font-weight:600}
 table.cmp td .r{font-family:var(--font-display);font-weight:700}
-table.cmp td .r.top{color:var(--accent-ink)}
+table.cmp td .r.top{color:var(--hl-strong)}
 table.cmp td .sc{display:block;font-size:.78rem;color:var(--muted)}
 .scn-list{display:grid;gap:6px;margin-top:12px}
 .scn-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line-2)}
@@ -215,17 +240,24 @@ dialog .sect{border-top:1px solid var(--line-2);padding-top:10px}
 dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;color:var(--fg-2)}
 @media print{
   :root:root:root{
-    --bg:#ffffff; --surface:#ffffff; --surface-2:#e9efec; --fg:#15231f; --fg-2:#4a5a55; --muted:#7b8a85;
-    --line:#d1dbd6; --line-2:#e3eae6; --accent:#1b4d41; --accent-fg:#ffffff; --accent-soft:#d8efe2; --accent-ink:#1b4d41;
-    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948; --s0:#8a9490;
-    --seq:27,77,65; --shadow:none; color-scheme:light;
+    --bg:#ffffff; --surface:#ffffff; --surface-2:#e0f2ee; --fg:#173630; --fg-2:#3d5a52; --muted:#6b8079;
+    --line:#b3ded6; --line-2:#e0f2ee; --accent:#173630; --accent-fg:#ffffff; --accent-soft:#e0f2ee; --accent-ink:#173630;
+    --brand:#173630; --brand-fg:#ffffff; --brand-soft:#bfe6c4; --hl:#3958fe; --hl-strong:#0021d0; --hl-soft:#dee3ff; --hl-fg:#ffffff;
+    --good:#3b9746; --critical:#c0503e;
+    --s1:#173630; --s2:#3b9746; --s3:#67bead; --s4:#a1b0ff; --s5:#3958fe; --s6:#d47969; --s7:#7a600f; --s8:#73c87e; --s0:#8a9a94;
+    --seq:59,151,70; --shadow:none; color-scheme:light;
   }
   @page{margin:14mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{padding:0;background:#fff}
   .print-only{display:block}
   .tip,dialog{display:none!important}
-  body.printing .toolbar,body.printing aside.panel,body.printing .tabs{display:none!important}
+  body.printing .toolbar,body.printing nav.pages,body.printing .page-intro,body.printing .tabs{display:none!important}
+  body.printing [data-pagebody=input]{display:none!important}
+  body.printing [data-pagebody=results]{display:block!important}
+  body.printing header.top{background:#fff;color:var(--fg);margin:0;padding:0 0 8px;border-bottom:2px solid var(--brand)}
+  body.printing header.top h1{color:var(--fg)}
+  body.printing header.top .sub{color:var(--fg-2)}
   body.printing .layout{display:block;margin-top:12px}
   body.printing .stack{display:block}
   body.printing .panel{box-shadow:none;break-inside:avoid;margin-bottom:14px}
@@ -241,29 +273,65 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <body>
 
 <header class="top">
-  <div>
-    <h1>Supplier Stack-Up <span class="badge" id="badge">Example data</span></h1>
-    <div class="sub">Supplier partnership segmentation across four perspectives. Weight the criteria, adjust the scores, and watch the ranking and the segmentation map move. Everything stays in this browser; nothing is sent anywhere.</div>
+  <div class="bar">
+    <div>
+      <h1>Supplier Stack-Up <span class="badge" id="badge">Example data</span></h1>
+      <div class="sub">Supplier partnership segmentation across four perspectives. Everything stays in this browser; nothing is sent anywhere.</div>
+    </div>
+    <div class="toolbar">
+      <label for="scnSel">Scenario</label>
+      <select id="scnSel" aria-label="Scenario"></select>
+      <button id="btnImport">Import data</button>
+      <button id="btnExport">Export</button>
+      <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
+    </div>
   </div>
-  <div class="toolbar">
-    <label for="scnSel">Scenario</label>
-    <select id="scnSel" aria-label="Scenario"></select>
-    <button id="btnImport">Import data</button>
-    <button id="btnExport">Export</button>
-    <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
-  </div>
+  <nav class="pages" aria-label="Pages">
+    <button data-page="input" aria-current="page"><span class="n">1</span>Input: weights &amp; scores</button>
+    <button data-page="results"><span class="n">2</span>Results</button>
+  </nav>
 </header>
 
-<div class="layout">
-  <aside class="panel" aria-label="Weights">
-    <div class="head"><h2>Criteria weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
-    <div class="body">
-      <div class="small muted" style="margin-bottom:10px">0 = ignore, 10 = critical. The share shows how much of the final score each criterion carries. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
-      <div id="weights"></div>
-    </div>
-  </aside>
+<div data-pagebody="input">
+  <div class="page-intro"><p>Set how much each criterion matters and score every supplier from 1 to 5. The preview on the right shows the ranking move as you change things; the full analysis is on Results.</p><button class="primary" data-goto="results">See results →</button></div>
+  <div class="layout">
+    <aside class="panel" aria-label="Weights">
+      <div class="head"><h2>Criteria weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
+      <div class="body">
+        <div class="small muted" style="margin-bottom:10px">0 = ignore, 10 = critical. The share shows how much of the final score each criterion carries. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
+        <div id="weights"></div>
+      </div>
+    </aside>
+    <main class="stack">
+      <section class="panel mini" aria-label="Live preview">
+        <div class="head"><h2>Live ranking preview</h2><span class="small muted" id="scnTagMini"></span></div>
+        <div class="body"><div class="rank" id="rankMini"></div></div>
+      </section>
+      <section class="panel" aria-label="Scores">
+        <div class="head"><h2>Supplier scores</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
+        <div class="body">
+          <div class="scroll"><table class="matrix" id="matrix"></table></div>
+          <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it. Higher always means more of the criterion: more spend, more risk, more capability, more willingness.</span></div>
+        </div>
+      </section>
+      <section class="panel" aria-label="Scenarios">
+        <div class="head"><h2>Saved weight scenarios</h2></div>
+        <div class="body">
+          <div class="small muted">Save the current weights under a name to compare them on the Results page. Scores are shared; only the weights differ.</div>
+          <div class="saveas">
+            <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
+            <button class="primary" id="btnSaveScn">Save current weights</button>
+          </div>
+          <div class="scn-list" id="scnList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
 
-  <main class="stack">
+<div data-pagebody="results" hidden>
+  <div class="page-intro"><p>The outcome of the current weights and scores. Change them on the Input page, or pick another scenario in the bar above.</p><button data-goto="input">← Back to input</button></div>
+  <div class="results">
     <section class="panel" aria-label="Ranking">
       <div class="head"><div><h2>Overall ranking</h2><div class="print-only small muted" id="printMeta"></div></div><span class="small muted" id="scnTag"></span></div>
       <div class="body">
@@ -277,9 +345,8 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="tabs" role="tablist">
         <button role="tab" aria-selected="true" data-tab="map">Segmentation map</button>
         <button role="tab" aria-selected="false" data-tab="h2h">Head to head</button>
-        <button role="tab" aria-selected="false" data-tab="scores">Scores</button>
         <button role="tab" aria-selected="false" data-tab="profile">Profiles</button>
-        <button role="tab" aria-selected="false" data-tab="scn">Scenarios</button>
+        <button role="tab" aria-selected="false" data-tab="scn">Scenario comparison</button>
       </div>
       <div class="body" id="pane-map" role="tabpanel">
         <div class="map-wrap">
@@ -303,11 +370,6 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="insight" id="h2hIns"></div>
         <div class="small muted" style="margin-top:8px">The gap bar shows each criterion's weighted contribution difference, so it moves with the weights. Raw scores are shown either side.</div>
       </div>
-      <div class="body" id="pane-scores" role="tabpanel" hidden>
-        <div class="scroll"><table class="matrix" id="matrix"></table></div>
-        <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it. Higher always means more of the criterion: more spend, more risk, more capability, more willingness.</span></div>
-        <div style="margin-top:12px"><button class="small" id="btnAddSup">+ Supplier</button></div>
-      </div>
       <div class="body" id="pane-profile" role="tabpanel" hidden>
         <div class="radar-wrap">
           <svg id="radar" viewBox="0 0 600 520" role="img" aria-label="Radar chart of supplier scores per criterion"></svg>
@@ -319,16 +381,11 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         </div>
       </div>
       <div class="body" id="pane-scn" role="tabpanel" hidden>
-        <div class="small muted" style="margin-bottom:10px">Rank and segment of each supplier under each saved set of weights. Scores are shared; only the weights differ.</div>
+        <div class="small muted" style="margin-bottom:10px">Rank and segment of each supplier under each saved set of weights.</div>
         <div class="scroll"><table class="cmp" id="cmp"></table></div>
-        <div class="saveas">
-          <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
-          <button class="primary" id="btnSaveScn">Save current weights</button>
-        </div>
-        <div class="scn-list" id="scnList"></div>
       </div>
     </section>
-  </main>
+  </div>
 </div>
 
 <dialog id="dlgImport">
@@ -483,7 +540,11 @@ function attachTip(el,html){el.addEventListener('mouseenter',e=>showTip(e,html))
 /* ---------- ranking ---------- */
 function baseScn(){return S.scenarios.find(x=>x.id===S.baseScn)||null;}
 function renderRanking(c){
-  const host=document.getElementById('rank');host.innerHTML='';
+  ['rank','rankMini'].forEach(hid=>renderRankInto(c,document.getElementById(hid)));
+  renderInsight(c);
+}
+function renderRankInto(c,host){
+  host.innerHTML='';
   // when weights differ from a saved scenario, show how far each supplier moved against it
   const base=!S.activeScn&&baseScn()?evaluate(baseScn().weights):null;
   c.sorted.forEach(r=>{
@@ -504,6 +565,8 @@ function renderRanking(c){
     if(r.out){row.querySelector('.score').title='Below the knock-out on: '+r.failed.join(', ');attachTip(row.querySelector('.score'),'Below the knock-out on: '+esc(r.failed.join(', ')));}
     host.appendChild(row);
   });
+}
+function renderInsight(c){
   document.getElementById('dimLegend').innerHTML=S.persp.map((p,i)=>`<span class="i"><i style="background:${col(i)}"></i>${esc(p.name)}</span>`).join('');
   const inRun=c.sorted.filter(r=>!r.out);const ins=document.getElementById('insight');
   if(inRun.length<2){ins.textContent=inRun.length?`Only ${inRun[0].s.name} clears every knock-out.`:'No supplier clears every knock-out.';return;}
@@ -622,7 +685,7 @@ function renderScnSelect(){
   const sel=document.getElementById('scnSel');
   sel.innerHTML=`<option value="">Custom weights</option>`+S.scenarios.map(sc=>`<option value="${sc.id}">${esc(sc.name)}</option>`).join('');
   sel.value=S.activeScn||'';
-  const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
+  const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTagMini').textContent=document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
 }
 function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;S.dims.forEach(d=>{if(sc.weights[d.id]!==undefined)d.weight=+sc.weights[d.id];});S.activeScn=id;S.baseScn=id;renderResults();save();}
 function renderScenarios(){
@@ -649,8 +712,17 @@ document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.valu
 /* ---------- tabs ---------- */
 document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tabs [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
-  ['map','h2h','scores','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
+  ['map','h2h','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
 }));
+
+/* ---------- pages ---------- */
+function showPage(pg){
+  if(pg!=='results')pg='input';S.page=pg;
+  document.querySelectorAll('[data-pagebody]').forEach(el=>el.hidden=el.dataset.pagebody!==pg);
+  document.querySelectorAll('nav.pages [data-page]').forEach(b=>{if(b.dataset.page===pg)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  save();
+}
+document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListener('click',()=>{showPage(b.dataset.page||b.dataset.goto);window.scrollTo(0,0);}));
 
 /* ---------- add / reset ---------- */
 document.getElementById('btnAddDim').addEventListener('click',()=>{
@@ -662,7 +734,7 @@ document.getElementById('btnAddSup').addEventListener('click',()=>{
   const s={id:nid(),name:'New supplier'};S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
   const last=document.querySelector('#matrix tbody tr:last-child td.sup input');if(last){last.focus();last.select();}
 });
-document.getElementById('btnReset').addEventListener('click',()=>{S=exampleState();renderAll();save();});
+document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;renderAll();save();});
 
 /* ---------- import / export ---------- */
 function toCSV(){
@@ -775,8 +847,8 @@ document.getElementById('h2hSwap').addEventListener('click',()=>{S.h2h=[S.h2h[1]
 
 /* ---------- ranking export (png / print) ---------- */
 // fixed light palette so exports look the same whatever theme the room laptop uses
-const EXP={bg:'#ffffff',fg:'#15231f',fg2:'#4a5a55',muted:'#7b8a85',track:'#e9efec',line:'#d1dbd6',crit:'#d03b3b',soft:'#d8efe2',accent:'#1b4d41',
-  s:['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#6250d6','#e34948'],s0:'#8a9490'};
+const EXP={bg:'#ffffff',fg:'#173630',fg2:'#3d5a52',muted:'#6b8079',track:'#e0f2ee',line:'#b3ded6',crit:'#c0503e',soft:'#dee3ff',accent:'#3958fe',
+  s:['#173630','#3b9746','#67bead','#a1b0ff','#3958fe','#d47969','#7a600f','#73c87e'],s0:'#8a9a94'};
 const expCol=i=>i<EXP.s.length?EXP.s[i]:EXP.s0;
 function scnLabel(){const sc=S.scenarios.find(x=>x.id===S.activeScn);return sc?`Weights: ${sc.name}`:'Weights: custom';}
 function wrapText(t,n){const words=t.split(/\s+/);const lines=[];let cur='';words.forEach(w=>{if((cur+' '+w).trim().length>n){if(cur)lines.push(cur);cur=w;}else cur=(cur+' '+w).trim();});if(cur)lines.push(cur);return lines;}
@@ -866,7 +938,7 @@ function renderResults(){
   document.getElementById('badge').hidden=!S.example;
 }
 function renderAll(){buildWeights();buildMatrix();renderResults();}
-S=load();if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();
+S=load();if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
 })();
 </script>
 </body>
