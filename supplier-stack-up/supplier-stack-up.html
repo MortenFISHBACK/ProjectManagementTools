@@ -90,8 +90,11 @@ header.top .sub{color:var(--fg-2);margin-top:4px;max-width:62ch}
 
 /* ranking */
 .rank{display:grid;gap:8px}
-.rrow{display:grid;grid-template-columns:2.2ch minmax(120px,190px) minmax(0,1fr) 5.5ch;gap:10px;align-items:center}
-@media (max-width:520px){.rrow{grid-template-columns:2.2ch minmax(0,1fr) 5.5ch}.rrow .track{grid-column:1/-1}}
+.rrow{display:grid;grid-template-columns:2.2ch minmax(120px,190px) minmax(0,1fr) 5.5ch 3.4ch;gap:10px;align-items:center}
+@media (max-width:520px){.rrow{grid-template-columns:2.2ch minmax(0,1fr) 5.5ch 3.4ch}.rrow .track{grid-column:1/-1}}
+.rrow .mv{font-size:.8rem;font-weight:600;white-space:nowrap}
+.rrow .mv.up{color:var(--good)}
+.rrow .mv.down{color:var(--critical)}
 .rrow .pos{font-family:var(--font-display);font-weight:700;color:var(--muted);text-align:right}
 .rrow .sname{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rrow .track{height:22px;display:flex;align-items:stretch;background:var(--surface-2);border-radius:4px;overflow:hidden}
@@ -187,6 +190,51 @@ dialog .err{color:var(--critical);font-size:.9rem}
 dialog .ok{color:var(--good);font-size:.9rem}
 .tip{position:fixed;pointer-events:none;background:var(--fg);color:var(--bg);font-size:.8rem;padding:4px 8px;border-radius:4px;z-index:20;max-width:280px;opacity:0;transition:opacity .1s}
 .tip.on{opacity:1}
+/* head to head */
+.h2h-pick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.h2h-pick select{padding:6px 8px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);min-width:0;flex:1 1 160px;max-width:260px}
+.h2h-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.h2h-card{border:1px solid var(--line-2);border-top:4px solid var(--s0);border-radius:6px;padding:10px 12px;min-width:0}
+.h2h-card .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h2h-card .big{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1.1}
+table.h2h{border-collapse:collapse;width:100%;min-width:560px}
+table.h2h th,table.h2h td{padding:5px 8px;border-bottom:1px solid var(--line-2);text-align:center;vertical-align:middle}
+table.h2h th{font-family:var(--font-display);font-weight:600;font-size:.8rem;color:var(--fg-2)}
+table.h2h .c{text-align:left}
+table.h2h td.win{font-weight:700}
+table.h2h td.fail{color:var(--critical)}
+table.h2h tr.pg td{background:var(--surface-2);font-family:var(--font-display);font-weight:600;font-size:.82rem}
+table.h2h tr.pg td:first-child{border-left:4px solid var(--s0)}
+table.h2h tr.tot td{font-family:var(--font-display);font-weight:700;border-top:2px solid var(--line)}
+.gap{position:relative;height:14px;min-width:140px;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat}
+.gap i{position:absolute;top:1px;bottom:1px;border-radius:2px}
+
+/* export + print */
+.print-only{display:none}
+dialog .sect{border-top:1px solid var(--line-2);padding-top:10px}
+dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;color:var(--fg-2)}
+@media print{
+  :root:root:root{
+    --bg:#ffffff; --surface:#ffffff; --surface-2:#e9efec; --fg:#15231f; --fg-2:#4a5a55; --muted:#7b8a85;
+    --line:#d1dbd6; --line-2:#e3eae6; --accent:#1b4d41; --accent-fg:#ffffff; --accent-soft:#d8efe2; --accent-ink:#1b4d41;
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948; --s0:#8a9490;
+    --seq:27,77,65; --shadow:none; color-scheme:light;
+  }
+  @page{margin:14mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{padding:0;background:#fff}
+  .print-only{display:block}
+  .tip,dialog{display:none!important}
+  body.printing .toolbar,body.printing aside.panel,body.printing .tabs{display:none!important}
+  body.printing .layout{display:block;margin-top:12px}
+  body.printing .stack{display:block}
+  body.printing .panel{box-shadow:none;break-inside:avoid;margin-bottom:14px}
+  body.printing section[aria-label=Detail]{display:none}
+  body.printing.print-map section[aria-label=Detail]{display:block}
+  body.printing [role=tabpanel]{display:none!important}
+  body.printing.print-map #pane-map{display:block!important}
+  body.printing .map-side .thr input{display:none}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -217,7 +265,7 @@ dialog .ok{color:var(--good);font-size:.9rem}
 
   <main class="stack">
     <section class="panel" aria-label="Ranking">
-      <div class="head"><h2>Overall ranking</h2><span class="small muted" id="scnTag"></span></div>
+      <div class="head"><div><h2>Overall ranking</h2><div class="print-only small muted" id="printMeta"></div></div><span class="small muted" id="scnTag"></span></div>
       <div class="body">
         <div class="rank" id="rank"></div>
         <div class="rank-foot"><span class="eyebrow" style="align-self:center">Bar segments by perspective</span><div class="legend" id="dimLegend"></div></div>
@@ -228,6 +276,7 @@ dialog .ok{color:var(--good);font-size:.9rem}
     <section class="panel" aria-label="Detail">
       <div class="tabs" role="tablist">
         <button role="tab" aria-selected="true" data-tab="map">Segmentation map</button>
+        <button role="tab" aria-selected="false" data-tab="h2h">Head to head</button>
         <button role="tab" aria-selected="false" data-tab="scores">Scores</button>
         <button role="tab" aria-selected="false" data-tab="profile">Profiles</button>
         <button role="tab" aria-selected="false" data-tab="scn">Scenarios</button>
@@ -242,6 +291,17 @@ dialog .ok{color:var(--good);font-size:.9rem}
             <div class="small muted">Each axis is the weighted average (1 to 5) of the criteria in the perspectives assigned to it. Knocked-out suppliers are drawn hollow.</div>
           </div>
         </div>
+      </div>
+      <div class="body" id="pane-h2h" role="tabpanel" hidden>
+        <div class="h2h-pick">
+          <select id="h2hA" aria-label="First supplier"></select>
+          <button class="small" id="h2hSwap" title="Swap sides" aria-label="Swap sides">⇄</button>
+          <select id="h2hB" aria-label="Second supplier"></select>
+        </div>
+        <div class="h2h-cards" id="h2hCards"></div>
+        <div class="scroll"><table class="h2h" id="h2hTbl"></table></div>
+        <div class="insight" id="h2hIns"></div>
+        <div class="small muted" style="margin-top:8px">The gap bar shows each criterion's weighted contribution difference, so it moves with the weights. Raw scores are shown either side.</div>
       </div>
       <div class="body" id="pane-scores" role="tabpanel" hidden>
         <div class="scroll"><table class="matrix" id="matrix"></table></div>
@@ -284,6 +344,11 @@ dialog .ok{color:var(--good);font-size:.9rem}
 <dialog id="dlgExport">
   <div class="dh"><h3>Export</h3><button class="small ghost" data-close>Close</button></div>
   <div class="db">
+    <div class="eyebrow">Final ranking</div>
+    <div class="small">The current ranking as an image for slides and minutes, or as a print-ready page you can save as PDF.</div>
+    <div class="row"><button class="primary" id="btnPng">Download ranking .png</button><button id="btnPrint">Print / save as PDF</button><label class="chk"><input type="checkbox" id="prMap" checked> Include segmentation map in PDF</label></div>
+    <div class="row"><span id="pngMsg" class="ok small"></span></div>
+    <div class="sect eyebrow">Data</div>
     <div class="small">Current criteria, weights and scores as CSV. Paste into a spreadsheet, or fill it with the real suppliers and import it back.</div>
     <textarea id="exportText" readonly></textarea>
     <div class="row"><button class="primary" id="btnCopy">Copy</button><a id="dl" download="supplier-stack-up.csv"><button>Download .csv</button></a><span id="exportMsg" class="ok"></span></div>
@@ -335,7 +400,7 @@ function exampleState(){
     {id:nid(),name:'Resilience first',weights:w([6,5,10,9,4,3,5,4,5])},
     {id:nid(),name:'Value creation',weights:w([5,7,5,6,10,8,8,6,6])}
   ];
-  return {example:true,persp,dims,suppliers,scores,scenarios,activeScn:scenarios[0].id,picks:null,thr:3};
+  return {example:true,persp,dims,suppliers,scores,scenarios,activeScn:scenarios[0].id,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null};
 }
 function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slice(0,24);const sp=cut.lastIndexOf(' ');return (sp>10?cut.slice(0,sp):cut)+'…';}
 
@@ -415,15 +480,22 @@ function hideTip(){tip.classList.remove('on');}
 function attachTip(el,html){el.addEventListener('mouseenter',e=>showTip(e,html));el.addEventListener('mousemove',moveTip);el.addEventListener('mouseleave',hideTip);}
 
 /* ---------- ranking ---------- */
+function baseScn(){return S.scenarios.find(x=>x.id===S.baseScn)||null;}
 function renderRanking(c){
   const host=document.getElementById('rank');host.innerHTML='';
+  // when weights differ from a saved scenario, show how far each supplier moved against it
+  const base=!S.activeScn&&baseScn()?evaluate(baseScn().weights):null;
   c.sorted.forEach(r=>{
     const row=document.createElement('div');row.className='rrow'+(r.out?' out':'');
+    const mvCell=r=>{if(!base)return '<div class="mv"></div>';const b=base.rows.find(x=>x.s.id===r.s.id);
+      if(!b||!b.rank||!r.rank)return '<div class="mv"></div>';const d=b.rank-r.rank;
+      if(!d)return '<div class="mv muted" title="Same rank as in '+esc(baseScn().name)+'">=</div>';
+      return `<div class="mv ${d>0?'up':'down'}" title="${d>0?'Up':'Down'} ${Math.abs(d)} vs ${esc(baseScn().name)}">${d>0?'▲':'▼'}${Math.abs(d)}</div>`;};
     let segs='';
     S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);ds.forEach((d,k)=>{const v=r.parts[d.id];if(v<=0)return;segs+=`<div class="seg${k===ds.length-1?' pend':''}" style="width:${(v/5*100).toFixed(2)}%;background:${col(pi)}" data-dim="${d.id}"></div>`;});});
     row.innerHTML=`<div class="pos num">${r.rank?r.rank:'–'}</div><div class="sname" title="${esc(r.s.name)}">${esc(r.s.name)}</div>
       <div class="track" role="img" aria-label="${esc(r.s.name)}: ${f2(r.total)} of 5">${segs}</div>
-      <div class="score num">${r.out?'knocked out':f2(r.total)}</div>`;
+      <div class="score num">${r.out?'knocked out':f2(r.total)}</div>${mvCell(r)}`;
     row.querySelectorAll('.seg').forEach(seg=>{
       const d=S.dims.find(x=>x.id===seg.dataset.dim);const sc=S.scores[r.s.id][d.id];const nw=c.sumW>0?(+d.weight||0)/c.sumW:0;
       attachTip(seg,`<strong>${esc(r.s.name)}</strong><br>${esc(d.name)}: score ${sc} × weight ${pct(nw)} = ${f2(r.parts[d.id])}`);
@@ -549,9 +621,9 @@ function renderScnSelect(){
   const sel=document.getElementById('scnSel');
   sel.innerHTML=`<option value="">Custom weights</option>`+S.scenarios.map(sc=>`<option value="${sc.id}">${esc(sc.name)}</option>`).join('');
   sel.value=S.activeScn||'';
-  const sc=S.scenarios.find(x=>x.id===S.activeScn);document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:'Weights: custom (not saved)';
+  const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
 }
-function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;S.dims.forEach(d=>{if(sc.weights[d.id]!==undefined)d.weight=+sc.weights[d.id];});S.activeScn=id;renderResults();save();}
+function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;S.dims.forEach(d=>{if(sc.weights[d.id]!==undefined)d.weight=+sc.weights[d.id];});S.activeScn=id;S.baseScn=id;renderResults();save();}
 function renderScenarios(){
   const t=document.getElementById('cmp');
   const cols=S.scenarios.map(sc=>({name:sc.name,ev:evaluate(sc.weights),id:sc.id}));
@@ -568,6 +640,7 @@ document.getElementById('btnSaveScn').addEventListener('click',()=>{
   const inp=document.getElementById('scnName');const name=inp.value.trim()||('Scenario '+(S.scenarios.length+1));
   const existing=S.scenarios.find(x=>x.name.toLowerCase()===name.toLowerCase());
   if(existing){existing.weights=weightsNow();S.activeScn=existing.id;}else{const sc={id:nid(),name,weights:weightsNow()};S.scenarios.push(sc);S.activeScn=sc.id;}
+  S.baseScn=S.activeScn;
   inp.value='';renderResults();save();
 });
 document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.value)applyScn(e.target.value);else{S.activeScn=null;renderResults();save();}});
@@ -575,7 +648,7 @@ document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.valu
 /* ---------- tabs ---------- */
 document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tabs [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
-  ['map','scores','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
+  ['map','h2h','scores','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
 }));
 
 /* ---------- add / reset ---------- */
@@ -628,7 +701,7 @@ function importCSV(text){
   dims.forEach(d=>{if(!d.pid)d.pid=perspByName('Other').id;});
   if(persp.length>8)throw new Error('At most 8 perspectives.');
   const w={};dims.forEach(d=>w[d.id]=d.weight);
-  S={example:false,persp,dims,suppliers,scores,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=S.scenarios[0].id;
+  S={example:false,persp,dims,suppliers,scores,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=S.scenarios[0].id;S.baseScn=S.activeScn;
 }
 const dlgI=document.getElementById('dlgImport'),dlgE=document.getElementById('dlgExport');
 document.querySelectorAll('dialog [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
@@ -639,7 +712,7 @@ document.getElementById('btnDoImport').addEventListener('click',()=>{
   try{importCSV(document.getElementById('importText').value);renderAll();save();dlgI.close();}catch(err){msg.textContent=err.message;}
 });
 document.getElementById('btnExport').addEventListener('click',()=>{
-  const csv=toCSV();document.getElementById('exportText').value=csv;document.getElementById('exportMsg').textContent='';
+  document.getElementById('pngMsg').textContent='';const csv=toCSV();document.getElementById('exportText').value=csv;document.getElementById('exportMsg').textContent='';
   document.getElementById('dl').href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);dlgE.showModal();
 });
 document.getElementById('btnCopy').addEventListener('click',()=>{
@@ -648,13 +721,122 @@ document.getElementById('btnCopy').addEventListener('click',()=>{
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(()=>{msg.textContent='Copied.';}).catch(fallback);}else fallback();
 });
 
+/* ---------- head to head ---------- */
+function h2hPair(c){
+  const ids=S.suppliers.map(s=>s.id);
+  if(!Array.isArray(S.h2h)||S.h2h.length!==2||!S.h2h.every(id=>ids.includes(id))||S.h2h[0]===S.h2h[1]){
+    const top=c.sorted.map(r=>r.s.id);S.h2h=[top[0],top[1]];
+  }
+  return S.h2h;
+}
+function renderH2H(c){
+  const [ia,ib]=h2hPair(c);
+  const opts=sel=>S.suppliers.map(s=>`<option value="${s.id}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
+  const sa=document.getElementById('h2hA'),sb=document.getElementById('h2hB');
+  if(document.activeElement!==sa)sa.innerHTML=opts(ia);if(document.activeElement!==sb)sb.innerHTML=opts(ib);
+  const A=c.rows.find(r=>r.s.id===ia),B=c.rows.find(r=>r.s.id===ib);
+  const ca=col(S.suppliers.indexOf(A.s)),cb=col(S.suppliers.indexOf(B.s));
+  const card=(r,cl)=>`<div class="h2h-card" style="border-top-color:${cl}"><div class="eyebrow">${r.rank?'Rank #'+r.rank:'Knocked out'}</div><div class="nm" title="${esc(r.s.name)}">${esc(r.s.name)}</div><div class="big num">${f2(r.total)}</div><div class="small muted">${r.seg?SEGMENTS[r.seg]:''}${r.out?' · below knock-out on '+esc(r.failed.join(', ')):''}</div></div>`;
+  document.getElementById('h2hCards').innerHTML=card(A,ca)+card(B,cb);
+  // one scale for criteria, perspective subtotals and the total, so bars stay comparable and never overflow
+  let maxAbs=Math.abs(A.total-B.total);S.dims.forEach(d=>{maxAbs=Math.max(maxAbs,Math.abs(A.parts[d.id]-B.parts[d.id]));});
+  S.persp.forEach(p=>{const ds=dimsOf(p.id);maxAbs=Math.max(maxAbs,Math.abs(ds.reduce((t,d)=>t+A.parts[d.id]-B.parts[d.id],0)));});
+  const bar=v=>{const w=maxAbs>0?Math.abs(v)/maxAbs*50:0;if(w<0.01)return '<div class="gap"></div>';
+    return `<div class="gap"><i style="${v>0?`right:50%;background:${ca}`:`left:50%;background:${cb}`};width:${w.toFixed(1)}%"></i></div>`;};
+  const sg=v=>(v>0?'+':v<0?'−':'')+f2(Math.abs(v));
+  let rows='';
+  S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);if(!ds.length)return;
+    const pa=ds.reduce((t,d)=>t+A.parts[d.id],0),pb=ds.reduce((t,d)=>t+B.parts[d.id],0);
+    rows+=`<tr class="pg"><td class="c" style="border-left-color:${col(pi)}">${esc(p.name)}</td><td class="num">${c.sumW>0?pct(ds.reduce((t,d)=>t+(+d.weight||0),0)/c.sumW):'0%'}</td><td class="num">${f2(pa)}</td><td class="num">${f2(pb)}</td><td>${bar(pa-pb)}</td><td class="num">${sg(pa-pb)}</td></tr>`;
+    ds.forEach(d=>{const va=S.scores[A.s.id][d.id],vb=S.scores[B.s.id][d.id];const diff=A.parts[d.id]-B.parts[d.id];
+      const fa=d.min>0&&va<d.min,fb=d.min>0&&vb<d.min;
+      rows+=`<tr><td class="c" title="${esc(d.name)}">${esc(d.short||shorten(d.name))}${d.min?` <span class="muted small">min ${d.min}</span>`:''}</td><td class="num muted">${c.sumW>0?pct((+d.weight||0)/c.sumW):'0%'}</td>`+
+        `<td class="num${va>vb?' win':''}${fa?' fail':''}">${va}</td><td class="num${vb>va?' win':''}${fb?' fail':''}">${vb}</td><td>${bar(diff)}</td><td class="num muted">${sg(diff)}</td></tr>`;});
+  });
+  rows+=`<tr class="tot"><td class="c">Weighted score</td><td></td><td class="num">${f2(A.total)}</td><td class="num">${f2(B.total)}</td><td>${bar(A.total-B.total)}</td><td class="num">${sg(A.total-B.total)}</td></tr>`;
+  document.getElementById('h2hTbl').innerHTML=`<thead><tr><th class="c">Criterion</th><th>Share</th><th style="color:${ca}">${esc(shorten(A.s.name))}</th><th style="color:${cb}">${esc(shorten(B.s.name))}</th><th>← ahead · ahead →</th><th>Gap</th></tr></thead><tbody>${rows}</tbody>`;
+  if(A.s.id===B.s.id){document.getElementById('h2hIns').textContent='Pick two different suppliers.';return;}
+  const edges=S.dims.map(d=>({d,v:A.parts[d.id]-B.parts[d.id]}));
+  const top=(arr)=>arr.slice(0,2).map(e=>`${esc(e.d.name)} (+${f2(Math.abs(e.v))})`).join(' and ');
+  const aE=edges.filter(e=>e.v>0.005).sort((x,y)=>y.v-x.v),bE=edges.filter(e=>e.v<-0.005).sort((x,y)=>x.v-y.v);
+  const lead=A.total>=B.total?[A,B]:[B,A];const gap=Math.abs(A.total-B.total);
+  let t=gap<0.005?`<strong>${esc(A.s.name)}</strong> and <strong>${esc(B.s.name)}</strong> are level on weighted score.`:
+    `<strong>${esc(lead[0].s.name)}</strong> is ahead of <strong>${esc(lead[1].s.name)}</strong> by ${f2(gap)} points.`;
+  if(aE.length)t+=` ${esc(A.s.name)} wins most on ${top(aE)}.`;
+  if(bE.length)t+=` ${esc(B.s.name)} wins most on ${top(bE)}.`;
+  if(A.out||B.out)t+=` ${[A,B].filter(r=>r.out).map(r=>esc(r.s.name)).join(' and ')} ${A.out&&B.out?'are':'is'} knocked out.`;
+  document.getElementById('h2hIns').innerHTML=t;
+}
+const pickH2H=(i,v)=>{const o=1-i;if(S.h2h[o]===v)S.h2h[o]=S.h2h[i];S.h2h[i]=v;renderH2H(compute());save();};
+document.getElementById('h2hA').addEventListener('change',e=>pickH2H(0,e.target.value));
+document.getElementById('h2hB').addEventListener('change',e=>pickH2H(1,e.target.value));
+document.getElementById('h2hSwap').addEventListener('click',()=>{S.h2h=[S.h2h[1],S.h2h[0]];renderH2H(compute());save();});
+
+/* ---------- ranking export (png / print) ---------- */
+// fixed light palette so exports look the same whatever theme the room laptop uses
+const EXP={bg:'#ffffff',fg:'#15231f',fg2:'#4a5a55',muted:'#7b8a85',track:'#e9efec',line:'#d1dbd6',crit:'#d03b3b',soft:'#d8efe2',accent:'#1b4d41',
+  s:['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#6250d6','#e34948'],s0:'#8a9490'};
+const expCol=i=>i<EXP.s.length?EXP.s[i]:EXP.s0;
+function scnLabel(){const sc=S.scenarios.find(x=>x.id===S.activeScn);return sc?`Weights: ${sc.name}`:'Weights: custom';}
+function wrapText(t,n){const words=t.split(/\s+/);const lines=[];let cur='';words.forEach(w=>{if((cur+' '+w).trim().length>n){if(cur)lines.push(cur);cur=w;}else cur=(cur+' '+w).trim();});if(cur)lines.push(cur);return lines;}
+function rankingSVG(){
+  const c=compute();const W=1200,PX=48,rowH=40,top=118;
+  const posW=40,nameW=300,scoreW=120;const barX=PX+posW+nameW,barW=W-PX-scoreW-barX-12;
+  const F='font-family="Segoe UI, Helvetica Neue, Arial, sans-serif"';
+  let o=`<rect width="100%" height="100%" fill="${EXP.bg}"/>`;
+  o+=`<text x="${PX}" y="54" ${F} font-size="30" font-weight="700" fill="${EXP.fg}">Supplier ranking</text>`;
+  o+=`<text x="${PX}" y="84" ${F} font-size="16" fill="${EXP.fg2}">${esc(scnLabel())} · weighted score out of 5 · ${esc(new Date().toLocaleDateString())}${S.example?' · example data':''}</text>`;
+  c.sorted.forEach((r,i)=>{const y=top+i*rowH;const cy=y+rowH/2;
+    o+=`<text x="${PX+posW-12}" y="${cy+6}" ${F} font-size="18" font-weight="700" fill="${EXP.muted}" text-anchor="end">${r.rank||'–'}</text>`;
+    const nm=r.s.name.length>34?r.s.name.slice(0,33)+'…':r.s.name;
+    o+=`<text x="${PX+posW}" y="${cy+6}" ${F} font-size="18" font-weight="600" fill="${EXP.fg}"${r.out?' opacity=".55"':''}>${esc(nm)}</text>`;
+    o+=`<rect x="${barX}" y="${cy-12}" width="${barW}" height="24" rx="4" fill="${EXP.track}"/>`;
+    let x=barX;
+    S.persp.forEach((p,pi)=>{dimsOf(p.id).forEach(d=>{const v=r.parts[d.id];if(v<=0)return;const w=v/5*barW;
+      o+=`<rect x="${x.toFixed(1)}" y="${cy-12}" width="${Math.max(0,w-2).toFixed(1)}" height="24" fill="${expCol(pi)}"${r.out?' opacity=".45"':''}/>`;x+=w;});});
+    o+=`<text x="${W-PX}" y="${cy+6}" ${F} font-size="${r.out?15:18}" font-weight="700" fill="${r.out?EXP.crit:EXP.fg}" text-anchor="end">${r.out?'knocked out':f2(r.total)}</text>`;
+  });
+  let y=top+c.sorted.length*rowH+30;let lx=PX;
+  S.persp.forEach((p,pi)=>{const label=p.name;const w=label.length*8.2+34;if(lx+w>W-PX){lx=PX;y+=26;}
+    o+=`<rect x="${lx}" y="${y-11}" width="13" height="13" rx="2" fill="${expCol(pi)}"/><text x="${lx+20}" y="${y}" ${F} font-size="15" fill="${EXP.fg2}">${esc(label)}</text>`;lx+=w;});
+  const ins=document.getElementById('insight').textContent.trim();
+  if(ins){y+=26;const lines=wrapText(ins,125);const h=lines.length*22+18;
+    o+=`<rect x="${PX}" y="${y}" width="${W-2*PX}" height="${h}" fill="${EXP.soft}"/><rect x="${PX}" y="${y}" width="4" height="${h}" fill="${EXP.accent}"/>`;
+    lines.forEach((l,i)=>{o+=`<text x="${PX+16}" y="${y+28+i*22}" ${F} font-size="16" fill="${EXP.fg}">${esc(l)}</text>`;});y+=h;}
+  const H=Math.ceil(y+36);
+  return {svg:`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${o}</svg>`,w:W,h:H};
+}
+function fileBase(){const sc=S.scenarios.find(x=>x.id===S.activeScn);const slug=(sc?sc.name:'custom').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  return `supplier-ranking-${slug||'custom'}-${new Date().toISOString().slice(0,10)}`;}
+function downloadPNG(){
+  const msg=document.getElementById('pngMsg');msg.className='ok small';msg.textContent='';
+  const {svg,w,h}=rankingSVG();const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));const img=new Image();
+  img.onload=()=>{try{const cv=document.createElement('canvas');cv.width=w*2;cv.height=h*2;const g=cv.getContext('2d');g.scale(2,2);g.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
+    cv.toBlob(b=>{if(!b){msg.className='err small';msg.textContent='Could not make the image in this browser.';return;}
+      const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fileBase()+'.png';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg.textContent='Saved '+a.download;},'image/png');}
+    catch(err){msg.className='err small';msg.textContent='Could not make the image in this browser.';}};
+  img.onerror=()=>{URL.revokeObjectURL(url);msg.className='err small';msg.textContent='Could not make the image in this browser.';};
+  img.src=url;
+}
+function printRanking(){
+  document.getElementById('printMeta').textContent=`${scnLabel()} · ${new Date().toLocaleDateString()}`;
+  document.body.classList.add('printing');document.body.classList.toggle('print-map',document.getElementById('prMap').checked);
+  dlgE.close();
+  const done=()=>{document.body.classList.remove('printing','print-map');window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done);
+  setTimeout(()=>{window.print();},60);
+}
+document.getElementById('btnPng').addEventListener('click',downloadPNG);
+document.getElementById('btnPrint').addEventListener('click',printRanking);
+
 /* ---------- render ---------- */
 function renderResults(){
-  const c=compute();updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderScnSelect();renderScenarios();
+  const c=compute();updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderScnSelect();renderScenarios();
   document.getElementById('badge').hidden=!S.example;
 }
 function renderAll(){buildWeights();buildMatrix();renderResults();}
-S=load();renderAll();
+S=load();if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();
 })();
 </script>
 </body>
