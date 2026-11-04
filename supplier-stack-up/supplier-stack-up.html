@@ -311,6 +311,36 @@ button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-l
 
 body[data-page=scoring] header.top .sub{display:none}
 body[data-page=scoring] .sc-wrap{margin-top:10px}
+#scAll[aria-pressed=true]{background:var(--hl);color:var(--hl-fg);border-color:var(--hl)}
+.sc-wrap.table .sc-grid{display:none}
+.sc-wrap.table{height:auto}
+.sup-list{display:grid;gap:2px}
+.sup-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line-2)}
+.sup-row i{width:10px;height:10px;border-radius:50%}
+.sup-row input{border:1px solid transparent;background:transparent;font-weight:600;padding:3px 5px;border-radius:4px;min-width:0;width:100%}
+.sup-row input:hover{border-color:var(--line)}
+.sup-row input:focus{outline:0;border-color:var(--hl)}
+/* facilitation guide */
+.res-wrap{display:block}
+.res-wrap.on{display:grid;grid-template-columns:minmax(280px,32%) minmax(0,1fr);gap:20px;align-items:start;margin-top:16px}
+.res-wrap.on .results{margin-top:0}
+@media (max-width:900px){.res-wrap.on{grid-template-columns:1fr}}
+.facil{position:sticky;top:10px;max-height:calc(100vh - 20px);display:flex;flex-direction:column;border-color:var(--hl)}
+.facil>.body{overflow:auto;flex:1;min-height:0}
+.fsteps{display:flex;gap:3px;padding:8px 12px 0;flex-wrap:wrap}
+.fsteps button{flex:1 1 0;min-width:0;padding:4px 2px;font-size:.72rem;font-weight:600;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsteps button[aria-current=step]{background:var(--hl);color:var(--hl-fg);border-color:var(--hl)}
+.fsteps button.has{box-shadow:inset 0 -3px 0 var(--good)}
+.fnav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;border-top:1px solid var(--line-2)}
+.facil h3{font-size:1.05rem;margin-bottom:4px}
+.facil .lab{font-family:var(--font-display);font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.facil ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.9rem}
+.facil ul.pts li::marker{color:var(--hl)}
+.facil textarea{width:100%;font:inherit;font-size:.9rem;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);resize:vertical;min-height:90px}
+.facil textarea:focus{outline:0;border-color:var(--hl)}
+.facil .sumblk{border-bottom:1px solid var(--line-2);padding:6px 0;font-size:.88rem;white-space:pre-wrap}
+.facil .sumblk b{display:block;font-family:var(--font-display);font-size:.82rem}
+.panel.spot{box-shadow:0 0 0 3px var(--hl)}
 /* stakeholders per criterion */
 .stk{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--surface)}
 .stk-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:6px}
@@ -346,7 +376,8 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   body{padding:0;background:#fff}
   .print-only{display:block}
   .tip,dialog{display:none!important}
-  body.printing .toolbar,body.printing nav.pages,body.printing .page-intro,body.printing .tabs{display:none!important}
+  body.printing .res-wrap{display:block!important}
+  body.printing .facil,body.printing .toolbar,body.printing nav.pages,body.printing .page-intro,body.printing .tabs{display:none!important}
   body.printing [data-pagebody=input]{display:none!important}
   body.printing [data-pagebody=results]{display:block!important}
   body.printing header.top{background:#fff;color:var(--fg);margin:0;padding:0 0 8px;border-bottom:2px solid var(--brand)}
@@ -381,14 +412,14 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
     </div>
   </div>
   <nav class="pages" aria-label="Pages">
-    <button data-page="input" aria-current="page"><span class="n">1</span>Setup: weights &amp; scores</button>
-    <button data-page="scoring"><span class="n">2</span>Score by criterion</button>
-    <button data-page="results"><span class="n">3</span>Results</button>
+    <button data-page="input" aria-current="page"><span class="n">1</span>Setup &amp; weighting</button>
+    <button data-page="scoring"><span class="n">2</span>Supplier criteria scoring</button>
+    <button data-page="results"><span class="n">3</span>Supplier evaluations</button>
   </nav>
 </header>
 
 <div data-pagebody="input">
-  <div class="page-intro"><p>Set how much each criterion matters and see all scores at a glance. Score the suppliers one criterion at a time on <b>Score by criterion</b>; the preview on the right shows the ranking move as you change things.</p><button class="primary" data-goto="scoring">Score by criterion →</button></div>
+  <div class="page-intro"><p>Set up the suppliers in scope, how much each criterion matters, and any weight scenarios you want to compare. Scoring happens on the next page.</p><button class="primary" data-goto="scoring">Supplier criteria scoring →</button></div>
   <div class="layout">
     <aside class="panel" aria-label="Weights">
       <div class="head"><h2>Criteria weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
@@ -398,21 +429,14 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       </div>
     </aside>
     <main class="stack">
-      <section class="panel mini" aria-label="Live preview">
-        <div class="head"><h2>Live ranking preview</h2><span class="small muted" id="scnTagMini"></span></div>
-        <div class="body"><div class="rank" id="rankMini"></div></div>
-      </section>
-      <section class="panel" aria-label="Scores">
-        <div class="head"><h2>Supplier scores</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
-        <div class="body">
-          <div class="scroll"><table class="matrix" id="matrix"></table></div>
-          <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it, or score one criterion at a time on <b>Score by criterion</b>. Hover a criterion for its definition. Use <b>Notes</b> to add comments behind a score; a blue corner marks a score with a comment.</span></div>
-        </div>
+      <section class="panel" aria-label="Suppliers">
+        <div class="head"><h2>Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
+        <div class="body"><div class="sup-list" id="supList"></div></div>
       </section>
       <section class="panel" aria-label="Scenarios">
         <div class="head"><h2>Saved weight scenarios</h2></div>
         <div class="body">
-          <div class="small muted">Save the current weights under a name to compare them on the Results page. Scores are shared; only the weights differ.</div>
+          <div class="small muted">Save the current weights under a name to compare them on the Supplier evaluations page. Scores are shared; only the weights differ.</div>
           <div class="saveas">
             <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
             <button class="primary" id="btnSaveScn">Save current weights</button>
@@ -430,6 +454,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <button id="scPrev" aria-label="Previous criterion">‹ Prev</button>
       <div class="sc-dots" id="scDots" role="tablist" aria-label="Criteria"></div>
       <button id="scNext" class="primary" aria-label="Next criterion">Next ›</button>
+      <button id="scAll" aria-pressed="false" title="All suppliers and criteria in one table">All scores</button>
     </div>
     <div class="sc-grid">
       <aside class="panel sc-cmp" aria-label="Comparison">
@@ -440,11 +465,25 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="body" id="scMain"></div>
       </section>
     </div>
+      <section class="panel sc-table-view" aria-label="Scores" hidden>
+        <div class="head"><h2>All scores</h2><span class="small muted">Suppliers are added on Setup &amp; weighting</span></div>
+        <div class="body">
+          <div class="scroll"><table class="matrix" id="matrix"></table></div>
+          <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it. Hover a criterion for its definition. Use <b>Notes</b> to add comments behind a score; a blue corner marks a score with a comment.</span></div>
+        </div>
+      </section>
   </div>
 </div>
 
 <div data-pagebody="results" hidden>
-  <div class="page-intro"><p>The outcome of the current weights and scores. Change them on the Input page, or pick another scenario in the bar above.</p><button data-goto="input">← Back to input</button></div>
+  <div class="page-intro"><p>The outcome of the current weights and scores. Change weights on Setup &amp; weighting, scores on Supplier criteria scoring, or pick another scenario in the bar above.</p><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button data-goto="scoring">← Back to scoring</button><button class="primary" id="btnFacil" aria-pressed="false">Facilitate the session</button></div></div>
+  <div class="res-wrap" id="resWrap">
+  <aside class="panel facil" id="facil" aria-label="Facilitation guide" hidden>
+    <div class="head"><h2>Facilitation guide</h2><button class="small ghost" id="facilClose">Close</button></div>
+    <div class="fsteps" id="fSteps"></div>
+    <div class="body" id="fBody"></div>
+    <div class="fnav"><button id="fPrev">‹ Prev</button><span class="small muted" id="fPos"></span><button class="primary" id="fNext">Next ›</button></div>
+  </aside>
   <div class="results">
     <section class="panel" aria-label="Ranking">
       <div class="head"><div><h2>Overall ranking</h2><div class="print-only small muted" id="printMeta"></div></div><span class="small muted" id="scnTag"></span></div>
@@ -501,6 +540,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       </div>
     </section>
   </div>
+</div>
 </div>
 
 <dialog id="dlgImport">
@@ -689,7 +729,7 @@ function attachTip(el,html){el.addEventListener('mouseenter',e=>showTip(e,html))
 /* ---------- ranking ---------- */
 function baseScn(){return S.scenarios.find(x=>x.id===S.baseScn)||null;}
 function renderRanking(c){
-  ['rank','rankMini'].forEach(hid=>renderRankInto(c,document.getElementById(hid)));
+  renderRankInto(c,document.getElementById('rank'));
   renderInsight(c);
 }
 function renderRankInto(c,host){
@@ -772,7 +812,18 @@ function renderMap(c){
 }
 document.getElementById('thr').addEventListener('input',e=>{S.thr=+e.target.value;renderResults();save();});
 
-/* ---------- definitions ---------- */
+/* ---------- suppliers list (setup) ---------- */
+function buildSuppliers(){
+  const host=document.getElementById('supList');
+  host.innerHTML=S.suppliers.map((s,i)=>`<div class="sup-row" data-sid="${s.id}"><i style="background:${col(i)}"></i><input value="${esc(s.name)}" aria-label="Supplier name"><button class="small notes-btn" data-notes>Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button><button class="small ghost" data-remove aria-label="Remove ${esc(s.name)}">remove</button></div>`).join('');
+  host.querySelectorAll('.sup-row').forEach(r=>{const s=S.suppliers.find(x=>x.id===r.dataset.sid);
+    r.querySelector('input').addEventListener('change',e=>{s.name=e.target.value.trim()||s.name;e.target.value=s.name;renderAll();save();});
+    r.querySelector('[data-notes]').addEventListener('click',()=>openNotes(s.id));
+    r.querySelector('[data-remove]').addEventListener('click',()=>removeSupplier(s));});
+}
+function removeSupplier(s){if(S.suppliers.length<=2)return;S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.notes)delete S.notes[s.id];if(S.supNotes)delete S.supNotes[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();}
+
+/* ---------- matrix ---------- */
 // grow a textarea to fit its text
 function fit(ta){ta.style.height='auto';if(ta.scrollHeight)ta.style.height=(ta.scrollHeight+2)+'px';}
 
@@ -796,7 +847,7 @@ function buildMatrix(){
       inp.addEventListener('input',apply);inp.addEventListener('change',apply);
     });
     tr.querySelector('[data-notes]').addEventListener('click',()=>openNotes(s.id));
-    tr.querySelector('[data-remove]').addEventListener('click',()=>{if(S.suppliers.length<=2)return;S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.notes)delete S.notes[s.id];if(S.supNotes)delete S.supNotes[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();});
+    tr.querySelector('[data-remove]').addEventListener('click',()=>removeSupplier(s));
   });
 }
 function updateMatrixTotals(c){
@@ -828,7 +879,7 @@ function renderNotes(){
 }
 document.getElementById('notesPrev').addEventListener('click',()=>{const i=S.suppliers.findIndex(x=>x.id===notesSid);if(i>0){notesSid=S.suppliers[i-1].id;renderNotes();}});
 document.getElementById('notesNext').addEventListener('click',()=>{const i=S.suppliers.findIndex(x=>x.id===notesSid);if(i<S.suppliers.length-1){notesSid=S.suppliers[i+1].id;renderNotes();}});
-document.getElementById('dlgNotes').addEventListener('close',()=>{buildMatrix();renderResults();});
+document.getElementById('dlgNotes').addEventListener('close',()=>{buildSuppliers();buildMatrix();renderResults();renderScoring();});
 
 /* ---------- radar ---------- */
 function currentPicks(){
@@ -864,7 +915,7 @@ function renderScnSelect(){
   const sel=document.getElementById('scnSel');
   sel.innerHTML=`<option value="">Custom weights</option>`+S.scenarios.map(sc=>`<option value="${sc.id}">${esc(sc.name)}</option>`).join('');
   sel.value=S.activeScn||'';
-  const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTagMini').textContent=document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
+  const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
 }
 function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;S.dims.forEach(d=>{if(sc.weights[d.id]!==undefined)d.weight=+sc.weights[d.id];});S.activeScn=id;S.baseScn=id;renderResults();save();}
 function renderScenarios(){
@@ -968,6 +1019,11 @@ function renderScoreCmp(d){
   host.querySelectorAll('.cmp-row').forEach(el=>el.addEventListener('click',()=>{const inp=document.querySelector(`#scMain .srow[data-sid="${el.dataset.sid}"] input.cm`);if(inp)inp.focus();}));
 }
 function stepDim(k){const o=orderedDims();const i=o.findIndex(d=>d.id===S.curDim);const j=Math.max(0,Math.min(o.length-1,i+k));if(j!==i){S.curDim=o[j].id;scFocusSid=null;renderScoring();save();}}
+function setScView(v){S.scView=v;const w=document.getElementById('scWrap');w.classList.toggle('table',v==='table');
+  document.querySelector('.sc-table-view').hidden=v!=='table';document.getElementById('scAll').setAttribute('aria-pressed',String(v==='table'));
+  if(v!=='table'){renderScoring();sizeScoring();}}
+document.getElementById('scAll').addEventListener('click',()=>{setScView(S.scView==='table'?'crit':'table');save();});
+document.getElementById('scDots').addEventListener('click',()=>{if(S.scView==='table')setScView('crit');});
 document.getElementById('scPrev').addEventListener('click',()=>stepDim(-1));
 document.getElementById('scNext').addEventListener('click',()=>stepDim(1));
 document.addEventListener('keydown',e=>{if(S.page!=='scoring'||e.altKey||e.ctrlKey||e.metaKey)return;const t=e.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return;
@@ -977,13 +1033,128 @@ function sizeScoring(){const w=document.getElementById('scWrap');if(!w||w.offset
   w.style.setProperty('--sc-h',Math.max(420,window.innerHeight-top-34)+'px');}
 window.addEventListener('resize',sizeScoring);
 
+/* ---------- facilitation guide (Supplier evaluations) ---------- */
+const FSTEPS=[
+  {k:'rank',t:'Overall ranking',short:'Ranking',spot:'Ranking',
+   look:'Start with the order and the size of the gaps, not the exact scores.',
+   q:['Does this order match the room\'s gut feeling? If not, which score or weight is off?','Is anyone surprised to be in or out of the top three?','Do we accept the knock-outs?']},
+  {k:'scn',t:'How robust is the ranking?',short:'Robustness',tab:'scn',spot:'Detail',
+   look:'Compare the saved weight scenarios. Suppliers that move a lot depend on what we choose to value.',
+   q:['Which scenario best reflects our category strategy?','For suppliers that move, what would make us confident in one position?']},
+  {k:'map',t:'Segmentation',short:'Segments',tab:'map',spot:'Detail',
+   look:'Check each supplier\'s segment, especially those close to the segment lines.',
+   q:['Do we agree with each supplier\'s segment?','What does each segment mean for how we engage: partner, develop, secure, or keep transactional?']},
+  {k:'h2h',t:'Close calls, head to head',short:'Head to head',tab:'h2h',spot:'Detail',
+   look:'The closest pair is selected. Walk through the criteria where they differ most and the comments behind them.',
+   q:['What evidence backs the biggest gaps?','Would a validated score from a stakeholder change the call?']},
+  {k:'profile',t:'Strengths and gaps',short:'Profiles',tab:'profile',spot:'Detail',
+   look:'The top three are shown. Look for weak spots that need a development plan.',
+   q:['Which gaps are we willing to accept, and which need an action?','Who owns the follow-up with each supplier?']},
+  {k:'wrap',t:'Decisions and actions',short:'Wrap-up',
+   look:'Read back what was agreed, check open validations, and save the summary.',
+   q:['Have we agreed a segment and next step for every supplier?','Who validates the open criteria, and by when?']}
+];
+let fIdx=0;
+function facNote(k){return ((S.facil||{})[k])||'';}
+function talkingPoints(k){
+  const c=compute();const inRun=c.sorted.filter(r=>!r.out);const out=c.sorted.filter(r=>r.out);const pts=[];
+  if(k==='rank'){
+    if(inRun.length){pts.push(`<b>${esc(inRun[0].s.name)}</b> leads with ${f2(inRun[0].total)}${inRun[1]?`, ${f2(inRun[0].total-inRun[1].total)} ahead of ${esc(inRun[1].s.name)}`:''}.`);}
+    for(let i=0;i<inRun.length-1;i++){const g=inRun[i].total-inRun[i+1].total;if(g<0.15)pts.push(`Close call: <b>${esc(inRun[i].s.name)}</b> and <b>${esc(inRun[i+1].s.name)}</b> are ${f2(g)} apart; one score change could swap them.`);}
+    out.forEach(r=>pts.push(`<b>${esc(r.s.name)}</b> is knocked out on ${esc(r.failed.join(', '))}.`));
+    const bare=S.suppliers.filter(s=>!noteCount(s.id)).map(s=>esc(s.name));if(bare.length)pts.push(`No comments recorded yet for ${bare.join(', ')}. Ask what the scores are based on.`);
+  }
+  if(k==='scn'){
+    const evs=S.scenarios.map(sc=>({sc,ev:evaluate(sc.weights)}));
+    if(evs.length<2)pts.push('Fewer than two saved scenarios. Save a few weight sets on Setup &amp; weighting to test robustness.');
+    else{let moved=0;S.suppliers.forEach(s=>{const rs=evs.map(e=>e.ev.rows.find(r=>r.s===s).rank).filter(Boolean);if(rs.length&&Math.max(...rs)-Math.min(...rs)>=2){moved++;pts.push(`<b>${esc(s.name)}</b> moves between #${Math.min(...rs)} and #${Math.max(...rs)} across scenarios.`);}});
+      const tops=[...new Set(evs.map(e=>{const t=e.ev.sorted.find(r=>!r.out);return t?t.s.name:'';}))].filter(Boolean);
+      pts.unshift(tops.length===1?`<b>${esc(tops[0])}</b> is first in every saved scenario.`:`The leader changes with the scenario: ${tops.map(esc).join(', ')}.`);
+      if(!moved)pts.push('No supplier moves more than one place across scenarios.');}
+    const ins=document.getElementById('insight').textContent;const m=/Moving .*?first\./.exec(ins);if(m)pts.push(esc(m[0]));
+  }
+  if(k==='map'){
+    ['hh','lh','hl','ll'].forEach(sg=>{const n=c.sorted.filter(r=>r.seg===sg).map(r=>esc(r.s.name));if(n.length)pts.push(`<b>${SEGMENTS[sg]}</b>: ${n.join(', ')}.`);});
+    c.rows.forEach(r=>{if(r.x===null||r.y===null)return;const near=[];if(Math.abs(r.x-S.thr)<0.25)near.push('X '+f2(r.x));if(Math.abs(r.y-S.thr)<0.25)near.push('Y '+f2(r.y));
+      if(near.length)pts.push(`<b>${esc(r.s.name)}</b> sits close to the segment line (${near.join(', ')}); its segment is borderline.`);});
+  }
+  if(k==='h2h'){const [a,b]=S.h2h||[];const A=c.rows.find(r=>r.s.id===a),B=c.rows.find(r=>r.s.id===b);
+    if(A&&B)pts.push(`Comparing <b>${esc(A.s.name)}</b> and <b>${esc(B.s.name)}</b>: ${f2(Math.abs(A.total-B.total))} apart.`);
+    const t=document.getElementById('h2hIns').textContent;const m=t.split(/(?<=\.)\s+/).slice(1).filter(x=>/wins most/.test(x));m.forEach(x=>pts.push(esc(x)));}
+  if(k==='profile'){inRun.slice(0,3).forEach(r=>{let lo=null;S.dims.forEach(d=>{const v=S.scores[r.s.id][d.id];if(!lo||v<lo.v)lo={d,v};});
+    if(lo)pts.push(`<b>${esc(r.s.name)}</b>: weakest on ${esc(lo.d.name)} (${lo.v})${lo.v<=2?', a likely development area':''}.`);});}
+  if(k==='wrap'){
+    const open=S.dims.filter(d=>(d.stake||[]).some(x=>!x.done));
+    pts.push(open.length?`Stakeholder input still open on: ${open.map(d=>esc(d.short||shorten(d.name))).join(', ')}.`:'All listed stakeholders are marked done.');
+    const none=S.dims.filter(d=>!(d.stake||[]).length);if(none.length)pts.push(`No stakeholders named yet for ${none.length} criteri${none.length>1?'a':'on'}.`);
+  }
+  return pts;
+}
+// pick the two in-run suppliers with the smallest gap
+function closestPair(){const r=compute().sorted.filter(x=>!x.out);let best=null;for(let i=0;i<r.length-1;i++){const g=r[i].total-r[i+1].total;if(!best||g<best.g)best={g,a:r[i].s.id,b:r[i+1].s.id};}return best;}
+function renderFacil(){
+  const st=FSTEPS[fIdx];
+  document.getElementById('fSteps').innerHTML=FSTEPS.map((x,i)=>`<button data-i="${i}"${i===fIdx?' aria-current="step"':''}${facNote(x.k).trim()?' class="has"':''} title="${esc(x.t)}">${i+1}. ${esc(x.short)}</button>`).join('');
+  document.querySelectorAll('#fSteps button').forEach(b=>b.addEventListener('click',()=>goFacil(+b.dataset.i)));
+  const pts=talkingPoints(st.k);
+  let h=`<h3>${fIdx+1}. ${esc(st.t)}</h3><div class="small" style="color:var(--fg-2)">${esc(st.look)}</div>`;
+  if(pts.length)h+=`<div class="lab">Talking points</div><ul class="pts">${pts.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  h+=`<div class="lab">Questions for the room</div><ul>${st.q.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  if(st.k==='wrap'){
+    const blocks=FSTEPS.filter(x=>x.k!=='wrap'&&facNote(x.k).trim()).map(x=>`<div class="sumblk"><b>${esc(x.t)}</b>${esc(facNote(x.k))}</div>`).join('');
+    h+=`<div class="lab">Captured so far</div>${blocks||'<div class="small muted">Nothing captured in the earlier steps yet.</div>'}`;
+  }
+  h+=`<div class="lab"><label for="fNote">${st.k==='wrap'?'Final decisions and actions (who, what, by when)':'Decisions and actions from the room'}</label></div><textarea id="fNote" placeholder="Agreed: …\nAction: … (owner, date)">${esc(facNote(st.k))}</textarea>`;
+  if(st.k==='wrap')h+=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="primary" id="fSum">Download workshop summary .md</button><span class="small" id="fSumMsg"></span></div>`;
+  const body=document.getElementById('fBody');body.innerHTML=h;body.scrollTop=0;
+  body.querySelector('#fNote').addEventListener('input',e=>{S.facil=S.facil||{};S.facil[st.k]=e.target.value;save();
+    const b=document.querySelector(`#fSteps button[data-i="${fIdx}"]`);if(b)b.classList.toggle('has',!!e.target.value.trim());});
+  const sb=body.querySelector('#fSum');if(sb)sb.addEventListener('click',async()=>{const m=document.getElementById('fSumMsg');
+    try{const r=await saveFile(fileBase().replace('supplier-ranking','workshop-summary')+'.md',workshopSummary());m.textContent=r==='saved'?'Saved.':'';}catch(e){m.textContent='Could not save here.';}});
+  document.getElementById('fPrev').disabled=fIdx===0;const nx=document.getElementById('fNext');nx.disabled=fIdx===FSTEPS.length-1;
+  document.getElementById('fPos').textContent=`Step ${fIdx+1} of ${FSTEPS.length}`;
+}
+function goFacil(i){
+  fIdx=Math.max(0,Math.min(FSTEPS.length-1,i));const st=FSTEPS[fIdx];
+  if(st.k==='h2h'){const p=closestPair();if(p)S.h2h=[p.a,p.b];}
+  if(st.k==='profile'){S.picks=compute().sorted.filter(r=>!r.out).slice(0,3).map(r=>r.s.id);}
+  if(st.k==='h2h'||st.k==='profile')renderResults();
+  if(st.tab){const b=document.querySelector(`.tabs [data-tab="${st.tab}"]`);if(b)b.click();}
+  document.querySelectorAll('.results .panel').forEach(p=>p.classList.toggle('spot',!!st.spot&&p.getAttribute('aria-label')===st.spot));
+  renderFacil();
+  const target=st.spot&&document.querySelector(`.results .panel[aria-label="${st.spot}"]`);
+  if(target&&window.innerWidth>900)target.scrollIntoView({behavior:'smooth',block:'start'});
+  S.fIdx=fIdx;save();
+}
+function setFacil(on){S.facilOn=on;document.getElementById('facil').hidden=!on;document.getElementById('resWrap').classList.toggle('on',on);
+  document.getElementById('btnFacil').setAttribute('aria-pressed',String(on));document.getElementById('btnFacil').textContent=on?'Facilitating…':'Facilitate the session';
+  if(on)goFacil(S.fIdx||0);else document.querySelectorAll('.results .panel').forEach(p=>p.classList.remove('spot'));save();}
+document.getElementById('btnFacil').addEventListener('click',()=>setFacil(!S.facilOn));
+document.getElementById('facilClose').addEventListener('click',()=>setFacil(false));
+document.getElementById('fPrev').addEventListener('click',()=>goFacil(fIdx-1));
+document.getElementById('fNext').addEventListener('click',()=>goFacil(fIdx+1));
+function workshopSummary(){
+  const c=compute();const sc=S.scenarios.find(x=>x.id===S.activeScn);const L=[];
+  L.push(`# Supplier workshop summary`,``,`${new Date().toLocaleDateString()} · ${sc?'Weights: '+sc.name:'Weights: custom'}${S.example?' · example data':''}`,``,`## Ranking`,``);
+  c.sorted.forEach(r=>L.push(`${r.rank?r.rank+'.':'–'} ${r.s.name}: ${r.out?'knocked out ('+r.failed.join(', ')+')':r.total.toFixed(2)}${r.seg?' · '+SEGMENTS[r.seg]:''}`));
+  L.push(``,`## Segments`,``);['hh','lh','hl','ll'].forEach(k=>{const n=c.sorted.filter(r=>r.seg===k).map(r=>r.s.name);L.push(`- **${SEGMENTS[k]}**: ${n.length?n.join(', '):'none'}`);});
+  L.push(``,`## Decisions and actions`,``);
+  FSTEPS.forEach(x=>{const t=facNote(x.k).trim();if(t)L.push(`### ${x.t}`,``,t,``);});
+  if(!FSTEPS.some(x=>facNote(x.k).trim()))L.push(`_None captured._`,``);
+  L.push(`## Stakeholder input per criterion`,``);
+  S.dims.forEach(d=>{const st=d.stake||[];L.push(`- **${d.name}**: ${st.length?st.map(x=>`${x.name} (${x.role}${x.done?', done':', open'})`).join('; '):'none named'}`);});
+  const sn=S.suppliers.filter(s=>supNoteOf(s.id));if(sn.length){L.push(``,`## Supplier notes`,``);sn.forEach(s=>L.push(`- **${s.name}**: ${supNoteOf(s.id)}`));}
+  return L.join('\n')+'\n';
+}
+
 /* ---------- pages ---------- */
 function showPage(pg){
   if(pg!=='results'&&pg!=='scoring')pg='input';S.page=pg;
   document.querySelectorAll('[data-pagebody]').forEach(el=>el.hidden=el.dataset.pagebody!==pg);
   document.querySelectorAll('nav.pages [data-page]').forEach(b=>{if(b.dataset.page===pg)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   document.body.dataset.page=pg;
-  if(pg==='scoring'){renderScoring();sizeScoring();}
+  if(pg==='scoring'){setScView(S.scView||'crit');}
+  if(pg==='results'&&S.facilOn)renderFacil();
   save();
 }
 document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListener('click',()=>{showPage(b.dataset.page||b.dataset.goto);window.scrollTo(0,0);}));
@@ -996,7 +1167,7 @@ document.getElementById('btnAddDim').addEventListener('click',()=>{
 });
 document.getElementById('btnAddSup').addEventListener('click',()=>{
   const s={id:nid(),name:'New supplier'};S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
-  const last=document.querySelector('#matrix tbody tr:last-child td.sup input');if(last){last.focus();last.select();}
+  const last=document.querySelector('#supList .sup-row:last-child input');if(last){last.focus();last.select();}
 });
 document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;renderAll();save();});
 
@@ -1213,11 +1384,11 @@ document.getElementById('btnPrint').addEventListener('click',printRanking);
 
 /* ---------- render ---------- */
 function renderResults(){
-  const c=compute();updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderScnSelect();renderScenarios();
+  const c=compute();setTimeout(()=>{if(S.facilOn&&S.page==='results'&&!document.activeElement.closest('#facil'))renderFacil();},0);updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderScnSelect();renderScenarios();
   document.getElementById('badge').hidden=!S.example;
 }
-function renderAll(){buildWeights();buildMatrix();renderResults();renderScoring();}
-S=load();if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
+function renderAll(){buildWeights();buildSuppliers();buildMatrix();renderResults();renderScoring();}
+S=load();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
 })();
 </script>
 </body>
