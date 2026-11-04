@@ -234,6 +234,39 @@ table.h2h tr.tot td{font-family:var(--font-display);font-weight:700;border-top:2
 .gap{position:relative;height:14px;min-width:140px;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat}
 .gap i{position:absolute;top:1px;bottom:1px;border-radius:2px}
 
+/* definitions + notes */
+table.defs{border-collapse:collapse;width:100%;min-width:720px}
+table.defs th,table.defs td{padding:6px 8px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+table.defs th{font-family:var(--font-display);font-weight:600;font-size:.8rem;color:var(--fg-2)}
+table.defs th.lo{color:var(--critical)} table.defs th.hi{color:var(--good)}
+table.defs td.nm{font-weight:600;width:18%;padding-top:10px}
+table.defs tr.pg td{background:var(--surface-2);font-family:var(--font-display);font-weight:600;font-size:.82rem;padding:5px 8px}
+table.defs tr.pg td:first-child{border-left:4px solid var(--s0)}
+table.defs textarea,dialog .note textarea,#notesBody>textarea{width:100%;min-height:0;font:inherit;font-size:.88rem;padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:var(--surface);resize:vertical}
+table.defs textarea:focus,dialog .note textarea:focus,#notesBody>textarea:focus{outline:0;border-color:var(--hl)}
+table.matrix td.cell,table.h2h td.noted{position:relative}
+table.matrix td.cell.noted::after,table.h2h td.noted::after{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 9px 9px 0;border-color:transparent var(--hl) transparent transparent}
+button.notes-btn{white-space:nowrap}
+button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-left:4px;border-radius:999px;background:var(--hl);color:var(--hl-fg);font-size:.75rem}
+#dlgNotes{max-width:min(820px,calc(100vw - 32px))}
+#dlgNotes .db{max-height:min(70vh,760px);overflow:auto}
+#dlgNotes textarea{min-height:0}
+.note{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--line-2)}
+.note .nm{font-weight:600}
+.note .scale{grid-column:1/-1;font-size:.8rem;color:var(--muted)}
+.note .scale b{font-weight:600;color:var(--fg-2)}
+.note textarea{grid-column:1/-1}
+.note select{padding:2px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.note-pg{font-family:var(--font-display);font-weight:600;font-size:.82rem;padding:6px 8px;margin-top:8px;background:var(--surface-2);border-left:4px solid var(--s0);border-radius:2px}
+.h2h-card .ov{margin-top:6px;font-size:.85rem;color:var(--fg-2);font-style:italic}
+.h2h-notes{display:grid;gap:6px;margin-top:12px}
+.h2h-notes .it{display:grid;grid-template-columns:minmax(120px,22%) 1fr 1fr;gap:4px 12px;font-size:.86rem;padding:6px 0;border-bottom:1px solid var(--line-2)}
+@media (max-width:640px){.h2h-notes .it{grid-template-columns:1fr}}
+.h2h-notes .it b{font-weight:600}
+.h2h-notes .it span.q{color:var(--fg-2)}
+.h2h-notes .it span.q i{font-style:normal;font-weight:600}
+.rrow .sname .nt{color:var(--hl);font-size:.8em;margin-left:4px}
+
 /* export + print */
 .print-only{display:none}
 dialog .sect{border-top:1px solid var(--line-2);padding-top:10px}
@@ -307,11 +340,17 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="head"><h2>Live ranking preview</h2><span class="small muted" id="scnTagMini"></span></div>
         <div class="body"><div class="rank" id="rankMini"></div></div>
       </section>
+      <section class="panel" aria-label="Definitions">
+        <div class="head"><h2>Criteria definitions</h2><span class="small muted">What each criterion measures, and what a 1 and a 5 look like</span></div>
+        <div class="body">
+          <div class="scroll"><table class="defs" id="defs"></table></div>
+        </div>
+      </section>
       <section class="panel" aria-label="Scores">
         <div class="head"><h2>Supplier scores</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
         <div class="body">
           <div class="scroll"><table class="matrix" id="matrix"></table></div>
-          <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it. Higher always means more of the criterion: more spend, more risk, more capability, more willingness.</span></div>
+          <div class="scale-note"><span><strong>Scale</strong> 1 low · 2 limited · 3 moderate · 4 high · 5 very high</span><span>Click a score to change it. Hover a criterion for its definition. Use <b>Notes</b> to add comments behind a score; a blue corner marks a score with a comment.</span></div>
         </div>
       </section>
       <section class="panel" aria-label="Scenarios">
@@ -367,6 +406,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         </div>
         <div class="h2h-cards" id="h2hCards"></div>
         <div class="scroll"><table class="h2h" id="h2hTbl"></table></div>
+        <div class="h2h-notes" id="h2hNotes"></div>
         <div class="insight" id="h2hIns"></div>
         <div class="small muted" style="margin-top:8px">The gap bar shows each criterion's weighted contribution difference, so it moves with the weights. Raw scores are shown either side.</div>
       </div>
@@ -391,11 +431,16 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <dialog id="dlgImport">
   <div class="dh"><h3>Import data</h3><button class="small ghost" data-close>Close</button></div>
   <div class="db">
-    <div class="small">Paste CSV (or pick a file). First row: <code>Supplier</code> then one column per criterion. Optional rows: <code>Perspective</code> (which perspective each criterion belongs to), <code>Weight</code> (0-10) and <code>Knock-out</code> (minimum score). Every other row is a supplier with scores 1-5. Export first to get a template with the current criteria.</div>
+    <div class="small">Paste CSV (or pick a file). First row: <code>Supplier</code> then one column per criterion. Optional rows: <code>Perspective</code>, <code>Weight</code> (0-10), <code>Knock-out</code> (minimum score), <code>Definition</code>, <code>Score 1 means</code> and <code>Score 5 means</code>. Optional columns: <code>Comment: &lt;criterion&gt;</code> and <code>Overall note</code>. Every other row is a supplier with scores 1-5. Export first to get a template with the current criteria.</div>
     <div class="row"><input type="file" id="file" accept=".csv,text/csv,.txt" aria-label="Choose a CSV file"></div>
     <textarea id="importText" placeholder="Supplier,Spend and future volume,Supply risk and criticality&#10;Perspective,Business importance,Resilience &amp; dependency&#10;Weight,8,7&#10;Acme Ltd,4,3"></textarea>
     <div class="row"><button class="primary" id="btnDoImport">Load</button><span id="importMsg" class="err"></span></div>
   </div>
+</dialog>
+
+<dialog id="dlgNotes">
+  <div class="dh"><h3 id="notesTitle">Notes</h3><div class="row" style="display:flex;gap:6px"><button class="small" id="notesPrev">← Prev</button><button class="small" id="notesNext">Next →</button><button class="small ghost" data-close>Close</button></div></div>
+  <div class="db" id="notesBody"></div>
 </dialog>
 
 <dialog id="dlgExport">
@@ -424,6 +469,18 @@ const col=i=>i<SLOTS.length?`var(${SLOTS[i]})`:'var(--s0)';
 let uid=1; const nid=()=>'id'+(uid++)+'_'+Math.random().toString(36).slice(2,6);
 const SEGMENTS={hh:'Strategic partner',lh:'Develop',hl:'Secure & manage',ll:'Transactional'};
 
+// Default definitions for the example criteria: what is measured, and what a 1 and a 5 look like.
+const DEFS={
+  'Spend and future volume':{desc:'Our current annual spend and expected volume over the next 3-5 years.',low:'Small, declining or one-off spend.',high:'One of our largest spend areas, and growing.'},
+  'Future growth dependency':{desc:'How much our growth plans rely on this supplier.',low:'Not needed for any growth plan.',high:'Key growth plans depend on them.'},
+  'Supply risk and criticality':{desc:'Impact on us if supply stops, and how likely disruption is.',low:'Easy to replace; little impact if supply stops.',high:'Single source; production stops without them.'},
+  'Technical differentiation and unique capabilities':{desc:'Technology, know-how or IP that others cannot offer.',low:'Commodity; many suppliers offer the same.',high:'Unique capability nobody else offers.'},
+  'Supplier innovation capability':{desc:'Ability to bring new products, processes or ideas to us.',low:'No track record of bringing ideas.',high:'Regularly brings innovation that we adopt.'},
+  'Sustainability and Scope 3 contribution':{desc:'Share of our Scope 3 footprint and their ability to help reduce it.',low:'Small share and no reduction plan.',high:'Large share with a credible, ambitious reduction plan.'},
+  'Willingness to invest alongside us':{desc:'Readiness to commit capacity, people or capital to joint work.',low:'Unwilling to commit resources.',high:'Actively proposes joint investment.'},
+  'Relationship quality and executive engagement':{desc:'Trust, openness and senior-level engagement on both sides.',low:'Transactional; no executive contact.',high:'Regular executive dialogue and high trust.'},
+  'Preferred-customer position, reciprocity and mutual dependence':{desc:'Whether we are a preferred customer and the dependence runs both ways.',low:'We are a minor customer to them.',high:'We are a key, preferred customer.'}
+};
 function exampleState(){
   const persp=[
     {id:nid(),name:'Business importance',desc:'Why the supplier matters to us',axis:'x'},
@@ -442,7 +499,7 @@ function exampleState(){
     [P[3],'Willingness to invest alongside us','Willingness to invest',6],
     [P[3],'Relationship quality and executive engagement','Relationship quality',5],
     [P[3],'Preferred-customer position, reciprocity and mutual dependence','Reciprocity',5]
-  ].map(d=>({id:nid(),pid:d[0],name:d[1],short:d[2],weight:d[3],min:0}));
+  ].map(d=>Object.assign({id:nid(),pid:d[0],name:d[1],short:d[2],weight:d[3],min:0},DEFS[d[1]]||{}));
   const sups=[
     ['Northwind Chemicals',[5,4,4,3,3,3,4,4,3]],
     ['Atlas Fermentation Systems',[3,5,5,5,5,4,4,3,2]],
@@ -458,15 +515,28 @@ function exampleState(){
     {id:nid(),name:'Resilience first',weights:w([6,5,10,9,4,3,5,4,5])},
     {id:nid(),name:'Value creation',weights:w([5,7,5,6,10,8,8,6,6])}
   ];
-  return {example:true,persp,dims,suppliers,scores,scenarios,activeScn:scenarios[0].id,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null};
+  const notes={},supNotes={};const byName=n=>suppliers.find(x=>x.name===n).id;const dimBy=n=>dims.find(x=>x.name===n).id;
+  supNotes[byName('Atlas Fermentation Systems')]='Example note: sole qualified source for our fermentation vessels; 40-week lead time.';
+  notes[byName('Atlas Fermentation Systems')]={[dimBy('Preferred-customer position, reciprocity and mutual dependence')]:'Example: we are under 3% of their revenue.'};
+  notes[byName('Corvex Bioprocess')]={[dimBy('Willingness to invest alongside us')]:'Example: offered to co-fund a pilot line in 2027.'};
+  return {example:true,persp,dims,suppliers,scores,scenarios,activeScn:scenarios[0].id,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null,notes,supNotes};
 }
 function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slice(0,24);const sp=cut.lastIndexOf(' ');return (sp>10?cut.slice(0,sp):cut)+'…';}
 
 let S;
 function load(){
-  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&o.suppliers&&o.persp)return o;}}catch(e){}
+  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&o.suppliers&&o.persp){
+    o.notes=o.notes||{};o.supNotes=o.supNotes||{};
+    o.dims.forEach(d=>{const df=DEFS[d.name];if(df&&d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);});
+    return o;}}}catch(e){}
   return exampleState();
 }
+const noteOf=(sid,did)=>((S.notes||{})[sid]||{})[did]||'';
+const supNoteOf=sid=>(S.supNotes||{})[sid]||'';
+const noteCount=sid=>Object.values((S.notes||{})[sid]||{}).filter(v=>v&&v.trim()).length+(supNoteOf(sid).trim()?1:0);
+function setNote(sid,did,v){S.notes=S.notes||{};S.notes[sid]=S.notes[sid]||{};if(v.trim())S.notes[sid][did]=v;else delete S.notes[sid][did];}
+function defText(d){const parts=[];if(d.desc)parts.push(d.desc);if(d.low)parts.push('1 = '+d.low);if(d.high)parts.push('5 = '+d.high);return parts.join('\n');}
+function defHTML(d){return (d.desc?esc(d.desc)+'<br>':'')+(d.low?'<b>1</b> '+esc(d.low)+'<br>':'')+(d.high?'<b>5</b> '+esc(d.high):'');}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
 const pIndex=pid=>S.persp.findIndex(p=>p.id===pid);
 const dimsOf=pid=>S.dims.filter(d=>d.pid===pid);
@@ -555,12 +625,12 @@ function renderRankInto(c,host){
       return `<div class="mv ${d>0?'up':'down'}" title="${d>0?'Up':'Down'} ${Math.abs(d)} vs ${esc(baseScn().name)}">${d>0?'▲':'▼'}${Math.abs(d)}</div>`;};
     let segs='';
     S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);ds.forEach((d,k)=>{const v=r.parts[d.id];if(v<=0)return;segs+=`<div class="seg${k===ds.length-1?' pend':''}" style="width:${(v/5*100).toFixed(2)}%;background:${col(pi)}" data-dim="${d.id}"></div>`;});});
-    row.innerHTML=`<div class="pos num">${r.rank?r.rank:'–'}</div><div class="sname" title="${esc(r.s.name)}">${esc(r.s.name)}</div>
+    row.innerHTML=`<div class="pos num">${r.rank?r.rank:'–'}</div><div class="sname" title="${esc(r.s.name+(supNoteOf(r.s.id)?'\n\n'+supNoteOf(r.s.id):''))}">${esc(r.s.name)}${noteCount(r.s.id)?'<span class="nt" aria-label="has comments">✎</span>':''}</div>
       <div class="track" role="img" aria-label="${esc(r.s.name)}: ${f2(r.total)} of 5">${segs}</div>
       <div class="score num">${r.out?'knocked out':f2(r.total)}</div>${mvCell(r)}`;
     row.querySelectorAll('.seg').forEach(seg=>{
       const d=S.dims.find(x=>x.id===seg.dataset.dim);const sc=S.scores[r.s.id][d.id];const nw=c.sumW>0?(+d.weight||0)/c.sumW:0;
-      attachTip(seg,`<strong>${esc(r.s.name)}</strong><br>${esc(d.name)}: score ${sc} × weight ${pct(nw)} = ${f2(r.parts[d.id])}`);
+      const nt=noteOf(r.s.id,d.id);attachTip(seg,`<strong>${esc(r.s.name)}</strong><br>${esc(d.name)}: score ${sc} × weight ${pct(nw)} = ${f2(r.parts[d.id])}${nt?'<br><em>“'+esc(nt)+'”</em>':''}`);
     });
     if(r.out){row.querySelector('.score').title='Below the knock-out on: '+r.failed.join(', ');attachTip(row.querySelector('.score'),'Below the knock-out on: '+esc(r.failed.join(', ')));}
     host.appendChild(row);
@@ -617,21 +687,36 @@ function renderMap(c){
     o+=`<text class="pl" x="${best.lx.toFixed(1)}" y="${best.ly.toFixed(1)}" text-anchor="${best.anchor}">${esc(p.r.s.name)}</text>`;
   });
   svg.innerHTML=o;
-  svg.querySelectorAll('circle[data-sid]').forEach(ci=>{const r=c.rows.find(x=>x.s.id===ci.dataset.sid);attachTip(ci,`<strong>${esc(r.s.name)}</strong><br>X ${f2(r.x)} · Y ${f2(r.y)}<br>${r.seg?SEGMENTS[r.seg]:''}${r.out?' · knocked out':''}`);});
+  svg.querySelectorAll('circle[data-sid]').forEach(ci=>{const r=c.rows.find(x=>x.s.id===ci.dataset.sid);attachTip(ci,`<strong>${esc(r.s.name)}</strong><br>X ${f2(r.x)} · Y ${f2(r.y)}<br>${r.seg?SEGMENTS[r.seg]:''}${r.out?' · knocked out':''}${supNoteOf(r.s.id)?'<br><em>'+esc(supNoteOf(r.s.id))+'</em>':''}`);});
   const sl=document.getElementById('seglist');
   sl.innerHTML=['hh','lh','hl','ll'].map(k=>{const names=c.sorted.filter(r=>r.seg===k).map(r=>esc(r.s.name)+(r.out?' (out)':''));return `<div><b>${SEGMENTS[k]}</b><span class="small">${names.length?names.join(', '):'<span class="muted">none</span>'}</span></div>`;}).join('');
 }
 document.getElementById('thr').addEventListener('input',e=>{S.thr=+e.target.value;renderResults();save();});
 
+/* ---------- definitions ---------- */
+// grow a textarea to fit its text
+function fit(ta){ta.style.height='auto';if(ta.scrollHeight)ta.style.height=(ta.scrollHeight+2)+'px';}
+function buildDefs(){
+  const t=document.getElementById('defs');
+  let h=`<thead><tr><th>Criterion</th><th>What it measures</th><th class="lo">Score 1 means</th><th class="hi">Score 5 means</th></tr></thead><tbody>`;
+  S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);if(!ds.length)return;
+    h+=`<tr class="pg"><td colspan="4" style="border-left-color:${col(pi)}">${esc(p.name)}</td></tr>`;
+    ds.forEach(d=>{h+=`<tr data-dim="${d.id}"><td class="nm">${esc(d.name)}</td>`+['desc','low','high'].map(k=>`<td><textarea rows="2" data-k="${k}" aria-label="${esc(d.name)}: ${k==='desc'?'what it measures':k==='low'?'score 1 means':'score 5 means'}">${esc(d[k]||'')}</textarea></td>`).join('')+`</tr>`;});
+  });
+  t.innerHTML=h+'</tbody>';
+  t.querySelectorAll('tr[data-dim]').forEach(tr=>{const d=S.dims.find(x=>x.id===tr.dataset.dim);
+    tr.querySelectorAll('textarea').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();renderResults();});});});
+}
+
 /* ---------- matrix ---------- */
 function buildMatrix(){
   const c=compute();const t=document.getElementById('matrix');
-  const h1=`<tr><th class="sup" rowspan="2" style="text-align:left;vertical-align:bottom">Supplier</th>${S.persp.map((p,i)=>{const n=dimsOf(p.id).length;return n?`<th class="pg" colspan="${n}" style="border-bottom-color:${col(i)}">${esc(p.name)}</th>`:'';}).join('')}<th rowspan="2" style="vertical-align:bottom">Weighted</th><th rowspan="2" style="vertical-align:bottom">Rank</th><th rowspan="2" style="vertical-align:bottom">Segment</th><th rowspan="2"></th></tr>`;
+  const h1=`<tr><th class="sup" rowspan="2" style="text-align:left;vertical-align:bottom">Supplier</th>${S.persp.map((p,i)=>{const n=dimsOf(p.id).length;return n?`<th class="pg" colspan="${n}" style="border-bottom-color:${col(i)}">${esc(p.name)}</th>`:'';}).join('')}<th rowspan="2" style="vertical-align:bottom">Weighted</th><th rowspan="2" style="vertical-align:bottom">Rank</th><th rowspan="2" style="vertical-align:bottom">Segment</th><th rowspan="2" style="vertical-align:bottom">Comments</th></tr>`;
   const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
-  const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name)}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${d.weight}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
+  const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name+(defText(d)?'\n\n'+defText(d):''))}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${d.weight}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
   const body=`<tbody>${S.suppliers.map(s=>{const r=c.rows.find(x=>x.s===s);return `<tr data-sup="${s.id}"><td class="sup"><input value="${esc(s.name)}" aria-label="Supplier name"></td>`+
-    ordered.map(d=>{const v=S.scores[s.id][d.id];const fail=d.min>0&&v<d.min;return `<td class="cell${fail?' fail':''}" data-dim="${d.id}" style="background:rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})"><input type="number" min="1" max="5" step="1" value="${v}" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
-    `<td class="total num" data-total>${r.out?'–':f2(r.total)}</td><td class="num" data-rank>${r.rank||'out'}</td><td class="small" data-seg>${r.seg?SEGMENTS[r.seg]:'–'}</td><td><button class="small ghost" title="Remove supplier" aria-label="Remove ${esc(s.name)}">remove</button></td></tr>`;}).join('')}</tbody>`;
+    ordered.map(d=>{const v=S.scores[s.id][d.id];const fail=d.min>0&&v<d.min;const nt=noteOf(s.id,d.id);return `<td class="cell${fail?' fail':''}${nt?' noted':''}" data-dim="${d.id}"${nt?` title="${esc(nt)}"`:''} style="background:rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})"><input type="number" min="1" max="5" step="1" value="${v}" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
+    `<td class="total num" data-total>${r.out?'–':f2(r.total)}</td><td class="num" data-rank>${r.rank||'out'}</td><td class="small" data-seg>${r.seg?SEGMENTS[r.seg]:'–'}</td><td style="white-space:nowrap"><button class="small notes-btn" data-notes title="Comments for ${esc(s.name)}">Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button> <button class="small ghost" data-remove title="Remove supplier" aria-label="Remove ${esc(s.name)}">remove</button></td></tr>`;}).join('')}</tbody>`;
   t.innerHTML=`<thead>${h1}${h2}</thead>${body}`;
   t.querySelectorAll('tbody tr').forEach(tr=>{
     const s=S.suppliers.find(x=>x.id===tr.dataset.sup);
@@ -642,7 +727,8 @@ function buildMatrix(){
         td.style.background=`rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})`;td.classList.toggle('fail',d.min>0&&v<d.min);renderResults();save();};
       inp.addEventListener('input',apply);inp.addEventListener('change',apply);
     });
-    tr.querySelector('button').addEventListener('click',()=>{if(S.suppliers.length<=2)return;S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();});
+    tr.querySelector('[data-notes]').addEventListener('click',()=>openNotes(s.id));
+    tr.querySelector('[data-remove]').addEventListener('click',()=>{if(S.suppliers.length<=2)return;S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.notes)delete S.notes[s.id];if(S.supNotes)delete S.supNotes[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();});
   });
 }
 function updateMatrixTotals(c){
@@ -650,6 +736,31 @@ function updateMatrixTotals(c){
     tr.querySelector('[data-total]').textContent=r.out?'–':f2(r.total);tr.querySelector('[data-rank]').textContent=r.rank||'out';tr.querySelector('[data-seg]').textContent=r.seg?SEGMENTS[r.seg]:'–';});
   document.querySelectorAll('#matrix [data-w]').forEach(el=>{const d=S.dims.find(x=>x.id===el.dataset.w);if(d)el.textContent=`weight ${d.weight}${d.min?' · min '+d.min:''}`;});
 }
+
+/* ---------- notes dialog ---------- */
+let notesSid=null;
+function openNotes(sid){notesSid=sid;renderNotes();const dl=document.getElementById('dlgNotes');if(!dl.open)dl.showModal();}
+function renderNotes(){
+  const s=S.suppliers.find(x=>x.id===notesSid);if(!s)return;
+  document.getElementById('notesTitle').textContent='Notes: '+s.name;
+  const body=document.getElementById('notesBody');
+  let h=`<label class="eyebrow" for="supNote">Overall note</label><textarea id="supNote" rows="3" placeholder="Overall view of this supplier: context, concerns, opportunities">${esc(supNoteOf(s.id))}</textarea>`;
+  S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);if(!ds.length)return;
+    h+=`<div class="note-pg" style="border-left-color:${col(pi)}">${esc(p.name)}</div>`;
+    ds.forEach(d=>{h+=`<div class="note" data-dim="${d.id}"><span class="nm">${esc(d.name)}</span><label class="small">Score <select aria-label="Score for ${esc(d.name)}">${[1,2,3,4,5].map(v=>`<option${S.scores[s.id][d.id]===v?' selected':''}>${v}</option>`).join('')}</select></label>`+
+      ((d.low||d.high)?`<span class="scale">${d.low?'<b>1</b> '+esc(d.low):''}${d.low&&d.high?' · ':''}${d.high?'<b>5</b> '+esc(d.high):''}</span>`:'')+
+      `<textarea rows="2" placeholder="Why this score? Evidence, examples, open questions">${esc(noteOf(s.id,d.id))}</textarea></div>`;});
+  });
+  body.innerHTML=h;
+  body.querySelector('#supNote').addEventListener('input',e=>{S.supNotes=S.supNotes||{};if(e.target.value.trim())S.supNotes[s.id]=e.target.value;else delete S.supNotes[s.id];save();});
+  body.querySelectorAll('.note').forEach(el=>{const did=el.dataset.dim;
+    el.querySelector('textarea').addEventListener('input',e=>{setNote(s.id,did,e.target.value);save();});
+    el.querySelector('select').addEventListener('change',e=>{S.scores[s.id][did]=+e.target.value;markScnDirty();renderResults();save();});});
+  const i=S.suppliers.indexOf(s);document.getElementById('notesPrev').disabled=i<=0;document.getElementById('notesNext').disabled=i>=S.suppliers.length-1;
+}
+document.getElementById('notesPrev').addEventListener('click',()=>{const i=S.suppliers.findIndex(x=>x.id===notesSid);if(i>0){notesSid=S.suppliers[i-1].id;renderNotes();}});
+document.getElementById('notesNext').addEventListener('click',()=>{const i=S.suppliers.findIndex(x=>x.id===notesSid);if(i<S.suppliers.length-1){notesSid=S.suppliers[i+1].id;renderNotes();}});
+document.getElementById('dlgNotes').addEventListener('close',()=>{buildMatrix();renderResults();});
 
 /* ---------- radar ---------- */
 function currentPicks(){
@@ -668,7 +779,7 @@ function renderRadar(){
   for(let k=1;k<=5;k++){out+=`<polygon class="ring" points="${ordered.map((d,i)=>pt(i,k).map(v=>v.toFixed(1)).join(',')).join(' ')}"/>`;}
   ordered.forEach((d,i)=>{const [x,y]=pt(i,5);const pi=pIndex(d.pid);out+=`<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" style="stroke:${col(pi)};stroke-opacity:.6"/>`;
     const [lx,ly]=pt(i,5.6);const a=Math.cos(ang(i));const anchor=a>0.2?'start':a<-0.2?'end':'middle';
-    out+=`<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="${anchor}">${esc(d.short||shorten(d.name))}</text>`;});
+    out+=`<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="${anchor}">${esc(d.short||shorten(d.name))}<title>${esc(d.name+(defText(d)?'\n'+defText(d):''))}</title></text>`;});
   for(let k=1;k<=5;k++){const [x,y]=pt(0,k);out+=`<text x="${(x+5).toFixed(1)}" y="${(y+4).toFixed(1)}" style="font-size:10px;fill:var(--muted)">${k}</text>`;}
   picks.forEach(id=>{const si=S.suppliers.findIndex(s=>s.id===id);if(si<0)return;const s=S.suppliers[si];
     const pts=ordered.map((d,i)=>pt(i,S.scores[s.id][d.id]||0));
@@ -720,13 +831,14 @@ function showPage(pg){
   if(pg!=='results')pg='input';S.page=pg;
   document.querySelectorAll('[data-pagebody]').forEach(el=>el.hidden=el.dataset.pagebody!==pg);
   document.querySelectorAll('nav.pages [data-page]').forEach(b=>{if(b.dataset.page===pg)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  document.querySelectorAll('#defs textarea').forEach(fit);
   save();
 }
 document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListener('click',()=>{showPage(b.dataset.page||b.dataset.goto);window.scrollTo(0,0);}));
 
 /* ---------- add / reset ---------- */
 document.getElementById('btnAddDim').addEventListener('click',()=>{
-  if(S.dims.length>=12)return;const p=S.persp[S.persp.length-1];const d={id:nid(),pid:p.id,name:'New criterion',short:'New criterion',weight:5,min:0};S.dims.push(d);
+  if(S.dims.length>=12)return;const p=S.persp[S.persp.length-1];const d={id:nid(),pid:p.id,name:'New criterion',short:'New criterion',weight:5,min:0,desc:'',low:'',high:''};S.dims.push(d);
   S.suppliers.forEach(s=>S.scores[s.id][d.id]=3);S.scenarios.forEach(sc=>sc.weights[d.id]=5);renderAll();save();
   const last=document.querySelector('#weights .pgroup:last-child .wrow:last-child .name input');if(last){last.focus();last.select();}
 });
@@ -738,10 +850,13 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
 
 /* ---------- import / export ---------- */
 function toCSV(){
-  const q=v=>/[",\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
+  const q=v=>/[",;\t\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
   const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
   const lines=[['Supplier',...ordered.map(d=>d.name)].map(q).join(','),['Perspective',...ordered.map(d=>S.persp.find(p=>p.id===d.pid).name)].map(q).join(','),['Weight',...ordered.map(d=>d.weight)].join(','),['Knock-out',...ordered.map(d=>d.min||0)].join(',')];
-  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id])].join(',')));
+  lines[0]+=','+[...ordered.map(d=>'Comment: '+d.name),'Overall note'].map(q).join(',');
+  const pad=','.repeat(ordered.length+1);for(let i=1;i<4;i++)lines[i]+=pad;
+  [['Definition','desc'],['Score 1 means','low'],['Score 5 means','high']].forEach(([lab,k])=>lines.push([lab,...ordered.map(d=>d[k]||'')].map(q).join(',')+pad));
+  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id]),...ordered.map(d=>q(noteOf(s.id,d.id))),q(supNoteOf(s.id))].join(',')));
   return lines.join('\n');
 }
 function parseCSV(text){
@@ -755,26 +870,34 @@ function parseCSV(text){
 }
 function importCSV(text){
   const rows=parseCSV(text);if(rows.length<2)throw new Error('Need a header row and at least one supplier row.');
-  const header=rows[0];const dimNames=header.slice(1).filter(h=>h!=='');if(dimNames.length<2)throw new Error('Need at least two criterion columns.');
-  if(dimNames.length>12)throw new Error('At most 12 criteria.');
-  const dims=dimNames.map(n=>({id:nid(),pid:null,name:n,short:shorten(n),weight:5,min:0}));
+  const header=rows[0];const dims=[],cmtCols=[];let noteCol=-1;
+  header.forEach((h,j)=>{if(j===0||h==='')return;const m=/^comments?\s*:\s*(.+)$/i.exec(h);
+    if(m)cmtCols.push({j,name:m[1].trim().toLowerCase()});else if(/^overall\s+notes?$/i.test(h))noteCol=j;
+    else dims.push({id:nid(),pid:null,name:h,short:shorten(h),weight:5,min:0,col:j});});
+  if(dims.length<2)throw new Error('Need at least two criterion columns.');
+  if(dims.length>12)throw new Error('At most 12 criteria.');
+  cmtCols.forEach(c=>{c.dim=dims.find(d=>d.name.toLowerCase()===c.name);});
   const persp=[];const perspByName=n=>{let p=persp.find(x=>x.name.toLowerCase()===n.toLowerCase());if(!p){p={id:nid(),name:n,desc:'',axis:persp.length<2?'x':'y'};persp.push(p);}return p;};
-  const suppliers=[],scores={};
+  const suppliers=[],scores={},notes={},supNotes={};
   rows.slice(1).forEach(r=>{
     const key=(r[0]||'').toLowerCase();
-    if(key==='perspective'||key==='group'||key==='category'){dims.forEach((d,i)=>{d.pid=perspByName(r[i+1]||'Other').id;});return;}
-    if(key==='weight'||key==='weights'){dims.forEach((d,i)=>{const v=Math.round(+r[i+1]);d.weight=isFinite(v)?Math.max(0,Math.min(10,v)):5;});return;}
-    if(key==='knock-out'||key==='knockout'||key==='min'||key==='minimum'){dims.forEach((d,i)=>{const v=Math.round(+r[i+1]);d.min=(v>=2&&v<=5)?v:0;});return;}
+    if(key==='perspective'||key==='group'||key==='category'){dims.forEach(d=>{d.pid=perspByName(r[d.col]||'Other').id;});return;}
+    const defKey={'definition':'desc','description':'desc','score 1 means':'low','1 means':'low','low':'low','score 5 means':'high','5 means':'high','high':'high'}[key];
+    if(defKey){dims.forEach(d=>{d[defKey]=r[d.col]||'';});return;}
+    if(key==='weight'||key==='weights'){dims.forEach(d=>{const v=Math.round(+r[d.col]);d.weight=isFinite(v)?Math.max(0,Math.min(10,v)):5;});return;}
+    if(key==='knock-out'||key==='knockout'||key==='min'||key==='minimum'){dims.forEach(d=>{const v=Math.round(+r[d.col]);d.min=(v>=2&&v<=5)?v:0;});return;}
     if(!r[0])return;
     const id=nid();suppliers.push({id,name:r[0]});scores[id]={};
-    dims.forEach((d,i)=>{let v=Math.round(+r[i+1]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
+    cmtCols.forEach(c=>{if(c.dim&&r[c.j]){notes[id]=notes[id]||{};notes[id][c.dim.id]=r[c.j];}});
+    if(noteCol>0&&r[noteCol])supNotes[id]=r[noteCol];
+    dims.forEach(d=>{let v=Math.round(+r[d.col]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
   });
   if(suppliers.length<2)throw new Error('Need at least two suppliers.');
   if(!persp.length){const p={id:nid(),name:'All criteria',desc:'',axis:'x'};persp.push(p);}
   dims.forEach(d=>{if(!d.pid)d.pid=perspByName('Other').id;});
   if(persp.length>8)throw new Error('At most 8 perspectives.');
-  const w={};dims.forEach(d=>w[d.id]=d.weight);
-  S={example:false,persp,dims,suppliers,scores,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=S.scenarios[0].id;S.baseScn=S.activeScn;
+  const w={};dims.forEach(d=>{w[d.id]=d.weight;delete d.col;});
+  S={example:false,persp,dims,suppliers,scores,notes,supNotes,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=S.scenarios[0].id;S.baseScn=S.activeScn;
 }
 const dlgI=document.getElementById('dlgImport'),dlgE=document.getElementById('dlgExport');
 document.querySelectorAll('dialog [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
@@ -809,7 +932,7 @@ function renderH2H(c){
   if(document.activeElement!==sa)sa.innerHTML=opts(ia);if(document.activeElement!==sb)sb.innerHTML=opts(ib);
   const A=c.rows.find(r=>r.s.id===ia),B=c.rows.find(r=>r.s.id===ib);
   const ca=col(S.suppliers.indexOf(A.s)),cb=col(S.suppliers.indexOf(B.s));
-  const card=(r,cl)=>`<div class="h2h-card" style="border-top-color:${cl}"><div class="eyebrow">${r.rank?'Rank #'+r.rank:'Knocked out'}</div><div class="nm" title="${esc(r.s.name)}">${esc(r.s.name)}</div><div class="big num">${f2(r.total)}</div><div class="small muted">${r.seg?SEGMENTS[r.seg]:''}${r.out?' · below knock-out on '+esc(r.failed.join(', ')):''}</div></div>`;
+  const card=(r,cl)=>`<div class="h2h-card" style="border-top-color:${cl}"><div class="eyebrow">${r.rank?'Rank #'+r.rank:'Knocked out'}</div><div class="nm" title="${esc(r.s.name)}">${esc(r.s.name)}</div><div class="big num">${f2(r.total)}</div><div class="small muted">${r.seg?SEGMENTS[r.seg]:''}${r.out?' · below knock-out on '+esc(r.failed.join(', ')):''}</div>${supNoteOf(r.s.id)?`<div class="ov">${esc(supNoteOf(r.s.id))}</div>`:''}</div>`;
   document.getElementById('h2hCards').innerHTML=card(A,ca)+card(B,cb);
   // one scale for criteria, perspective subtotals and the total, so bars stay comparable and never overflow
   let maxAbs=Math.abs(A.total-B.total);S.dims.forEach(d=>{maxAbs=Math.max(maxAbs,Math.abs(A.parts[d.id]-B.parts[d.id]));});
@@ -823,11 +946,14 @@ function renderH2H(c){
     rows+=`<tr class="pg"><td class="c" style="border-left-color:${col(pi)}">${esc(p.name)}</td><td class="num">${c.sumW>0?pct(ds.reduce((t,d)=>t+(+d.weight||0),0)/c.sumW):'0%'}</td><td class="num">${f2(pa)}</td><td class="num">${f2(pb)}</td><td>${bar(pa-pb)}</td><td class="num">${sg(pa-pb)}</td></tr>`;
     ds.forEach(d=>{const va=S.scores[A.s.id][d.id],vb=S.scores[B.s.id][d.id];const diff=A.parts[d.id]-B.parts[d.id];
       const fa=d.min>0&&va<d.min,fb=d.min>0&&vb<d.min;
-      rows+=`<tr><td class="c" title="${esc(d.name)}">${esc(d.short||shorten(d.name))}${d.min?` <span class="muted small">min ${d.min}</span>`:''}</td><td class="num muted">${c.sumW>0?pct((+d.weight||0)/c.sumW):'0%'}</td>`+
-        `<td class="num${va>vb?' win':''}${fa?' fail':''}">${va}</td><td class="num${vb>va?' win':''}${fb?' fail':''}">${vb}</td><td>${bar(diff)}</td><td class="num muted">${sg(diff)}</td></tr>`;});
+      const na=noteOf(A.s.id,d.id),nb=noteOf(B.s.id,d.id);
+      rows+=`<tr><td class="c" title="${esc(d.name+(defText(d)?'\n\n'+defText(d):''))}">${esc(d.short||shorten(d.name))}${d.min?` <span class="muted small">min ${d.min}</span>`:''}</td><td class="num muted">${c.sumW>0?pct((+d.weight||0)/c.sumW):'0%'}</td>`+
+        `<td class="num${va>vb?' win':''}${fa?' fail':''}${na?' noted':''}"${na?` title="${esc(na)}"`:''}>${va}</td><td class="num${vb>va?' win':''}${fb?' fail':''}${nb?' noted':''}"${nb?` title="${esc(nb)}"`:''}>${vb}</td><td>${bar(diff)}</td><td class="num muted">${sg(diff)}</td></tr>`;});
   });
   rows+=`<tr class="tot"><td class="c">Weighted score</td><td></td><td class="num">${f2(A.total)}</td><td class="num">${f2(B.total)}</td><td>${bar(A.total-B.total)}</td><td class="num">${sg(A.total-B.total)}</td></tr>`;
   document.getElementById('h2hTbl').innerHTML=`<thead><tr><th class="c">Criterion</th><th>Share</th><th style="color:${ca}">${esc(shorten(A.s.name))}</th><th style="color:${cb}">${esc(shorten(B.s.name))}</th><th>← ahead · ahead →</th><th>Gap</th></tr></thead><tbody>${rows}</tbody>`;
+  const withNotes=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>{const na=noteOf(A.s.id,d.id),nb=noteOf(B.s.id,d.id);if(na||nb)withNotes.push({d,na,nb});}));
+  document.getElementById('h2hNotes').innerHTML=withNotes.length?`<div class="eyebrow">Comments behind the scores</div>`+withNotes.map(x=>`<div class="it"><b title="${esc(defText(x.d))}">${esc(x.d.short||shorten(x.d.name))}</b><span class="q"><i style="color:${ca}">${esc(shorten(A.s.name))}:</i> ${x.na?esc(x.na):'<span class="muted">none</span>'}</span><span class="q"><i style="color:${cb}">${esc(shorten(B.s.name))}:</i> ${x.nb?esc(x.nb):'<span class="muted">none</span>'}</span></div>`).join(''):'';
   if(A.s.id===B.s.id){document.getElementById('h2hIns').textContent='Pick two different suppliers.';return;}
   const edges=S.dims.map(d=>({d,v:A.parts[d.id]-B.parts[d.id]}));
   const top=(arr)=>arr.slice(0,2).map(e=>`${esc(e.d.name)} (+${f2(Math.abs(e.v))})`).join(' and ');
@@ -937,7 +1063,7 @@ function renderResults(){
   const c=compute();updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderScnSelect();renderScenarios();
   document.getElementById('badge').hidden=!S.example;
 }
-function renderAll(){buildWeights();buildMatrix();renderResults();}
+function renderAll(){buildWeights();buildDefs();buildMatrix();renderResults();}
 S=load();if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
 })();
 </script>
