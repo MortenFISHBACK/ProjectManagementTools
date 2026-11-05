@@ -341,6 +341,27 @@ body[data-page=scoring] .sc-wrap{margin-top:10px}
 .facil .sumblk{border-bottom:1px solid var(--line-2);padding:6px 0;font-size:.88rem;white-space:pre-wrap}
 .facil .sumblk b{display:block;font-family:var(--font-display);font-size:.82rem}
 .panel.spot{box-shadow:0 0 0 3px var(--hl)}
+/* supplier facts */
+table.facts{border-collapse:collapse;width:100%;min-width:1180px;font-size:.84rem}
+table.facts th,table.facts td{padding:4px 5px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:middle}
+table.facts th{font-family:var(--font-display);font-weight:600;font-size:.74rem;color:var(--fg-2);vertical-align:bottom}
+table.facts th.n,table.facts td.n{text-align:right}
+table.facts td.calc{font-family:var(--font-display);font-weight:600;white-space:nowrap;text-align:right}
+table.facts input{width:100%;min-width:56px;font:inherit;padding:3px 4px;border:1px solid transparent;border-radius:3px;background:transparent}
+table.facts input:hover{border-color:var(--line)}
+table.facts input:focus{outline:0;border-color:var(--hl);background:var(--surface)}
+table.facts input.n{text-align:right}
+table.facts td.sup{font-weight:600;white-space:nowrap}
+table.facts tr.warn td.sup{color:var(--fg)}
+table.facts a{color:var(--hl-strong)}
+.flag{display:inline-grid;place-items:center;width:1.25em;height:1.25em;border-radius:50%;background:var(--warn);color:#3a2f00;font-weight:700;font-size:.75em;margin-left:4px;vertical-align:middle;cursor:help}
+.dep-filt{display:grid;gap:4px}
+.dep-filt select{padding:4px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);margin-bottom:6px}
+.cmp-row .ev{grid-column:1/-1;font-size:.78rem;color:var(--fg-2)}
+.cmp-row .ev b{font-family:var(--font-display);color:var(--fg)}
+.sc-ev{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--fg-2);margin:-4px 0 8px}
+.sc-ev select{font-size:.8rem;padding:1px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+#dlgFacts textarea{min-height:180px}
 /* stakeholders per criterion */
 .stk{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--surface)}
 .stk-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:6px}
@@ -446,6 +467,12 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       </section>
     </main>
   </div>
+  <section class="panel" aria-label="Supplier facts" style="margin-top:20px">
+    <div class="head"><div><h2>Supplier facts</h2><div class="small muted">Spend, revenue and research status per supplier. Shown as evidence when scoring and in the Dependency view; they never change a score.</div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="small primary" id="btnPasteFacts">Paste from Excel</button><button class="small" id="btnFactsCsv">Download facts .csv</button></div></div>
+    <div class="body"><div class="scroll"><table class="facts" id="factsTbl"></table></div>
+      <div class="small muted" style="margin-top:8px">Revenue (EUR) = Supplier revenue (million) × FX to EUR. Share = Novonesis spend ÷ Supplier revenue (EUR). <span class="flag">!</span> marks a row whose research status isn't final or that has a caveat.</div></div>
+  </section>
 </div>
 
 <div data-pagebody="scoring" hidden>
@@ -499,6 +526,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <button role="tab" aria-selected="true" data-tab="map">Segmentation map</button>
         <button role="tab" aria-selected="false" data-tab="h2h">Head to head</button>
         <button role="tab" aria-selected="false" data-tab="profile">Profiles</button>
+        <button role="tab" aria-selected="false" data-tab="dep">Dependency</button>
         <button role="tab" aria-selected="false" data-tab="scn">Scenario comparison</button>
       </div>
       <div class="body" id="pane-map" role="tabpanel">
@@ -534,6 +562,17 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
           </div>
         </div>
       </div>
+      <div class="body" id="pane-dep" role="tabpanel" hidden>
+        <div class="map-wrap">
+          <svg id="dep" viewBox="0 0 640 460" role="img" aria-label="Novonesis spend against Novonesis share of supplier revenue"></svg>
+          <div class="map-side">
+            <div><div class="eyebrow">Who needs whom</div><div class="small" style="margin-top:4px">Right = we spend a lot with them. Up = we are a large share of their business. Lines sit at the median of the suppliers shown.</div></div>
+            <div class="dep-filt"><label class="eyebrow" for="depCat">Category L3</label><select id="depCat"></select><label class="eyebrow" for="depCty">Country</label><select id="depCty"></select></div>
+            <div class="small muted">Hollow points have figures that aren't final or carry a caveat. Facts are evidence only and don't change scores.</div>
+          </div>
+        </div>
+        <div class="scroll" style="margin-top:12px"><table class="facts ro" id="depTbl"></table></div>
+      </div>
       <div class="body" id="pane-scn" role="tabpanel" hidden>
         <div class="small muted" style="margin-bottom:10px">Rank and segment of each supplier under each saved set of weights.</div>
         <div class="scroll"><table class="cmp" id="cmp"></table></div>
@@ -556,6 +595,16 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <dialog id="dlgNotes">
   <div class="dh"><h3 id="notesTitle">Notes</h3><div class="row" style="display:flex;gap:6px"><button class="small" id="notesPrev">← Prev</button><button class="small" id="notesNext">Next →</button><button class="small ghost" data-close>Close</button></div></div>
   <div class="db" id="notesBody"></div>
+</dialog>
+
+<dialog id="dlgFacts">
+  <div class="dh"><h3>Paste supplier facts</h3><button class="small ghost" data-close>Close</button></div>
+  <div class="db">
+    <div class="small">Copy the rows from your Excel sheet <b>including the header row</b> and paste them here. Columns are matched by name (Supplier (consolidated), Supplier country, Category L3, Novonesis spend (EUR), Parent / revenue basis, Supplier revenue Milion, Currency, FX to EUR, Supplier revenue (EUR), Novonesis share of supplier revenue, Revenue period, Revenue basis / caveat, Research status, Source URL). Rows are matched to suppliers by name.</div>
+    <textarea id="factsText" placeholder="Paste here (Ctrl+V)"></textarea>
+    <label class="chk"><input type="checkbox" id="factsAdd" checked> Add suppliers that aren't in scope yet (scores start at 3)</label>
+    <div class="row"><button class="primary" id="btnDoFacts">Load facts</button><span id="factsMsg" class="small"></span></div>
+  </div>
 </dialog>
 
 <dialog id="dlgExport">
@@ -633,6 +682,15 @@ function exampleState(){
   const stk=(n,arr)=>{const d=dims.find(x=>x.name===n);if(d)d.stake=arr.map(a=>({name:a[0],role:a[1],done:!!a[2]}));};
   stk('Spend and future volume',[['Category manager','Provide input',1],['Finance business partner','Validate']]);
   stk('Supply risk and criticality',[['Site supply planning','Provide input'],['Quality & regulatory','Consult'],['Head of procurement','Validate']]);
+  const fx=(n,f)=>{const s=suppliers.find(x=>x.name===n);if(s)s.facts=f;};
+  // Dummy facts so the views have something to show; replace with the real sheet via Paste from Excel.
+  fx('Northwind Chemicals',{country:'Germany',cat:'Specialty chemicals',spend:18400000,parent:'Northwind Group (consolidated)',rev:2400,cur:'EUR',fx:1,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/northwind-annual-report'});
+  fx('Atlas Fermentation Systems',{country:'Denmark',cat:'Fermentation equipment',spend:9100000,parent:'Atlas Fermentation A/S',rev:310,cur:'DKK',fx:0.134,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/atlas-annual-report'});
+  fx('Meridian Packaging',{country:'Netherlands',cat:'Packaging',spend:6200000,parent:'Meridian Holdings (group)',rev:5200,cur:'EUR',fx:1,period:'FY2024',caveat:'Group revenue; packaging division not reported separately',status:'Draft',url:'https://example.com/meridian-holdings'});
+  fx('Halden Logistics',{country:'Norway',cat:'Logistics services',spend:3400000,parent:'Halden Logistics AS',rev:8900,cur:'NOK',fx:0.085,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/halden'});
+  fx('Corvex Bioprocess',{country:'United States',cat:'Bioprocess consumables',spend:4800000,parent:'Corvex Inc.',rev:120,cur:'USD',fx:0.92,period:'2025 estimate',caveat:'Estimate from press release',status:'In progress',url:'https://example.com/corvex-press'});
+  const evs={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'};
+  dims.forEach(d=>{if(evs[d.name])d.ev=evs[d.name];});
   const notes={},supNotes={};const byName=n=>suppliers.find(x=>x.name===n).id;const dimBy=n=>dims.find(x=>x.name===n).id;
   supNotes[byName('Atlas Fermentation Systems')]='Example note: sole qualified source for our fermentation vessels; 40-week lead time.';
   notes[byName('Atlas Fermentation Systems')]={[dimBy('Preferred-customer position, reciprocity and mutual dependence')]:'Example: we are under 3% of their revenue.'};
@@ -645,7 +703,8 @@ let S;
 function load(){
   try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&o.suppliers&&o.persp){
     o.notes=o.notes||{};o.supNotes=o.supNotes||{};
-    o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});});
+    o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});
+      if(d.ev===undefined)d.ev={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'}[d.name]||'';});
     return o;}}}catch(e){}
   return exampleState();
 }
@@ -942,8 +1001,133 @@ document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.valu
 /* ---------- tabs ---------- */
 document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tabs [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
-  ['map','h2h','profile','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
+  ['map','h2h','profile','dep','scn'].forEach(k=>document.getElementById('pane-'+k).hidden=(k!==b.dataset.tab));
 }));
+
+/* ---------- supplier facts (evidence only) ---------- */
+const FCOLS=[
+  {k:'name',h:'Supplier (consolidated)'},{k:'country',h:'Supplier country'},{k:'cat',h:'Category L3'},{k:'spend',h:'Novonesis spend (EUR)',num:1},
+  {k:'parent',h:'Parent / revenue basis'},{k:'rev',h:'Supplier revenue Milion',num:1},{k:'cur',h:'Currency'},{k:'fx',h:'FX to EUR',num:1},
+  {k:'revEur',h:'Supplier revenue (EUR)',calc:1},{k:'share',h:'Novonesis share of supplier revenue',calc:1},
+  {k:'period',h:'Revenue period'},{k:'caveat',h:'Revenue basis / caveat'},{k:'status',h:'Research status'},{k:'url',h:'Source URL'}];
+const factsOf=s=>s.facts||{};
+function revEur(f){const fxv=f.fx!==undefined&&f.fx!==''&&isFinite(+f.fx)?+f.fx:(/^eur$/i.test(f.cur||'')?1:NaN);
+  if(isFinite(+f.rev)&&f.rev!==''&&f.rev!==undefined&&isFinite(fxv))return +f.rev*1e6*fxv;
+  if(isFinite(+f.revEurIn)&&f.revEurIn)return +f.revEurIn<1e5?+f.revEurIn*1e6:+f.revEurIn;return null;}
+function shareOf(f){const r=revEur(f);if(r&&isFinite(+f.spend)&&f.spend!==''&&f.spend!==undefined)return +f.spend/r;if(isFinite(+f.shareIn)&&f.shareIn!=='')return +f.shareIn;return null;}
+const isFinal=f=>/^(final|verified|done|complete|completed|confirmed|validated)\b/i.test((f.status||'').trim());
+const factWarn=f=>(f.status||f.caveat||f.spend!==undefined)&&(!isFinal(f)||!!(f.caveat||'').trim());
+const hasFacts=f=>Object.keys(f).some(k=>f[k]!==''&&f[k]!==undefined&&f[k]!==null);
+const eurM=v=>v===null||!isFinite(v)?'–':(v>=1e9?'€'+(v/1e9).toFixed(1)+'bn':'€'+(v/1e6).toFixed(v<1e7?2:1)+'m');
+const pctS=v=>v===null||!isFinite(v)?'–':(v*100<1?(v*100).toFixed(2):(v*100).toFixed(1))+'%';
+function warnText(f){const w=[];if(!isFinal(f))w.push('Research status: '+(f.status||'not set'));if((f.caveat||'').trim())w.push('Caveat: '+f.caveat);return w.join('\n');}
+function safeUrl(u){u=String(u||'').trim();return /^https?:\/\//i.test(u)?u:'';}
+// parse numbers as Excel shows them: 18,400,000 · 18.400.000 · 18400000,5 · 3.1% · € 9.1
+// dec: '.' or ',' when known for the whole paste; otherwise guess from the value itself
+function parseNum(v,dec){if(v===undefined||v===null)return '';let t=String(v).trim();if(!t)return '';const pctg=/%$/.test(t);t=t.replace(/[^\d.,\-eE]/g,'').replace(/^[eE]+|[eE]+$/g,'');if(!t)return '';
+  if(!dec){const lc=t.lastIndexOf(','),ld=t.lastIndexOf('.');
+    if(lc>-1&&ld>-1)dec=lc>ld?',':'.';
+    else if(lc>-1)dec=(/^-?0,/.test(t)||!/^-?\d{1,3}(,\d{3})+$/.test(t))?',':'.';
+    else if(ld>-1)dec=(/^-?\d{1,3}(\.\d{3}){2,}$/.test(t))?',':'.';else dec='.';}
+  t=dec===','?t.replace(/\./g,'').replace(',','.'):t.replace(/,/g,'');
+  let n=+t;if(!isFinite(n))return arguments[1]?parseNum(v):'';if(pctg)n=n/100;return n;}
+// which decimal separator does a pasted table use? Count unambiguous clues across all numeric cells.
+function guessDecimal(cells){let c=0,d=0;cells.forEach(v=>{const t=String(v||'').replace(/[^\d.,\-]/g,'');if(!t)return;
+  if(/^-?0,\d/.test(t)||/\d,\d{1,2}$/.test(t)||/\d,\d{4,}$/.test(t)||/\d\.\d{3}\.\d{3}/.test(t)||/\.\d{3},\d/.test(t))c++;
+  if(/^-?0\.\d/.test(t)||/\d\.\d{1,2}$/.test(t)||/\d\.\d{4,}$/.test(t)||/\d,\d{3},\d{3}/.test(t)||/,\d{3}\.\d/.test(t))d++;});
+  return c>d?',':'.';}
+function buildFacts(){
+  const t=document.getElementById('factsTbl');if(!t)return;
+  t.innerHTML=`<thead><tr>${FCOLS.map(c=>`<th class="${c.num||c.calc?'n':''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>`+
+    S.suppliers.map(s=>{const f=factsOf(s);const w=hasFacts(f)&&factWarn(f);return `<tr data-sid="${s.id}"${w?' class="warn"':''}>`+FCOLS.map(c=>{
+      if(c.k==='name')return `<td class="sup">${esc(s.name)}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`;
+      if(c.k==='revEur')return `<td class="calc" data-calc="revEur">${eurM(revEur(f))}</td>`;
+      if(c.k==='share')return `<td class="calc" data-calc="share">${pctS(shareOf(f))}</td>`;
+      return `<td><input data-k="${c.k}" class="${c.num?'n':''}" value="${esc(f[c.k]===undefined?'':f[c.k])}" aria-label="${esc(s.name)}: ${esc(c.h)}" style="min-width:${({country:'96px',cat:'130px',spend:'96px',parent:'150px',rev:'64px',cur:'48px',fx:'56px',period:'80px',caveat:'170px',status:'90px',url:'170px'})[c.k]||'60px'}"></td>`;}).join('')+`</tr>`;}).join('')+`</tbody>`;
+  t.querySelectorAll('tbody tr').forEach(tr=>{const s=S.suppliers.find(x=>x.id===tr.dataset.sid);
+    tr.querySelectorAll('input[data-k]').forEach(inp=>inp.addEventListener('change',()=>{const c=FCOLS.find(x=>x.k===inp.dataset.k);s.facts=s.facts||{};
+      s.facts[c.k]=c.num?parseNum(inp.value):inp.value.trim();if(c.num)inp.value=s.facts[c.k];
+      tr.querySelector('[data-calc=revEur]').textContent=eurM(revEur(s.facts));tr.querySelector('[data-calc=share]').textContent=pctS(shareOf(s.facts));
+      save();renderDep();renderScoring();}));});
+}
+const HMAP={'supplier (consolidated)':'name','supplier':'name','supplier name':'name','supplier country':'country','country':'country','category l3':'cat','category':'cat',
+  'novonesis spend (eur)':'spend','spend (eur)':'spend','spend':'spend','parent / revenue basis':'parent','parent':'parent',
+  'supplier revenue milion':'rev','supplier revenue million':'rev','supplier revenue (million)':'rev','currency':'cur','fx to eur':'fx','fx':'fx',
+  'supplier revenue (eur)':'revEurIn','novonesis share of supplier revenue':'shareIn','revenue period':'period','revenue basis / caveat':'caveat','caveat':'caveat',
+  'research status':'status','status':'status','source url':'url','source':'url','url':'url'};
+function parseTable(text){
+  if(!/\t/.test(text))return parseCSV(text);
+  const rows=[];let row=[],cell='',inQ=false;const t=text.replace(/\r\n?/g,'\n');
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(inQ){if(ch==='"'){if(t[i+1]==='"'){cell+='"';i++;}else inQ=false;}else cell+=ch;}
+    else if(ch==='"'&&cell==='')inQ=true;else if(ch==='\t'){row.push(cell);cell='';}
+    else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}else cell+=ch;}
+  row.push(cell);rows.push(row);return rows.map(r=>r.map(c=>c.trim())).filter(r=>r.some(c=>c!==''));
+}
+function importFacts(text,addNew){
+  const rows=parseTable(text);if(rows.length<2)throw new Error('Paste the header row and at least one supplier row.');
+  const norm=h=>h.toLowerCase().replace(/\s+/g,' ').trim();const map=rows[0].map(h=>HMAP[norm(h)]||null);
+  if(!map.includes('name'))throw new Error('No "Supplier (consolidated)" column found in the header row.');
+  let upd=0,added=0;const skipped=[];const NUMK=['spend','rev','fx','revEurIn','shareIn'];
+  const dec=guessDecimal(rows.slice(1).flatMap(r=>map.map((k,j)=>NUMK.includes(k)?r[j]:null).filter(Boolean)));
+  rows.slice(1).forEach(r=>{const f={};map.forEach((k,j)=>{if(!k)return;const v=r[j]===undefined?'':r[j];
+      f[k]=NUMK.includes(k)?parseNum(v,dec):v;});
+    const name=(f.name||'').trim();if(!name)return;delete f.name;
+    let s=S.suppliers.find(x=>x.name.trim().toLowerCase()===name.toLowerCase());
+    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);added++;}else upd++;
+    s.facts=f;});
+  S.example=false;
+  return {upd,added,skipped};
+}
+function factsCSV(){const q=v=>/[",;\t\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
+  const L=[FCOLS.map(c=>q(c.h)).join(',')];
+  S.suppliers.forEach(s=>{const f=factsOf(s);L.push(FCOLS.map(c=>c.k==='name'?q(s.name):c.k==='revEur'?(revEur(f)===null?'':Math.round(revEur(f))):c.k==='share'?(shareOf(f)===null?'':shareOf(f).toFixed(6)):q(f[c.k]===undefined?'':f[c.k])).join(','));});
+  return L.join('\n');}
+const dlgF=document.getElementById('dlgFacts');
+document.getElementById('btnPasteFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
+document.getElementById('btnDoFacts').addEventListener('click',()=>{const m=document.getElementById('factsMsg');
+  try{const r=importFacts(document.getElementById('factsText').value,document.getElementById('factsAdd').checked);renderAll();save();
+    m.className='small ok';m.textContent=`Updated ${r.upd} supplier${r.upd===1?'':'s'}${r.added?`, added ${r.added}`:''}${r.skipped.length?`. Not in scope, skipped: ${r.skipped.join(', ')}`:''}.`;}
+  catch(e){m.className='small err';m.textContent=e.message;}});
+document.getElementById('btnFactsCsv').addEventListener('click',()=>{saveFile('supplier-facts.csv',factsCSV()).catch(()=>{});});
+
+/* dependency view: spend vs share of supplier revenue */
+function renderDep(){
+  const svg=document.getElementById('dep');if(!svg)return;
+  const all=S.suppliers.map((s,si)=>({s,si,f:factsOf(s)}));
+  const cats=[...new Set(all.map(x=>x.f.cat).filter(Boolean))].sort(),ctys=[...new Set(all.map(x=>x.f.country).filter(Boolean))].sort();
+  const cs=document.getElementById('depCat'),ys=document.getElementById('depCty');
+  if(S.depCat&&!cats.includes(S.depCat))S.depCat='';if(S.depCty&&!ctys.includes(S.depCty))S.depCty='';
+  cs.innerHTML=`<option value="">All categories</option>`+cats.map(c=>`<option${c===S.depCat?' selected':''}>${esc(c)}</option>`).join('');
+  ys.innerHTML=`<option value="">All countries</option>`+ctys.map(c=>`<option${c===S.depCty?' selected':''}>${esc(c)}</option>`).join('');
+  const rows=all.filter(x=>(!S.depCat||x.f.cat===S.depCat)&&(!S.depCty||x.f.country===S.depCty));
+  const pts=rows.map(x=>({...x,sp:isFinite(+x.f.spend)&&x.f.spend!==''&&x.f.spend!==undefined?+x.f.spend:null,sh:shareOf(x.f)})).filter(x=>x.sp!==null&&x.sh!==null);
+  const L=80,R=620,T=30,B=400;const maxX=Math.max(1,...pts.map(p=>p.sp))*1.1,maxY=Math.max(0.01,...pts.map(p=>p.sh))*1.15;
+  const sx=v=>L+v/maxX*(R-L),sy=v=>B-v/maxY*(B-T);
+  const med=a=>{const b=a.slice().sort((x,y)=>x-y);const m=b.length>>1;return b.length?(b.length%2?b[m]:(b[m-1]+b[m])/2):0;};
+  const mx=med(pts.map(p=>p.sp)),my=med(pts.map(p=>p.sh));
+  let o=`<rect x="${L}" y="${T}" width="${R-L}" height="${B-T}" fill="var(--surface)" stroke="var(--line)"/>`;
+  if(pts.length>1){o+=`<rect class="q" x="${sx(mx)}" y="${T}" width="${R-sx(mx)}" height="${sy(my)-T}" opacity=".55"/>`;
+    o+=`<line class="mid" x1="${sx(mx)}" y1="${T}" x2="${sx(mx)}" y2="${B}"/><line class="mid" x1="${L}" y1="${sy(my)}" x2="${R}" y2="${sy(my)}"/>`;
+    o+=`<text class="qlab" x="${R-8}" y="${T+16}" text-anchor="end">Mutual dependence</text><text class="qlab" x="${L+8}" y="${T+16}">They depend on us</text><text class="qlab" x="${R-8}" y="${B-8}" text-anchor="end">We depend on them</text><text class="qlab" x="${L+8}" y="${B-8}">Low dependence</text>`;}
+  for(let k=0;k<=4;k++){const vx=maxX*k/4,vy=maxY*k/4;o+=`<text x="${sx(vx)}" y="${B+18}" text-anchor="middle">${eurM(vx)}</text><text x="${L-8}" y="${sy(vy)+4}" text-anchor="end">${pctS(vy)}</text>`;}
+  o+=`<text class="axt" x="${(L+R)/2}" y="${B+44}" text-anchor="middle">Novonesis spend (EUR) →</text><text class="axt" transform="translate(18 ${(T+B)/2}) rotate(-90)" text-anchor="middle">Novonesis share of supplier revenue →</text>`;
+  pts.forEach(p=>{const w=hasFacts(p.f)&&factWarn(p.f);const cx=sx(p.sp),cy=sy(p.sh);const right=cx<R-150;
+    o+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="${w?'var(--surface)':col(p.si)}" stroke="${col(p.si)}" stroke-width="2.5"><title>${esc(p.s.name)}: ${eurM(p.sp)} spend, ${pctS(p.sh)} of their revenue${w?'\n'+warnText(p.f):''}</title></circle>`;
+    o+=`<text class="pl" x="${(cx+(right?13:-13)).toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="${right?'start':'end'}">${esc(p.s.name)}</text>`;});
+  if(!pts.length)o+=`<text x="${(L+R)/2}" y="${(T+B)/2}" text-anchor="middle">No suppliers with both spend and revenue yet. Add facts on Setup &amp; weighting.</text>`;
+  svg.innerHTML=o;
+  const cols=FCOLS.filter(c=>c.k!=='fx'&&c.k!=='cur'&&c.k!=='rev');
+  document.getElementById('depTbl').innerHTML=`<thead><tr>${cols.map(c=>`<th class="${c.num||c.calc?'n':''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>`+
+    rows.slice().sort((a,b)=>(shareOf(b.f)||0)-(shareOf(a.f)||0)).map(x=>{const f=x.f;const w=hasFacts(f)&&factWarn(f);return `<tr>`+cols.map(c=>{
+      if(c.k==='name')return `<td class="sup">${esc(x.s.name)}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`;
+      if(c.k==='spend')return `<td class="calc">${f.spend===''||f.spend===undefined?'–':eurM(+f.spend)}</td>`;
+      if(c.k==='revEur')return `<td class="calc">${eurM(revEur(f))}</td>`;if(c.k==='share')return `<td class="calc">${pctS(shareOf(f))}</td>`;
+      if(c.k==='url'){const u=safeUrl(f.url);return `<td>${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">source</a>`:esc(f.url||'')}</td>`;}
+      return `<td>${esc(f[c.k]||'')}</td>`;}).join('')+`</tr>`;}).join('')+`</tbody>`;
+}
+document.getElementById('depCat').addEventListener('change',e=>{S.depCat=e.target.value;renderDep();save();});
+document.getElementById('depCty').addEventListener('change',e=>{S.depCty=e.target.value;renderDep();save();});
 
 /* ---------- stakeholders per criterion ---------- */
 const ROLES=['Provide input','Consult','Validate','Inform'];
@@ -988,6 +1172,7 @@ function renderScoring(){
   // main: title, definition, rubric, supplier rows
   let h=`<div class="sc-title"><h2>${idx+1}. ${esc(d.name)}</h2><span class="meta"><span style="color:${col(pi)}">■</span> ${esc(p?p.name:'')} · weight ${d.weight} (${sumW>0?pct((+d.weight||0)/sumW):'0%'})${d.min?' · knock-out below '+d.min:''}</span></div>`;
   h+=`<div class="sc-desc"><textarea rows="1" data-k="desc" placeholder="What does this criterion measure?" aria-label="What ${esc(d.name)} measures">${esc(d.desc||'')}</textarea></div>`;
+  h+=`<div class="sc-ev"><label for="scEv">Evidence beside the comparison:</label><select id="scEv">${[['','none'],['spend','Novonesis spend'],['share','Share of supplier revenue'],['both','Spend and share']].map(([v,l])=>`<option value="${v}"${(d.ev||'')===v?' selected':''}>${l}</option>`).join('')}</select></div>`;
   h+=`<div class="sc-table"><div class="hd">Score</div>`;
   LVK.forEach((k,i)=>{const a=(0.06+i/4*0.34).toFixed(2);h+=`<div class="rub" style="background:rgba(var(--seq),${a})"><span class="lv">${i+1}</span><textarea data-k="${k}" placeholder="${i===0?'Lowest: what does a 1 look like?':i===4?'Highest: what does a 5 look like?':'What does a '+(i+1)+' look like?'}" aria-label="Score ${i+1} means">${esc(d[k]||'')}</textarea></div>`;});
   h+=`<div class="hd">Comment: why this score?</div>`;
@@ -998,6 +1183,7 @@ function renderScoring(){
   h+=`</div>`+stakeHTML(d);
   host.innerHTML=h;
   wireStake(host,d);
+  host.querySelector('#scEv').addEventListener('change',e=>{d.ev=e.target.value;renderScoreCmp(d);save();});
   host.querySelectorAll('textarea[data-k]').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();});});
   host.querySelectorAll('.srow').forEach(r=>{const sid=r.dataset.sid;
     r.querySelectorAll('.lvb').forEach(b=>b.addEventListener('click',()=>{S.scores[sid][d.id]=+b.dataset.v;scFocusSid=sid;
@@ -1007,6 +1193,10 @@ function renderScoring(){
   });
   renderScoreCmp(d);
 }
+function evLine(d,s){if(!d.ev)return '';const f=factsOf(s);if(!hasFacts(f))return '<span class="ev muted">No facts yet</span>';const bits=[];
+  if(d.ev==='spend'||d.ev==='both')bits.push(`<b>${f.spend===''||f.spend===undefined?'–':eurM(+f.spend)}</b> spend`);
+  if(d.ev==='share'||d.ev==='both')bits.push(`<b>${pctS(shareOf(f))}</b> of their revenue`);
+  const w=factWarn(f);return `<span class="ev">${bits.join(' · ')}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</span>`;}
 function renderScoreCmp(d){
   const host=document.getElementById('scCmp');
   const rows=S.suppliers.map((s,si)=>({s,si,v:S.scores[s.id][d.id],c:noteOf(s.id,d.id)})).sort((a,b)=>b.v-a.v||a.s.name.localeCompare(b.s.name));
@@ -1014,7 +1204,7 @@ function renderScoreCmp(d){
   let h=`<div class="cmp-stats">Average ${f1(avg)} · range ${rows.length?rows[rows.length-1].v:'–'} to ${rows.length?rows[0].v:'–'}</div>`;
   let lastV=null;
   rows.forEach(r=>{if(r.v!==lastV){h+=`<div class="cmp-lv"><b>${r.v}</b> ${esc(d[LVK[r.v-1]]||'')}</div>`;lastV=r.v;}
-    h+=`<div class="cmp-row" data-sid="${r.s.id}" title="Jump to ${esc(r.s.name)}"><span class="n">${esc(r.s.name)}</span><span class="v num">${r.v}</span><span class="bar"><i style="width:${r.v/5*100}%;background:${col(r.si)}"></i></span>${r.c?`<span class="c">${esc(r.c)}</span>`:''}</div>`;});
+    h+=`<div class="cmp-row" data-sid="${r.s.id}" title="Jump to ${esc(r.s.name)}"><span class="n">${esc(r.s.name)}</span><span class="v num">${r.v}</span><span class="bar"><i style="width:${r.v/5*100}%;background:${col(r.si)}"></i></span>${evLine(d,r.s)}${r.c?`<span class="c">${esc(r.c)}</span>`:''}</div>`;});
   host.innerHTML=h;
   host.querySelectorAll('.cmp-row').forEach(el=>el.addEventListener('click',()=>{const inp=document.querySelector(`#scMain .srow[data-sid="${el.dataset.sid}"] input.cm`);if(inp)inp.focus();}));
 }
@@ -1044,6 +1234,9 @@ const FSTEPS=[
   {k:'map',t:'Segmentation',short:'Segments',tab:'map',spot:'Detail',
    look:'Check each supplier\'s segment, especially those close to the segment lines.',
    q:['Do we agree with each supplier\'s segment?','What does each segment mean for how we engage: partner, develop, secure, or keep transactional?']},
+  {k:'dep',t:'Who needs whom',short:'Dependency',tab:'dep',spot:'Detail',
+   look:'Put the scores next to the facts: how much we spend, and how big we are for each supplier. Check flagged figures before relying on them.',
+   q:['Do the dependency facts support the segments we just agreed?','Where we depend on them more than they on us, what is our mitigation?']},
   {k:'h2h',t:'Close calls, head to head',short:'Head to head',tab:'h2h',spot:'Detail',
    look:'The closest pair is selected. Walk through the criteria where they differ most and the comments behind them.',
    q:['What evidence backs the biggest gaps?','Would a validated score from a stakeholder change the call?']},
@@ -1077,6 +1270,12 @@ function talkingPoints(k){
     ['hh','lh','hl','ll'].forEach(sg=>{const n=c.sorted.filter(r=>r.seg===sg).map(r=>esc(r.s.name));if(n.length)pts.push(`<b>${SEGMENTS[sg]}</b>: ${n.join(', ')}.`);});
     c.rows.forEach(r=>{if(r.x===null||r.y===null)return;const near=[];if(Math.abs(r.x-S.thr)<0.25)near.push('X '+f2(r.x));if(Math.abs(r.y-S.thr)<0.25)near.push('Y '+f2(r.y));
       if(near.length)pts.push(`<b>${esc(r.s.name)}</b> sits close to the segment line (${near.join(', ')}); its segment is borderline.`);});
+  }
+  if(k==='dep'){const fs=S.suppliers.map(s=>({s,f:factsOf(s),sh:shareOf(factsOf(s))}));const withSh=fs.filter(x=>x.sh!==null).sort((a,b)=>b.sh-a.sh);
+    if(!withSh.length)pts.push('No supplier facts loaded yet. Paste them on Setup &amp; weighting.');
+    else{pts.push(`We matter most to <b>${esc(withSh[0].s.name)}</b> (${pctS(withSh[0].sh)} of their revenue)${withSh.length>1?` and least to <b>${esc(withSh[withSh.length-1].s.name)}</b> (${pctS(withSh[withSh.length-1].sh)})`:''}.`);
+      const top=fs.filter(x=>x.f.spend!==''&&x.f.spend!==undefined).sort((a,b)=>b.f.spend-a.f.spend)[0];if(top)pts.push(`Largest spend: <b>${esc(top.s.name)}</b> (${eurM(+top.f.spend)}).`);}
+    const fl=fs.filter(x=>hasFacts(x.f)&&factWarn(x.f));if(fl.length)pts.push(`Check before relying on: ${fl.map(x=>`<b>${esc(x.s.name)}</b> (${esc(x.f.caveat||x.f.status||'status not set')})`).join('; ')}.`);
   }
   if(k==='h2h'){const [a,b]=S.h2h||[];const A=c.rows.find(r=>r.s.id===a),B=c.rows.find(r=>r.s.id===b);
     if(A&&B)pts.push(`Comparing <b>${esc(A.s.name)}</b> and <b>${esc(B.s.name)}</b>: ${f2(Math.abs(A.total-B.total))} apart.`);
@@ -1384,10 +1583,10 @@ document.getElementById('btnPrint').addEventListener('click',printRanking);
 
 /* ---------- render ---------- */
 function renderResults(){
-  const c=compute();setTimeout(()=>{if(S.facilOn&&S.page==='results'&&!document.activeElement.closest('#facil'))renderFacil();},0);updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderScnSelect();renderScenarios();
+  const c=compute();setTimeout(()=>{if(S.facilOn&&S.page==='results'&&!document.activeElement.closest('#facil'))renderFacil();},0);updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderDep();renderScnSelect();renderScenarios();
   document.getElementById('badge').hidden=!S.example;
 }
-function renderAll(){buildWeights();buildSuppliers();buildMatrix();renderResults();renderScoring();}
+function renderAll(){buildWeights();buildSuppliers();buildFacts();buildMatrix();renderResults();renderScoring();}
 S=load();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
 })();
 </script>
