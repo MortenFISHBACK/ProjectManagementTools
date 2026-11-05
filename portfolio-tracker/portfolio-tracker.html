@@ -75,6 +75,8 @@ textarea{resize:vertical;width:100%}
 .band button:hover{border-color:var(--brand-soft)}
 .notice{font-size:.82rem;color:var(--fg-2);padding-block:8px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
 .notice b{color:var(--fg)}
+.pill-file{background:var(--brand-soft);color:#173630;border-radius:99px;padding:1px 9px;font-weight:600;font-size:.75rem}
+.conflict{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--critical-soft);border-radius:8px;padding:8px 12px;color:var(--fg)}
 .pill-sample{background:var(--amber-soft);color:var(--fg);border-radius:99px;padding:1px 9px;font-weight:600;font-size:.75rem}
 
 /* Filters */
@@ -229,11 +231,8 @@ code{font-size:.82rem;background:var(--surface-2);padding:1px 5px;border-radius:
     <button id="importBtn" class="small">Import Sievo export</button>
   </div>
 </header>
-<div class="wrap notice">
-  <span class="pill-sample">Sample data</span>
-  <span>Mock-up with invented projects and figures. Changes are saved in this browser only.</span>
-  <button class="small ghost" id="resetBtn">Reset sample data</button>
-</div>
+<div class="wrap notice" id="fileBar" aria-live="polite"></div>
+<input type="file" id="xlInput" accept=".xlsx,.xls" hidden>
 
 <main class="wrap">
   <div class="filters" id="filters"></div>
@@ -244,6 +243,7 @@ code{font-size:.82rem;background:var(--surface-2);padding:1px 5px;border-radius:
 <div id="tip" hidden></div>
 <div id="layer"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -359,7 +359,141 @@ const KEY='portfolio-tracker-v1';
 const S={projects:null,f:{l1:'All',l2:'All',region:'All',status:'All',gcl:'All',focus:'All'},drill:null,sel:'all',search:'',showAll:false,author:'Morten'};
 try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(Array.isArray(d.projects))S.projects=d.projects;if(d.author)S.author=d.author}}catch(e){}
 if(!S.projects)S.projects=seedData();
-function save(){try{localStorage.setItem(KEY,JSON.stringify({projects:S.projects,author:S.author}))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({projects:S.projects,author:S.author}))}catch(e){}
+  if(F.handle){F.dirty=true;clearTimeout(F.timer);F.timer=setTimeout(writeFile,600);renderBar()}}
+
+/* ---------- Local Excel data file ----------
+   Works when this page is opened as a local file in Edge or Chrome (File System Access API).
+   The workbook holds every project, action, risk, comment and savings row; the tool writes it back after each change. */
+const F={handle:null,name:'',lastMod:0,savedAt:null,dirty:false,timer:null,conflict:false,error:'',readonly:false,reconnect:null,blocked:false};
+const XL_TYPES=[{description:'Excel workbook',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}];
+const canFS=()=>'showOpenFilePicker' in window&&!F.blocked;
+const yn=v=>v?'Yes':'No', isYes=v=>/^(y|yes|true|1|x|ja)$/i.test(String(v).trim());
+const pad=n=>String(n).padStart(2,'0');
+function toISO(v){if(v===''||v==null)return'';if(typeof v==='number'){const d=XLSX.SSF.parse_date_code(v);return d?`${d.y}-${pad(d.m)}-${pad(d.d)}`:''}
+  const t=String(v).trim();let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return`${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  m=t.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return`${y}-${pad(m[2])}-${pad(m[1])}`}return''}
+const SHEETS={
+  Projects:['Project ID','Project name','Category L1','Category L2','Region','GCL','Stage','Status','Current status','Focus project','Output','Planned finalization','Project charter','Sourcing strategy','Approved by Finance'],
+  Actions:['Project ID','Action ID','Action','Owner','Due date','Board column'],
+  Risks:['Project ID','Risk ID','Risk or issue','Mitigation','Impact','Likelihood','Owner','Status'],
+  Comments:['Project ID','On','Item ID','Author','Date','Comment'],
+  Savings:['Project ID','Benefit type','Unit','Year','Amount','Previous amount']};
+function toWorkbook(){
+  const wb=XLSX.utils.book_new();
+  const add=(name,rows)=>{const cols=SHEETS[name]||Object.keys(rows[0]||{});const ws=XLSX.utils.json_to_sheet(rows,{header:cols});
+    ws['!cols']=cols.map(c=>({wch:Math.min(50,Math.max(10,c.length+2,...rows.map(r=>String(r[c]??'').length+1)))}));if(rows.length)ws['!autofilter']={ref:ws['!ref']};XLSX.utils.book_append_sheet(wb,ws,name)};
+  const ps=S.projects;
+  add('Projects',ps.map(p=>({'Project ID':p.id,'Project name':p.name,'Category L1':p.l1,'Category L2':p.l2,'Region':p.region,'GCL':p.gcl,'Stage':GATES[p.gate],'Status':p.status,'Current status':HEALTH[p.health],'Focus project':yn(p.focus),'Output':p.output,'Planned finalization':p.finalize,'Project charter':yn(p.checklist.charter),'Sourcing strategy':yn(p.checklist.strategy),'Approved by Finance':yn(p.checklist.finance)})));
+  add('Actions',ps.flatMap(p=>p.actions.map(a=>({'Project ID':p.id,'Action ID':a.id,'Action':a.title,'Owner':a.owner,'Due date':a.due,'Board column':COLS.find(c=>c.key===a.col).label}))));
+  add('Risks',ps.flatMap(p=>p.risks.map(r=>({'Project ID':p.id,'Risk ID':r.id,'Risk or issue':r.title,'Mitigation':r.mitigation,'Impact':r.impact,'Likelihood':r.likelihood,'Owner':r.owner,'Status':r.status}))));
+  add('Comments',ps.flatMap(p=>[...p.actions.flatMap(a=>a.comments.map(c=>({'Project ID':p.id,'On':'Action','Item ID':a.id,'Author':c.who,'Date':c.when,'Comment':c.text}))),...p.risks.flatMap(r=>r.comments.map(c=>({'Project ID':p.id,'On':'Risk','Item ID':r.id,'Author':c.who,'Date':c.when,'Comment':c.text})))]));
+  add('Savings',ps.flatMap(p=>p.benefits.map(b=>{const B=BEN.find(x=>x.key===b.type);return{'Project ID':p.id,'Benefit type':B.label,'Unit':B.unit,'Year':b.year,'Amount':b.amount,'Previous amount':b.prev}})));
+  add('Read me',[
+    {'Portfolio Tracker data file':'This workbook is read and written by the Portfolio Tracker. Edits made in the tool are saved here automatically.'},
+    {'Portfolio Tracker data file':'You can also edit it in Excel: close the tool first, save in Excel, close Excel, then open the tool again.'},
+    {'Portfolio Tracker data file':'Keep the sheet names and column headings as they are. Formatting, formulas and extra sheets are not kept when the tool saves.'},
+    {'Portfolio Tracker data file':'IDs link the sheets: Actions, Risks, Comments and Savings use Project ID; Comments use Item ID (Action ID or Risk ID). New rows without an ID get one on the next save.'},
+    {'Portfolio Tracker data file':'Allowed values. Stage: '+GATES.join(', ')+'. Current status: '+Object.values(HEALTH).join(', ')+'. Board column: '+COLS.map(c=>c.label).join(', ')+'. Impact and Likelihood: High, Medium, Low. Risk status: '+RISK_STATUS.join(', ')+'.'}]);
+  return wb;
+}
+function fromWorkbook(wb){
+  const rows=n=>{const ws=wb.Sheets[n];if(!ws){if(n==='Projects')throw new Error('This file has no "Projects" sheet. Create a new data file from the tool to get the right layout.');return[]}return XLSX.utils.sheet_to_json(ws,{defval:'',raw:true})};
+  const str=v=>String(v??'').trim();let fixed=0;
+  const pm=new Map();
+  rows('Projects').forEach(r=>{const id=str(r['Project ID']);if(!id)return;const st=str(r['Stage']).toLowerCase();
+    const h=Object.keys(HEALTH).find(k=>HEALTH[k].toLowerCase()===str(r['Current status']).toLowerCase()||k===str(r['Current status']).toLowerCase())||'green';
+    pm.set(id,{id,name:str(r['Project name'])||id,l1:str(r['Category L1'])||'Direct',l2:str(r['Category L2'])||'Other',region:str(r['Region'])||'Global',gcl:str(r['GCL'])||'Unassigned',
+      gate:st.includes('verif')?6:Math.min(6,Math.max(0,parseInt((st.match(/g\s*(\d)/)||[])[1]??'0',10))),status:/complet/i.test(str(r['Status']))?'Completed':'Active',health:h,
+      focus:isYes(r['Focus project']),output:str(r['Output']),finalize:str(r['Planned finalization'])||'2027 Q1',
+      checklist:{charter:isYes(r['Project charter']),strategy:isYes(r['Sourcing strategy']),finance:isYes(r['Approved by Finance'])},benefits:[],actions:[],risks:[]})});
+  const items=new Map();
+  rows('Actions').forEach(r=>{const p=pm.get(str(r['Project ID']));if(!p||!str(r['Action']))return;let id=str(r['Action ID']);if(!id){id=uid();fixed++}
+    const cl=str(r['Board column']).toLowerCase();const col=(COLS.find(c=>c.label.toLowerCase()===cl||c.key===cl)||COLS[0]).key;
+    const a={id,title:str(r['Action']),owner:str(r['Owner']),due:toISO(r['Due date']),col,comments:[]};p.actions.push(a);items.set(id,a)});
+  const lvl=v=>['High','Medium','Low'].find(x=>x.toLowerCase()===str(v).toLowerCase())||'Medium';
+  rows('Risks').forEach(r=>{const p=pm.get(str(r['Project ID']));if(!p||!str(r['Risk or issue']))return;let id=str(r['Risk ID']);if(!id){id=uid();fixed++}
+    const rk={id,title:str(r['Risk or issue']),mitigation:str(r['Mitigation']),impact:lvl(r['Impact']),likelihood:lvl(r['Likelihood']),owner:str(r['Owner']),status:RISK_STATUS.find(x=>x.toLowerCase()===str(r['Status']).toLowerCase())||'Open',comments:[]};p.risks.push(rk);items.set(id,rk)});
+  rows('Comments').forEach(r=>{const it=items.get(str(r['Item ID']));if(it&&str(r['Comment']))it.comments.push({who:str(r['Author'])||'Unknown',when:toISO(r['Date'])||TODAY,text:str(r['Comment'])})});
+  const num=v=>typeof v==='number'?v:parseFloat(str(v).replace(/\s/g,'').replace(',','.'))||0;
+  rows('Savings').forEach(r=>{const p=pm.get(str(r['Project ID']));if(!p)return;const bt=str(r['Benefit type']).toLowerCase();const B=BEN.find(b=>b.label.toLowerCase()===bt||b.key===bt);if(!B)return;
+    const amt=num(r['Amount']);p.benefits.push({type:B.key,year:parseInt(r['Year'],10)||2026,amount:amt,prev:str(r['Previous amount'])===''?amt:num(r['Previous amount'])})});
+  return{projects:[...pm.values()],fixed};
+}
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('portfolio-tracker-files',1);r.onupgradeneeded=()=>r.result.createObjectStore('h');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbPut(v){try{const db=await idb();const tx=db.transaction('h','readwrite');v?tx.objectStore('h').put(v,'file'):tx.objectStore('h').delete('file')}catch(e){}}
+async function idbGet(){try{const db=await idb();return await new Promise(r=>{const q=db.transaction('h').objectStore('h').get('file');q.onsuccess=()=>r(q.result||null);q.onerror=()=>r(null)})}catch(e){return null}}
+function applyLoaded(projects){S.projects=projects;S.sel='all';S.drill=null;try{localStorage.setItem(KEY,JSON.stringify({projects:S.projects,author:S.author}))}catch(e){}render()}
+async function loadHandle(h,quiet){
+  const f=await h.getFile();const res=fromWorkbook(XLSX.read(await f.arrayBuffer()));
+  F.handle=h;F.name=f.name;F.lastMod=f.lastModified;F.conflict=false;F.error='';F.reconnect=null;F.readonly=false;F.dirty=false;
+  applyLoaded(res.projects);idbPut(h);renderBar();
+  if(res.fixed){save()}
+  if(!quiet)toast(`Opened ${f.name}: ${res.projects.length} projects`);
+}
+async function writeFile(){
+  if(!F.handle)return;clearTimeout(F.timer);
+  try{
+    const cur=await F.handle.getFile();
+    if(F.lastMod&&cur.lastModified!==F.lastMod){F.conflict=true;renderBar();return}
+    const buf=XLSX.write(toWorkbook(),{type:'array',bookType:'xlsx'});
+    const w=await F.handle.createWritable();await w.write(buf);await w.close();
+    F.lastMod=(await F.handle.getFile()).lastModified;F.savedAt=new Date();F.dirty=false;F.error='';
+  }catch(e){F.error=/NoModification|InvalidState|lock|busy/i.test(e.name+e.message)?'The file is locked, probably open in Excel. Close it there, then click Save now.':'Could not save: '+e.message}
+  renderBar();
+}
+async function pickOpen(){
+  if(!canFS()){$('#xlInput').click();return}
+  try{const[h]=await window.showOpenFilePicker({types:XL_TYPES,multiple:false});
+    if((await h.requestPermission({mode:'readwrite'}))!=='granted'){toast('Saving needs edit permission for the file');return}
+    await loadHandle(h)}
+  catch(e){if(e.name==='AbortError')return;if(e.name==='SecurityError'){F.blocked=true;renderBar();$('#xlInput').click();return}F.error=e.message;renderBar()}
+}
+async function pickCreate(){
+  if(!canFS()){downloadCopy();return}
+  try{const h=await window.showSaveFilePicker({suggestedName:'pm-data.xlsx',types:XL_TYPES});
+    F.handle=h;F.lastMod=0;F.name=h.name;F.readonly=false;F.conflict=false;await writeFile();idbPut(h);renderBar();toast('Created '+h.name)}
+  catch(e){if(e.name==='AbortError')return;if(e.name==='SecurityError'){F.blocked=true;renderBar();return}F.error=e.message;renderBar()}
+}
+function downloadCopy(){try{XLSX.writeFile(toWorkbook(),'pm-data.xlsx')}catch(e){toast('Download is not available here')}}
+function closeFile(){F.handle=null;F.name='';F.readonly=false;F.conflict=false;F.error='';F.dirty=false;idbPut(null);renderBar();toast('File closed. Changes now stay in this browser only.')}
+function renderBar(){
+  const b=$('#fileBar');if(!b)return;
+  if(typeof XLSX==='undefined'){b.innerHTML='<span class="pill-sample">Sample data</span><span class="warn">The Excel library did not load (no internet?). Excel files cannot be opened or saved.</span>';return}
+  const t=F.savedAt?F.savedAt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'';
+  let h='';
+  if(F.handle){
+    h=`<span class="pill-file">Excel file</span><b>${esc(F.name)}</b><span>${F.error?`<span class="warn">${esc(F.error)}</span>`:F.conflict?'':F.dirty?'Saving…':t?`All changes saved at ${t}`:'Linked. Changes save automatically.'}</span>
+       ${F.error?'<button class="small" data-fa="save">Save now</button>':''}<button class="small ghost" data-fa="reload">Reload from file</button><button class="small ghost" data-fa="close">Close file</button>`;
+    if(F.conflict)h+=`<div class="conflict"><b>${esc(F.name)} was changed by someone else</b> since you opened it. Your latest change is not saved yet.
+       <button class="small" data-fa="theirs">Load their version</button><button class="small" data-fa="mine">Keep mine and overwrite</button></div>`;
+  }else if(F.reconnect){
+    h=`<span class="pill-file">Excel file</span><span>Last used: <b>${esc(F.reconnect.name)}</b></span><button class="small primary" data-fa="reconnect">Reconnect</button><button class="small ghost" data-fa="forget">Use sample data</button>`;
+  }else if(F.readonly){
+    h=`<span class="pill-sample">Read only</span><span>Showing <b>${esc(F.name)}</b>. This browser cannot save to files, so changes stay here only.</span><button class="small ghost" data-fa="download">Download Excel copy</button><button class="small ghost" data-fa="open">Open another file</button>`;
+  }else{
+    h=`<span class="pill-sample">Sample data</span><span>Invented projects and figures. Changes stay in this browser only.</span>
+       <button class="small primary" data-fa="open">Open Excel data file</button><button class="small" data-fa="create">Create Excel data file</button><button class="small ghost" id="resetBtn">Reset sample data</button>`;
+    if(!canFS())h+=`<span class="muted" style="flex-basis:100%;font-size:.78rem">To save straight to an Excel file, open this tool as a local file in Edge or Chrome. Here you can read a file and download a copy.</span>`;
+  }
+  b.innerHTML=h;
+}
+document.addEventListener('click',async e=>{const a=e.target.closest('[data-fa]');if(!a)return;const k=a.dataset.fa;
+  if(k==='open')pickOpen();else if(k==='create')pickCreate();else if(k==='close')closeFile();else if(k==='download')downloadCopy();
+  else if(k==='save'){F.error='';writeFile()}
+  else if(k==='reload'||k==='theirs'){try{await loadHandle(F.handle,true);toast('Loaded the latest version of the file')}catch(err){F.error=err.message;renderBar()}}
+  else if(k==='mine'){F.conflict=false;F.lastMod=0;writeFile()}
+  else if(k==='forget'){F.reconnect=null;idbPut(null);renderBar()}
+  else if(k==='reconnect'){const h=F.reconnect;try{if((await h.requestPermission({mode:'readwrite'}))==='granted')await loadHandle(h);else toast('Permission was not given')}catch(err){F.reconnect=null;F.error='';renderBar();toast('Could not open the last file. Open it again.')}}
+});
+document.addEventListener('change',e=>{if(e.target.id!=='xlInput')return;const file=e.target.files[0];if(!file)return;const rd=new FileReader();
+  rd.onload=()=>{try{const res=fromWorkbook(XLSX.read(new Uint8Array(rd.result)));F.handle=null;F.readonly=true;F.name=file.name;applyLoaded(res.projects);renderBar();toast(`Opened ${file.name} (read only)`)}catch(err){toast(err.message)}};
+  rd.readAsArrayBuffer(file);e.target.value=''});
+/* Pick up changes other people saved to the shared file */
+setInterval(async()=>{if(!F.handle||F.dirty||F.conflict||document.hidden)return;try{const f=await F.handle.getFile();if(F.lastMod&&f.lastModified!==F.lastMod){await loadHandle(F.handle,true);toast('Updated with the latest changes from the file')}}catch(e){}},20000);
+(async()=>{if(!('showOpenFilePicker' in window))return;const h=await idbGet();if(!h)return;
+  try{if((await h.queryPermission({mode:'readwrite'}))==='granted'){await loadHandle(h,true);return}}catch(e){}
+  F.reconnect=h;renderBar()})();
 const P=id=>S.projects.find(p=>p.id===id);
 function inView(){const f=S.f;return S.projects.filter(p=>(f.l1==='All'||p.l1===f.l1)&&(f.l2==='All'||p.l2===f.l2)&&(f.region==='All'||p.region===f.region)&&(f.status==='All'||p.status===f.status)&&(f.gcl==='All'||p.gcl===f.gcl)&&(f.focus==='All'||(f.focus==='Focus only')===!!p.focus))}
 
@@ -700,8 +834,10 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-open]');if(t&&e.key==='Enter'){t.click()}});
 $('#importBtn').addEventListener('click',openImport);
-let resetArmed=false;$('#resetBtn').addEventListener('click',e=>{if(!resetArmed){resetArmed=true;e.target.textContent='Click again to reset';setTimeout(()=>{resetArmed=false;e.target.textContent='Reset sample data'},3000);return}
-  resetArmed=false;e.target.textContent='Reset sample data';S.projects=seedData();S.sel='all';S.drill=null;save();render();toast('Sample data restored')});
+let resetArmed=false;document.addEventListener('click',e=>{const btn=e.target.closest('#resetBtn');if(!btn)return;
+  if(!resetArmed){resetArmed=true;btn.textContent='Click again to reset';setTimeout(()=>{resetArmed=false;const x=$('#resetBtn');if(x)x.textContent='Reset sample data'},3000);return}
+  resetArmed=false;S.projects=seedData();S.sel='all';S.drill=null;save();render();renderBar();toast('Sample data restored')});
+renderBar();
 render();
 })();
 </script>
