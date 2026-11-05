@@ -164,6 +164,26 @@ td.r,th.r{text-align:right}
 .addrow{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
 .addrow .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
 .riskrow td:first-child{font-weight:600}
+.btnlink{display:inline-block;font-size:.85rem;font-weight:600;color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;background:var(--surface)}
+.btnlink:hover{border-color:var(--hl)}
+.pbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pbar select{max-width:100%;min-width:0;flex:0 1 380px}
+button:disabled{opacity:.45;cursor:default}
+.stepper{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;overflow-x:auto}
+.step{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding-top:2px;min-width:72px}
+.step::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.step:first-child::before{display:none}
+.step.done::before,.step.now::before{background:var(--good)}
+.step .dot{position:relative;z-index:1;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;background:var(--surface);border:2px solid var(--line);color:var(--on-strong)}
+.step.done .dot{background:var(--good);border-color:var(--good)}
+.step.now .dot{border-color:var(--hl);box-shadow:0 0 0 4px var(--hl-soft);background:var(--hl)}
+.step .gl{font-size:.8rem;font-weight:600}
+.step.next .gl{color:var(--muted);font-weight:400}
+.gck{font-size:.72rem;border-radius:4px;padding:1px 6px;background:var(--surface-2);color:var(--fg-2)}
+.gck.ok{background:var(--good-soft);color:var(--fg)}
+.gck.miss{background:var(--critical-soft);color:var(--fg);font-weight:600}
+.cmt.feed{text-align:left;width:100%;cursor:pointer;color:var(--fg)}
+.cmt.feed:hover{border-color:var(--hl)}
 tr.sel{background:var(--hl-soft)}
 tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--hl)}
 .star{border:0;background:transparent;padding:0 4px;font-size:1.15rem;line-height:1;color:var(--amber)}
@@ -204,6 +224,7 @@ code{font-size:.82rem;background:var(--surface-2);padding:1px 5px;border-radius:
     <nav class="tabs" aria-label="Pages">
       <a href="#kpi" id="tab-kpi">KPI overview</a>
       <a href="#board" id="tab-board">Projects board</a>
+      <a href="#project" id="tab-project">Project</a>
     </nav>
     <button id="importBtn" class="small">Import Sievo export</button>
   </div>
@@ -218,6 +239,7 @@ code{font-size:.82rem;background:var(--surface-2);padding:1px 5px;border-radius:
   <div class="filters" id="filters"></div>
   <section id="page-kpi" hidden></section>
   <section id="page-board" hidden></section>
+  <section id="page-project" hidden></section>
 </main>
 <div id="tip" hidden></div>
 <div id="layer"></div>
@@ -431,7 +453,7 @@ function renderKPI(){
     <div class="grid-sav">${BEN.map(B=>`<div class="sav"><h3>${B.label}<span>${B.unit}</span></h3><div class="chart" id="sav-${B.key}"></div></div>`).join('')}</div>
   </div>
   <div class="panel">
-    <div class="panel-head"><h2>Projects</h2>${S.drill?`<span class="chip drill">${esc(drillTxt)}<button data-act="clearDrill" aria-label="Clear selection">×</button></span>`:''}<span class="hint">${rows.length} shown. Click a project to open it on the board.</span></div>
+    <div class="panel-head"><h2>Projects</h2>${S.drill?`<span class="chip drill">${esc(drillTxt)}<button data-act="clearDrill" aria-label="Clear selection">×</button></span>`:''}<span class="hint">${rows.length} shown. Click a project to open its project page.</span></div>
     <div class="tbl-wrap"><table><thead><tr><th>Project</th><th>Category</th><th>GCL</th><th>Stage</th><th>Status</th><th>Output</th><th class="r">Open actions</th><th class="r">Open risks</th><th>Finalization</th></tr></thead><tbody>
     ${rows.map(p=>{const oa=p.actions.filter(a=>a.col!=='done').length,od=p.actions.filter(a=>a.col!=='done'&&a.due&&a.due<TODAY).length,or=p.risks.filter(r=>r.status!=='Closed').length;
       return`<tr class="click" data-open="${esc(p.id)}" tabindex="0"><td><b>${esc(p.name)}</b>${p.focus?' <span class="chip">Focus</span>':''}<div class="muted" style="font-size:.78rem">${esc(p.id)} · ${esc(p.region)}</div></td><td>${esc(p.l2)}<div class="muted" style="font-size:.78rem">${esc(p.l1)}</div></td><td>${esc(p.gcl)}</td><td><span class="chip ${p.gate===6?'ver':'gate'}">${GSHORT[p.gate]}</span></td><td>${ragHtml(p.health)}<div class="muted" style="font-size:.78rem">${p.status}</div></td><td style="min-width:160px">${esc(p.output)}</td><td class="r num">${oa}${od?` <span class="warn">(${od} overdue)</span>`:''}</td><td class="r num">${or}</td><td class="num">${esc(p.finalize)}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">No projects match these filters.</td></tr>'}
@@ -471,7 +493,12 @@ function renderBoard(){
      </tbody></table></div>
      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">${list.length>10?`<button class="small" id="toggleAll">${S.showAll?'Show top 10':'Show all '+list.length}</button>`:''}${p?`<button class="small" data-sel="all">Show actions and risks for all ${list.length} projects</button>`:''}</div>
    </div>
-     ${p?sheetHtml(p):`<div class="muted" style="font-size:.88rem">Showing actions and risks for all ${list.length} projects in view. Pick a project above to see its status sheet and to add actions or risks.</div>`}
+     ${p?sheetHtml(p,true):`<div class="muted" style="font-size:.88rem">Showing actions and risks for all ${list.length} projects in view. Pick a project above to see its status sheet and to add actions or risks.</div>`}
+     ${workHtml(p,allActions,allRisks)}
+   </div>`;
+  wireBoard();
+}
+function workHtml(p,allActions,allRisks){return`
      <div class="panel">
        <div class="panel-head"><h2>Actions</h2><span class="hint">Drag cards between columns, or open a card to move it, edit it and add comments.</span></div>
        <div class="kanban">${COLS.map(c=>{const cards=allActions.filter(a=>a.col===c.key).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
@@ -490,19 +517,16 @@ function renderBoard(){
          <select id="nr-imp" aria-label="Impact"><option value="High">Impact: High</option><option value="Medium" selected>Impact: Medium</option><option value="Low">Impact: Low</option></select>
          <select id="nr-lik" aria-label="Likelihood"><option value="High">Likelihood: High</option><option value="Medium" selected>Likelihood: Medium</option><option value="Low">Likelihood: Low</option></select>
          <button class="small primary" type="submit">Add risk</button></form>`:''}
-     </div>
-   </div>`;
-  wireBoard();
-}
+     </div>`}
 function cardHtml(a,showProj){const over=a.col!=='done'&&a.due&&a.due<TODAY;
   return`<div class="card" draggable="true" data-card="${a.id}" data-pid="${esc(a.pid)}" tabindex="0" role="button" aria-label="${esc(a.title)}">
    ${showProj?`<span class="ptag">${esc(a.pname)}</span>`:''}<span class="t">${esc(a.title)}</span>
    <span class="m"><span class="avatar" title="${esc(a.owner)}">${initials(a.owner)}</span><span>${esc(a.owner)}</span><span class="due ${over?'over':''}">${over?'Overdue · ':''}${dateLbl(a.due)}</span>${a.comments.length?`<span>💬 ${a.comments.length}</span>`:''}</span></div>`}
-function sheetHtml(p){
+function sheetHtml(p,zoom){
   const warns=CHECK.filter(c=>p.gate>c.gate&&!p.checklist[c.key]);
   return`<div class="panel">
    <div class="panel-head"><div><span class="eyebrow">${esc(p.id)} · ${esc(p.l1)} / ${esc(p.l2)} · ${esc(p.region)}</span><h2 style="font-size:1.25rem;margin-top:2px">${esc(p.name)}</h2></div>
-   <label style="margin-left:auto;font-size:.85rem;display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="focus" ${p.focus?'checked':''}> Focus project</label></div>
+   <div style="margin-left:auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><label style="font-size:.85rem;display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="focus" ${p.focus?'checked':''}> Focus project</label>${zoom?`<a class="btnlink" href="#project">Open project page →</a>`:''}</div></div>
    <div class="facts">
      <div class="fact"><span class="eyebrow">Current status</span><select data-pf="health" aria-label="Current status">${Object.keys(HEALTH).map(h=>`<option value="${h}" ${p.health===h?'selected':''}>${HEALTH[h]}</option>`).join('')}</select>${ragHtml(p.health)}</div>
      <div class="fact"><span class="eyebrow">Stage in Sievo</span><select data-pf="gate" aria-label="Stage in Sievo">${GATES.map((g,i)=>`<option value="${i}" ${p.gate===i?'selected':''}>${g}</option>`).join('')}</select><span class="muted" style="font-size:.78rem">${p.status}</span></div>
@@ -518,15 +542,17 @@ function wireBoard(){
   const tg=$('#toggleAll',el);if(tg)tg.addEventListener('click',()=>{S.showAll=!S.showAll;renderBoard()});
   el.querySelectorAll('[data-star]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const x=P(b.dataset.star);x.focus=!x.focus;save();render()}));
   el.querySelectorAll('[data-sel]').forEach(b=>{const go=()=>{S.sel=(b.dataset.sel===S.sel&&b.tagName==='TR')?'all':b.dataset.sel;renderBoard()};b.addEventListener('click',go);b.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target===b)go()})});
-  const p=S.sel==='all'?null:P(S.sel);
+  wireWork(el,S.sel==='all'?null:P(S.sel));
+}
+function wireWork(el,p){
   if(p){
     el.querySelectorAll('[data-pf]').forEach(i=>i.addEventListener('change',()=>{const k=i.dataset.pf;
-      if(k==='focus')p.focus=i.checked;else if(k==='gate'){p.gate=+i.value;if(p.gate<6&&p.status==='Completed'&&p.gate<4)p.status='Active'}else p[k]=i.value;save();renderBoard()}));
-    el.querySelectorAll('[data-ck]').forEach(i=>i.addEventListener('change',()=>{p.checklist[i.dataset.ck]=i.checked;save();renderBoard()}));
-    $('#addAction',el).addEventListener('submit',e=>{e.preventDefault();const t=$('#na-title').value.trim();if(!t)return;
-      p.actions.push({id:uid(),title:t,owner:$('#na-owner').value.trim()||p.gcl,due:$('#na-due').value,col:'todo',comments:[]});save();renderBoard();toast('Action added')});
-    $('#addRisk',el).addEventListener('submit',e=>{e.preventDefault();const t=$('#nr-title').value.trim();if(!t)return;
-      p.risks.push({id:uid(),title:t,mitigation:$('#nr-mit').value.trim(),impact:$('#nr-imp').value,likelihood:$('#nr-lik').value,owner:p.gcl,status:'Open',comments:[]});save();renderBoard();toast('Risk added')});
+      if(k==='focus')p.focus=i.checked;else if(k==='gate'){p.gate=+i.value;if(p.gate<6&&p.status==='Completed'&&p.gate<4)p.status='Active'}else p[k]=i.value;save();render()}));
+    el.querySelectorAll('[data-ck]').forEach(i=>i.addEventListener('change',()=>{p.checklist[i.dataset.ck]=i.checked;save();render()}));
+    $('#addAction',el).addEventListener('submit',e=>{e.preventDefault();const t=$('#na-title',el).value.trim();if(!t)return;
+      p.actions.push({id:uid(),title:t,owner:$('#na-owner',el).value.trim()||p.gcl,due:$('#na-due',el).value,col:'todo',comments:[]});save();render();toast('Action added')});
+    $('#addRisk',el).addEventListener('submit',e=>{e.preventDefault();const t=$('#nr-title',el).value.trim();if(!t)return;
+      p.risks.push({id:uid(),title:t,mitigation:$('#nr-mit',el).value.trim(),impact:$('#nr-imp',el).value,likelihood:$('#nr-lik',el).value,owner:p.gcl,status:'Open',comments:[]});save();render();toast('Risk added')});
   }
   el.querySelectorAll('.card').forEach(c=>{
     c.addEventListener('click',()=>openItem('action',c.dataset.pid,c.dataset.card));
@@ -537,8 +563,49 @@ function wireBoard(){
     col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over')});
     col.addEventListener('dragleave',e=>{if(!col.contains(e.relatedTarget))col.classList.remove('over')});
     col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');const[pid,id]=(e.dataTransfer.getData('text/plain')||'').split('|');const pp=P(pid);const a=pp&&pp.actions.find(x=>x.id===id);
-      if(a&&a.col!==col.dataset.col){a.col=col.dataset.col;save();renderBoard()}});});
+      if(a&&a.col!==col.dataset.col){a.col=col.dataset.col;save();render()}});});
   el.querySelectorAll('[data-risk]').forEach(r=>{const go=()=>openItem('risk',r.dataset.pid,r.dataset.risk);r.addEventListener('click',go);r.addEventListener('keydown',e=>{if(e.key==='Enter')go()})});
+}
+
+/* ---------- Project page ---------- */
+function renderProject(){
+  const el=$('#page-project');const list=boardList();
+  let p=S.sel==='all'?null:P(S.sel);
+  if(!p&&list.length){p=list[0];S.sel=p.id}
+  if(!p){el.innerHTML='<div class="panel muted">No projects match these filters.</div>';return}
+  const opts=list.includes(p)?list:[p,...list];const ix=opts.indexOf(p);
+  const acts=p.actions.map(a=>({...a,pid:p.id,pname:p.name})),risks=p.risks.map(r=>({...r,pid:p.id,pname:p.name})).sort((a,b)=>(a.status==='Closed')-(b.status==='Closed')||LVL[riskSev(b)]-LVL[riskSev(a)]);
+  const types=BEN.filter(B=>p.benefits.some(b=>b.type===B.key));
+  const oa=acts.filter(a=>a.col!=='done'),od=oa.filter(a=>a.due&&a.due<TODAY),orr=risks.filter(r=>r.status!=='Closed'),hi=orr.filter(r=>riskSev(r)==='High');
+  const done=acts.length?Math.round(acts.filter(a=>a.col==='done').length/acts.length*100):0;
+  let tiles=types.map(B=>{const v=p.benefits.filter(b=>b.type===B.key&&b.year===2026).reduce((a,b)=>a+b.amount,0),d=p.benefits.filter(b=>b.type===B.key&&b.year===2026).reduce((a,b)=>a+b.amount-b.prev,0),all=p.benefits.filter(b=>b.type===B.key).reduce((a,b)=>a+b.amount,0);
+    return`<div class="tile"><span class="eyebrow">${B.label} 2026</span><span class="val num">${fmt(v,B.unit)}<small>${B.unit}</small></span><span class="sub"><span class="delta ${dcls(d,B.unit)}">${fmtDelta(d,B.unit)}</span> vs ${PREV_MONTH.split(' ')[0]} · ${fmt(all,B.unit)} all years</span></div>`}).join('');
+  tiles+=`<div class="tile"><span class="eyebrow">Actions</span><span class="val num">${oa.length}<small>open</small></span><span class="sub">${od.length?`<span class="warn">${od.length} overdue</span> · `:''}${done}% of ${acts.length} done</span></div>`;
+  tiles+=`<div class="tile"><span class="eyebrow">Risks</span><span class="val num">${orr.length}<small>open</small></span><span class="sub">${hi.length?`<span class="sev High">${hi.length} high</span>`:'None rated high'}</span></div>`;
+  const feed=[...p.actions.flatMap(a=>a.comments.map(c=>({...c,kind:'action',id:a.id,on:a.title}))),...p.risks.flatMap(r=>r.comments.map(c=>({...c,kind:'risk',id:r.id,on:r.title})))].sort((a,b)=>a.when<b.when?1:-1);
+  const stepper=GATES.map((g,i)=>{const st=i<p.gate?'done':i===p.gate?'now':'next';const ck=CHECK.find(c=>c.gate===i);
+    return`<li class="step ${st}"><span class="dot">${st==='done'?'✓':''}</span><span class="gl">${esc(g)}</span>${ck?`<span class="gck ${p.checklist[ck.key]?'ok':(p.gate>i?'miss':'')}">${p.checklist[ck.key]?'✓ ':p.gate>i?'! ':''}${ck.label}</span>`:''}</li>`}).join('');
+  el.innerHTML=`<div class="sheet">
+   <div class="pbar"><a class="btnlink" href="#board">← Projects board</a>
+     <select id="pjSel" aria-label="Choose project">${opts.map(x=>`<option value="${esc(x.id)}" ${x===p?'selected':''}>${x.focus?'★ ':''}${esc(x.name)} (${esc(x.id)})</option>`).join('')}</select>
+     <button class="small" id="pjPrev" ${ix<=0?'disabled':''} aria-label="Previous project">‹ Prev</button><button class="small" id="pjNext" ${ix>=opts.length-1?'disabled':''} aria-label="Next project">Next ›</button>
+     <span class="muted" style="font-size:.8rem">${ix+1} of ${opts.length} in current filters</span></div>
+   <div class="panel"><div class="panel-head"><h2>Gate progress</h2><span class="hint">Stage in Sievo, with the PM checklist item each gate needs</span></div><ol class="stepper">${stepper}</ol></div>
+   ${sheetHtml(p,false)}
+   <div class="tiles" style="margin:0">${tiles}</div>
+   ${types.length?`<div class="panel"><div class="panel-head"><h2>Savings by year</h2><span class="hint">Chips show the change from ${PREV_MONTH} to ${REPORT_MONTH}</span>${legend(STATES)}</div><div class="grid-sav">${types.map(B=>`<div class="sav"><h3>${B.label}<span>${B.unit}</span></h3><div class="chart" id="pj-${B.key}"></div></div>`).join('')}</div></div>`:''}
+   ${workHtml(p,acts,risks)}
+   <div class="panel"><div class="panel-head"><h2>Discussion</h2><span class="hint">All comments on this project's actions and risks, newest first. Click one to open it.</span></div>
+     <div class="comments">${feed.map(c=>`<button class="cmt feed" data-feed="${c.kind}|${c.id}"><div class="who">${esc(c.who)}<span>${dateLbl(c.when)} · on ${c.kind==='action'?'action':'risk'}: ${esc(c.on)}</span></div>${esc(c.text)}</button>`).join('')||'<div class="muted" style="font-size:.88rem">No comments yet. Open an action or risk to start the discussion.</div>'}</div></div>
+  </div>`;
+  types.forEach(B=>{const cols=YEARS.map(y=>{const parts={};p.benefits.forEach(b=>{if(b.type===B.key&&b.year===y){const st=stateOf(p,y);parts[st]=(parts[st]||0)+b.amount}});return{label:String(y),title:B.label+' '+y+' ('+B.unit+')',parts}});
+    const deltas=YEARS.map(y=>p.benefits.filter(b=>b.type===B.key&&b.year===y).reduce((a,b)=>a+b.amount-b.prev,0));
+    colChart($('#pj-'+B.key),{cols,keys:STATES,height:190,f:v=>fmt(v,B.unit),deltas,unit:B.unit})});
+  $('#pjSel',el).addEventListener('change',e=>{S.sel=e.target.value;renderProject();scrollTo({top:0})});
+  $('#pjPrev',el).addEventListener('click',()=>{S.sel=opts[ix-1].id;renderProject()});
+  $('#pjNext',el).addEventListener('click',()=>{S.sel=opts[ix+1].id;renderProject()});
+  el.querySelectorAll('[data-feed]').forEach(b=>b.addEventListener('click',()=>{const[k,id]=b.dataset.feed.split('|');openItem(k,p.id,id)}));
+  wireWork(el,p);
 }
 
 /* ---------- Drawer: edit action or risk, comment thread ---------- */
@@ -617,18 +684,18 @@ function openImport(){
 }
 
 /* ---------- Router ---------- */
-function page(){return location.hash==='#board'?'board':'kpi'}
+const PAGES=['kpi','board','project'];
+function page(){const h=location.hash.slice(1);return PAGES.includes(h)?h:'kpi'}
 function render(){
   const pg=page();renderFilters();
-  $('#tab-kpi').setAttribute('aria-current',pg==='kpi'?'page':'false');$('#tab-board').setAttribute('aria-current',pg==='board'?'page':'false');
-  $('#page-kpi').hidden=pg!=='kpi';$('#page-board').hidden=pg!=='board';
-  pg==='kpi'?renderKPI():renderBoard();
+  PAGES.forEach(k=>{$('#tab-'+k).setAttribute('aria-current',pg===k?'page':'false');const sec=$('#page-'+k);sec.hidden=pg!==k;if(pg!==k)sec.innerHTML=''});
+  ({kpi:renderKPI,board:renderBoard,project:renderProject})[pg]();
 }
 $('#monthLbl').textContent='Reporting month: '+REPORT_MONTH+' · compared with '+PREV_MONTH;
 addEventListener('hashchange',()=>{hideTip();render()});
-let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(page()==='kpi')renderKPI()},150)});
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(page()!=='board')render()},150)});
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-open]');if(t){S.sel=t.dataset.open;S.search='';location.hash='board';return}
+  const t=e.target.closest('[data-open]');if(t){S.sel=t.dataset.open;S.search='';location.hash='project';return}
   if(e.target.closest('[data-act="clearDrill"]')){S.drill=null;renderKPI()}
 });
 document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-open]');if(t&&e.key==='Enter'){t.click()}});
