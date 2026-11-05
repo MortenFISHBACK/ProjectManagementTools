@@ -94,6 +94,11 @@ nav.pages button[aria-current=page] .n{background:var(--hl);color:#fff}
 
 /* weights rail */
 .pgroup{margin-bottom:14px}
+.phead .subtog{grid-column:1/-1;justify-self:start;display:flex;align-items:center;gap:6px;padding:2px 8px 2px 4px;font-size:.75rem;border:0;background:none;color:var(--fg-2);cursor:pointer;border-radius:4px}
+.phead .subtog:hover{background:var(--surface)}
+.phead .subtog .chev::before{content:'\25B8';font-size:.85rem}
+.pgroup:not(.collapsed) .subtog .chev::before{content:'\25BE'}
+.pgroup.collapsed .wrow{display:none}
 .phead{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;padding:6px 8px;border-radius:4px;background:var(--surface-2);border-left:4px solid var(--s1)}
 .phead .pname{font-family:var(--font-display);font-weight:600;font-size:.9rem}
 .phead .pdesc{grid-column:1/-1;font-size:.78rem;color:var(--muted);line-height:1.3}
@@ -853,14 +858,18 @@ const pct=n=>Math.round(n*100)+'%';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------- weights rail ---------- */
+// which dimensions show their sub-criteria on the setup page (collapsed by default, remembered per browser)
+let wOpen={};try{wOpen=JSON.parse(localStorage.getItem(STORE+'-wopen'))||{};}catch(_){}
 function buildWeights(){
   const host=document.getElementById('weights');host.innerHTML='';
   S.persp.forEach((p,pi)=>{
-    const g=document.createElement('div');g.className='pgroup';g.dataset.pid=p.id;
+    const g=document.createElement('div');g.className='pgroup'+(wOpen[p.id]?'':' collapsed');g.dataset.pid=p.id;const nd=dimsOf(p.id).length;
     const head=document.createElement('div');head.className='phead';head.style.borderLeftColor=col(pi);
     head.innerHTML=`<span class="pname">${pi+1}. ${esc(p.name)}</span><span class="share num" data-share></span><span class="pdesc">${esc(p.desc||'')}</span>
       <span class="pw"><input type="range" min="0" max="10" step="1" value="${curPW()[p.id]||0}" aria-label="Weight for ${esc(p.name)}"><span class="num" data-pwv>${curPW()[p.id]||0}</span></span>
-      <span class="axis">Map axis <button data-ax="x" aria-pressed="${p.axis==='x'}">X</button><button data-ax="y" aria-pressed="${p.axis==='y'}">Y</button><button data-ax="" aria-pressed="${!p.axis}">none</button></span>`;
+      <span class="axis">Map axis <button data-ax="x" aria-pressed="${p.axis==='x'}">X</button><button data-ax="y" aria-pressed="${p.axis==='y'}">Y</button><button data-ax="" aria-pressed="${!p.axis}">none</button></span>
+      <button class="subtog" aria-expanded="${!!wOpen[p.id]}"><span class="chev" aria-hidden="true"></span>${nd} sub-criteri${nd===1?'on':'a'}</button>`;
+    head.querySelector('.subtog').addEventListener('click',e=>{wOpen[p.id]=!wOpen[p.id];g.classList.toggle('collapsed',!wOpen[p.id]);e.currentTarget.setAttribute('aria-expanded',String(!!wOpen[p.id]));try{localStorage.setItem(STORE+'-wopen',JSON.stringify(wOpen));}catch(_){}});
     head.querySelector('.pw input').addEventListener('input',e=>{curPW()[p.id]=+e.target.value;head.querySelector('[data-pwv]').textContent=e.target.value;syncW();markScnDirty();renderResults();save();});
     head.querySelectorAll('[data-ax]').forEach(b=>b.addEventListener('click',()=>{p.axis=b.dataset.ax;head.querySelectorAll('[data-ax]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();save();}));
     g.appendChild(head);
