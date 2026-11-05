@@ -98,6 +98,9 @@ nav.pages button[aria-current=page] .n{background:var(--hl);color:#fff}
 .phead .pname{font-family:var(--font-display);font-weight:600;font-size:.9rem}
 .phead .pdesc{grid-column:1/-1;font-size:.78rem;color:var(--muted);line-height:1.3}
 .phead .share{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right}
+.phead .pw{grid-column:1/-1;display:flex;align-items:center;gap:8px}
+.phead .pw input{flex:1;accent-color:var(--hl);min-width:0}
+.phead .pw .num{font-family:var(--font-display);font-weight:700;min-width:2ch;text-align:right}
 .phead .axis{grid-column:1/-1;display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);margin-top:2px}
 .phead .axis button{padding:1px 7px;font-size:.72rem;border-radius:999px}
 .phead .axis button[aria-pressed=true]{background:var(--hl);color:var(--hl-fg);border-color:var(--hl)}
@@ -265,6 +268,7 @@ button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-l
 .h2h-notes .it b{font-weight:600}
 .h2h-notes .it span.q{color:var(--fg-2)}
 .h2h-notes .it span.q i{font-style:normal;font-weight:600}
+.rrow .sname.isfin::before{content:"★ ";color:var(--hl)}
 .rrow .sname .nt{color:var(--hl);font-size:.8em;margin-left:4px}
 
 /* scoring page: one criterion per screen */
@@ -362,6 +366,32 @@ table.facts a{color:var(--hl-strong)}
 .sc-ev{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--fg-2);margin:-4px 0 8px}
 .sc-ev select{font-size:.8rem;padding:1px 4px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
 #dlgFacts textarea{min-height:180px}
+/* final selection */
+.fin-gap{margin-top:16px;border-top:1px solid var(--line-2);padding-top:12px;display:grid;gap:6px}
+.fin-gap .pw,.fw .pw{display:flex;align-items:center;gap:8px}
+.fin-gap input,.fw input{flex:1;accent-color:var(--hl);min-width:0}
+.fin-gap .num,.fw .num{font-family:var(--font-display);font-weight:700;min-width:3ch;text-align:right}
+.fw{padding:8px 8px 6px;margin-bottom:8px;border-radius:4px;background:var(--surface-2);border-left:4px solid var(--s0)}
+.fw .nm{font-family:var(--font-display);font-weight:600;font-size:.9rem;display:flex;justify-content:space-between}
+table.fin{border-collapse:collapse;width:100%;min-width:860px}
+table.fin th,table.fin td{padding:6px 8px;border-bottom:1px solid var(--line-2);text-align:center;vertical-align:middle}
+table.fin th{font-family:var(--font-display);font-weight:600;font-size:.78rem;color:var(--fg-2);vertical-align:bottom}
+table.fin td.l,table.fin th.l{text-align:left}
+table.fin td.nm{font-weight:600}
+table.fin td.why{font-size:.78rem;color:var(--fg-2)}
+table.fin td.tot{min-width:150px}
+table.fin .bar{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden;margin-top:3px}
+table.fin .bar i{display:block;height:100%;background:var(--hl)}
+table.fin tr.sel td{background:var(--hl-soft)}
+table.fin input[type=checkbox]{width:18px;height:18px;accent-color:var(--hl)}
+.sel-item{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--line-2)}
+.sel-item .no{font-family:var(--font-display);font-weight:700;font-size:1.3rem;color:var(--hl-strong)}
+.sel-item textarea{grid-column:2;width:100%;font:inherit;font-size:.9rem;padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:var(--surface);resize:vertical;min-height:54px}
+.sel-item textarea:focus{outline:0;border-color:var(--hl)}
+.pick-cat{margin-bottom:12px}
+.pick-cat h3{font-size:.92rem;margin-bottom:4px}
+.pick-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:.88rem;padding:3px 0}
+.pick-row .m{color:var(--muted);font-size:.8rem}
 /* stakeholders per criterion */
 .stk{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--surface)}
 .stk-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:6px}
@@ -399,7 +429,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   .tip,dialog{display:none!important}
   body.printing .res-wrap{display:block!important}
   body.printing .facil,body.printing .toolbar,body.printing nav.pages,body.printing .page-intro,body.printing .tabs{display:none!important}
-  body.printing [data-pagebody=input]{display:none!important}
+  body.printing [data-pagebody=input],body.printing [data-pagebody=final],body.printing [data-pagebody=scoring]{display:none!important}
   body.printing [data-pagebody=results]{display:block!important}
   body.printing header.top{background:#fff;color:var(--fg);margin:0;padding:0 0 8px;border-bottom:2px solid var(--brand)}
   body.printing header.top h1{color:var(--fg)}
@@ -425,6 +455,8 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="sub">Supplier partnership segmentation across four perspectives. Everything stays in this browser; nothing is sent anywhere.</div>
     </div>
     <div class="toolbar">
+      <label for="catSel">Subcategory</label>
+      <select id="catSel" aria-label="Subcategory" style="max-width:260px"></select>
       <label for="scnSel">Scenario</label>
       <select id="scnSel" aria-label="Scenario"></select>
       <button id="btnImport">Import data</button>
@@ -436,28 +468,29 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
     <button data-page="input" aria-current="page"><span class="n">1</span>Setup &amp; weighting</button>
     <button data-page="scoring"><span class="n">2</span>Supplier criteria scoring</button>
     <button data-page="results"><span class="n">3</span>Supplier evaluations</button>
+    <button data-page="final"><span class="n">4</span>Final selection</button>
   </nav>
 </header>
 
 <div data-pagebody="input">
-  <div class="page-intro"><p>Set up the suppliers in scope, how much each criterion matters, and any weight scenarios you want to compare. Scoring happens on the next page.</p><button class="primary" data-goto="scoring">Supplier criteria scoring →</button></div>
+  <div class="page-intro"><p>Pick the subcategory in the bar above. Set how much each of the four dimensions matters for it, check the suppliers in scope, and keep the supplier facts up to date. Scoring happens on the next page.</p><button class="primary" data-goto="scoring">Supplier criteria scoring →</button></div>
   <div class="layout">
     <aside class="panel" aria-label="Weights">
-      <div class="head"><h2>Criteria weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
+      <div class="head"><h2 id="wTitle">Weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
       <div class="body">
-        <div class="small muted" style="margin-bottom:10px">0 = ignore, 10 = critical. The share shows how much of the final score each criterion carries. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
+        <div class="small muted" style="margin-bottom:10px">Weights are set per subcategory, on the four dimensions (0 = ignore, 10 = critical). The criteria inside a dimension share its weight equally; the % shows each one's share of the score. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
         <div id="weights"></div>
       </div>
     </aside>
     <main class="stack">
       <section class="panel" aria-label="Suppliers">
-        <div class="head"><h2>Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
+        <div class="head"><h2 id="supTitle">Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
         <div class="body"><div class="sup-list" id="supList"></div></div>
       </section>
       <section class="panel" aria-label="Scenarios">
         <div class="head"><h2>Saved weight scenarios</h2></div>
         <div class="body">
-          <div class="small muted">Save the current weights under a name to compare them on the Supplier evaluations page. Scores are shared; only the weights differ.</div>
+          <div class="small muted">Save the current dimension weights under a name. Scenarios can be applied to any subcategory and compared on Supplier evaluations.</div>
           <div class="saveas">
             <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
             <button class="primary" id="btnSaveScn">Save current weights</button>
@@ -513,10 +546,10 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   </aside>
   <div class="results">
     <section class="panel" aria-label="Ranking">
-      <div class="head"><div><h2>Overall ranking</h2><div class="print-only small muted" id="printMeta"></div></div><span class="small muted" id="scnTag"></span></div>
+      <div class="head"><div><h2 id="rankTitle">Overall ranking</h2><div class="print-only small muted" id="printMeta"></div></div><span class="small muted" id="scnTag"></span></div>
       <div class="body">
         <div class="rank" id="rank"></div>
-        <div class="rank-foot"><span class="eyebrow" style="align-self:center">Bar segments by perspective</span><div class="legend" id="dimLegend"></div></div>
+        <div class="rank-foot"><span class="eyebrow" style="align-self:center">★ goes to the final round</span><span class="eyebrow" style="align-self:center">Bar segments by dimension</span><div class="legend" id="dimLegend"></div></div>
         <div class="insight" id="insight"></div>
       </div>
     </section>
@@ -582,6 +615,38 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </div>
 </div>
 
+<div data-pagebody="final" hidden>
+  <div class="page-intro"><p>The finalists from every subcategory, compared on the four dimensions with one shared set of weights. Agree on the <b>1–3 suppliers</b> to work with, and write down why.</p><button id="btnFinalMd" class="primary">Download decision summary .md</button></div>
+  <div class="layout">
+    <aside class="panel" aria-label="Final weights">
+      <div class="head"><h2>Final round weights</h2></div>
+      <div class="body">
+        <div class="small muted" style="margin-bottom:10px">One set of weights across subcategories. Each dimension score is the average of its criteria (1–5).</div>
+        <div id="finW"></div>
+        <div class="fin-gap"><label class="eyebrow" for="finGap">Close call: runner-up within</label><div class="pw"><input type="range" id="finGap" min="0" max="1" step="0.05"><span class="num" id="finGapV"></span></div>
+          <div class="small muted">#2 and #3 in a subcategory join the final when they are this close to its winner (points on the 1–5 scale). The room can override per supplier below.</div></div>
+      </div>
+    </aside>
+    <main class="stack">
+      <section class="panel" aria-label="Finalists">
+        <div class="head"><h2>Finalists compared</h2><span class="small muted" id="finCount"></span></div>
+        <div class="body"><div class="scroll"><table class="fin" id="finTbl"></table></div></div>
+      </section>
+      <section class="panel" aria-label="Decision">
+        <div class="head"><h2>Decision: suppliers to work with</h2><span class="small muted" id="selCount"></span></div>
+        <div class="body">
+          <ul class="small" style="margin:0 0 10px;padding-left:18px;color:var(--fg-2)"><li>Which finalists give the most joint value for the effort?</li><li>Can we realistically run 1–3 partnerships at once? Who owns each?</li><li>Do the facts (spend, share of their revenue) support the choice?</li></ul>
+          <div id="selList"></div>
+        </div>
+      </section>
+      <section class="panel" aria-label="How finalists were picked">
+        <div class="head"><h2>How finalists were picked</h2></div>
+        <div class="body" id="finPick"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
 <dialog id="dlgImport">
   <div class="dh"><h3>Import data</h3><button class="small ghost" data-close>Close</button></div>
   <div class="db">
@@ -627,7 +692,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <script>
 (function(){
 'use strict';
-const STORE='supplier-stack-up-v2';
+const STORE='supplier-stack-up-v3';
 const SLOTS=['--s1','--s2','--s3','--s4','--s5','--s6','--s7','--s8'];
 const col=i=>i<SLOTS.length?`var(${SLOTS[i]})`:'var(--s0)';
 let uid=1; const nid=()=>'id'+(uid++)+'_'+Math.random().toString(36).slice(2,6);
@@ -664,48 +729,64 @@ function exampleState(){
     [P[3],'Relationship quality and executive engagement','Relationship quality',5],
     [P[3],'Preferred-customer position, reciprocity and mutual dependence','Reciprocity',5]
   ].map(d=>Object.assign({id:nid(),pid:d[0],name:d[1],short:d[2],weight:d[3],min:0},DEFS[d[1]]||{}));
+  // Three example subcategories (Category L3) with five suppliers each. All names and figures are dummy data.
   const sups=[
-    ['Northwind Chemicals',[5,4,4,3,3,3,4,4,3]],
-    ['Atlas Fermentation Systems',[3,5,5,5,5,4,4,3,2]],
-    ['Meridian Packaging',[4,2,2,1,2,3,2,3,4]],
-    ['Halden Logistics',[2,3,3,2,2,2,3,4,3]],
-    ['Corvex Bioprocess',[2,4,3,4,5,5,5,4,4]]
+    ['Atlas Fermentation Systems',[3,5,5,5,5,4,4,3,2]],['Corvex Bioprocess',[2,4,3,4,5,5,5,4,4]],['Vessel Dynamics',[3,3,4,3,2,2,3,3,3]],
+    ['Kestrel Process Systems',[4,4,4,4,4,3,4,4,3]],['BioSteel Engineering',[2,2,3,2,3,2,2,3,2]],
+    ['Northwind Chemicals',[5,4,4,3,3,3,4,4,3]],['Larkspur Chemicals',[3,3,3,3,4,4,3,3,4]],['Ostara Specialty',[4,3,2,2,3,2,3,4,3]],
+    ['Fenwick Additives',[2,2,2,3,2,3,2,2,2]],['Brightwater Reagents',[3,4,4,4,3,3,4,3,3]],
+    ['Meridian Packaging',[4,2,2,1,2,3,2,3,4]],['Halden Logistics',[2,3,3,2,2,2,3,4,3]],['Cobalt Containers',[4,3,3,2,3,4,4,4,3]],
+    ['Pinegrove Packaging',[3,2,2,2,2,2,3,3,4]],['Tessel Freight',[2,3,4,2,2,3,2,3,3]]
   ];
   const suppliers=[],scores={};
   sups.forEach(s=>{const id=nid();suppliers.push({id,name:s[0]});scores[id]={};dims.forEach((d,i)=>scores[id][d.id]=s[1][i]);});
-  const w=arr=>{const o={};dims.forEach((d,i)=>o[d.id]=arr[i]);return o;};
+  const pw=arr=>{const o={};persp.forEach((p,i)=>o[p.id]=arr[i]);return o;};
   const scenarios=[
-    {id:nid(),name:'Balanced',weights:w([8,7,8,7,6,5,6,5,5])},
-    {id:nid(),name:'Resilience first',weights:w([6,5,10,9,4,3,5,4,5])},
-    {id:nid(),name:'Value creation',weights:w([5,7,5,6,10,8,8,6,6])}
+    {id:nid(),name:'Balanced',pw:pw([8,8,6,5])},
+    {id:nid(),name:'Resilience first',pw:pw([5,10,4,5])},
+    {id:nid(),name:'Value creation',pw:pw([6,5,10,7])}
   ];
+  const FBE='Fermentation & bioprocess equipment',SPC='Specialty chemicals',PKL='Packaging & logistics';
+  const cats={[FBE]:{pw:pw([7,9,8,6]),ovr:{}},[SPC]:{pw:pw([8,7,6,6]),ovr:{}},[PKL]:{pw:pw([8,5,4,6]),ovr:{}}};
   const stk=(n,arr)=>{const d=dims.find(x=>x.name===n);if(d)d.stake=arr.map(a=>({name:a[0],role:a[1],done:!!a[2]}));};
   stk('Spend and future volume',[['Category manager','Provide input',1],['Finance business partner','Validate']]);
   stk('Supply risk and criticality',[['Site supply planning','Provide input'],['Quality & regulatory','Consult'],['Head of procurement','Validate']]);
   const fx=(n,f)=>{const s=suppliers.find(x=>x.name===n);if(s)s.facts=f;};
   // Dummy facts so the views have something to show; replace with the real sheet via Paste from Excel.
-  fx('Northwind Chemicals',{country:'Germany',cat:'Specialty chemicals',spend:18400000,parent:'Northwind Group (consolidated)',rev:2400,cur:'EUR',fx:1,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/northwind-annual-report'});
-  fx('Atlas Fermentation Systems',{country:'Denmark',cat:'Fermentation equipment',spend:9100000,parent:'Atlas Fermentation A/S',rev:310,cur:'DKK',fx:0.134,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/atlas-annual-report'});
-  fx('Meridian Packaging',{country:'Netherlands',cat:'Packaging',spend:6200000,parent:'Meridian Holdings (group)',rev:5200,cur:'EUR',fx:1,period:'FY2024',caveat:'Group revenue; packaging division not reported separately',status:'Draft',url:'https://example.com/meridian-holdings'});
-  fx('Halden Logistics',{country:'Norway',cat:'Logistics services',spend:3400000,parent:'Halden Logistics AS',rev:8900,cur:'NOK',fx:0.085,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/halden'});
-  fx('Corvex Bioprocess',{country:'United States',cat:'Bioprocess consumables',spend:4800000,parent:'Corvex Inc.',rev:120,cur:'USD',fx:0.92,period:'2025 estimate',caveat:'Estimate from press release',status:'In progress',url:'https://example.com/corvex-press'});
+  fx('Northwind Chemicals',{country:'Germany',cat:SPC,spend:18400000,parent:'Northwind Group (consolidated)',rev:2400,cur:'EUR',fx:1,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/northwind-annual-report'});
+  fx('Atlas Fermentation Systems',{country:'Denmark',cat:FBE,spend:9100000,parent:'Atlas Fermentation A/S',rev:310,cur:'DKK',fx:0.134,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/atlas-annual-report'});
+  fx('Meridian Packaging',{country:'Netherlands',cat:PKL,spend:6200000,parent:'Meridian Holdings (group)',rev:5200,cur:'EUR',fx:1,period:'FY2024',caveat:'Group revenue; packaging division not reported separately',status:'Draft',url:'https://example.com/meridian-holdings'});
+  fx('Halden Logistics',{country:'Norway',cat:PKL,spend:3400000,parent:'Halden Logistics AS',rev:8900,cur:'NOK',fx:0.085,period:'FY2025',caveat:'',status:'Verified',url:'https://example.com/halden'});
+  fx('Corvex Bioprocess',{country:'United States',cat:FBE,spend:4800000,parent:'Corvex Inc.',rev:120,cur:'USD',fx:0.92,period:'2025 estimate',caveat:'Estimate from press release',status:'In progress',url:'https://example.com/corvex-press'});
+  const more=[
+    ['Vessel Dynamics','Sweden',FBE,5200000,'Vessel Dynamics AB',640,'SEK',0.087,'FY2025','','Verified'],
+    ['Kestrel Process Systems','Germany',FBE,7600000,'Kestrel Group',95,'EUR',1,'FY2025','','Verified'],
+    ['BioSteel Engineering','Italy',FBE,2100000,'BioSteel S.p.A.',38,'EUR',1,'FY2024','','Draft'],
+    ['Larkspur Chemicals','United Kingdom',SPC,8900000,'Larkspur plc',410,'GBP',1.17,'FY2025','','Verified'],
+    ['Ostara Specialty','France',SPC,4300000,'Ostara SAS',260,'EUR',1,'FY2025','Includes a divested unit','In progress'],
+    ['Fenwick Additives','Belgium',SPC,1900000,'Fenwick NV',72,'EUR',1,'FY2025','','Verified'],
+    ['Brightwater Reagents','United States',SPC,6700000,'Brightwater Holdings',180,'USD',0.92,'FY2025','','Verified'],
+    ['Cobalt Containers','Poland',PKL,5100000,'Cobalt Sp. z o.o.',540,'PLN',0.23,'FY2025','','Verified'],
+    ['Pinegrove Packaging','Denmark',PKL,2800000,'Pinegrove A/S',220,'DKK',0.134,'FY2025','','Verified'],
+    ['Tessel Freight','Netherlands',PKL,3900000,'Tessel Group',1450,'EUR',1,'FY2024','Group revenue','Draft']];
+  more.forEach(m=>fx(m[0],{country:m[1],cat:m[2],spend:m[3],parent:m[4],rev:m[5],cur:m[6],fx:m[7],period:m[8],caveat:m[9],status:m[10],url:'https://example.com/'+m[0].toLowerCase().replace(/[^a-z]+/g,'-')}));
   const evs={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'};
   dims.forEach(d=>{if(evs[d.name])d.ev=evs[d.name];});
   const notes={},supNotes={};const byName=n=>suppliers.find(x=>x.name===n).id;const dimBy=n=>dims.find(x=>x.name===n).id;
   supNotes[byName('Atlas Fermentation Systems')]='Example note: sole qualified source for our fermentation vessels; 40-week lead time.';
   notes[byName('Atlas Fermentation Systems')]={[dimBy('Preferred-customer position, reciprocity and mutual dependence')]:'Example: we are under 3% of their revenue.'};
   notes[byName('Corvex Bioprocess')]={[dimBy('Willingness to invest alongside us')]:'Example: offered to co-fund a pilot line in 2027.'};
-  return {example:true,persp,dims,suppliers,scores,scenarios,activeScn:scenarios[0].id,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null,notes,supNotes};
+  return normalize({example:true,persp,dims,sup:suppliers,scores,scenarios,activeScn:null,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null,notes,supNotes,cats,curCat:FBE,closeGap:0.25,final:{pw:pw([7,7,8,7]),sel:{}}});
 }
 function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slice(0,24);const sp=cut.lastIndexOf(' ');return (sp>10?cut.slice(0,sp):cut)+'…';}
 
 let S;
 function load(){
-  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&o.suppliers&&o.persp){
-    o.notes=o.notes||{};o.supNotes=o.supNotes||{};
+  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp){
+    if(!o.sup)o.sup=o.suppliers||[];o.notes=o.notes||{};o.supNotes=o.supNotes||{};
     o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});
       if(d.ev===undefined)d.ev={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'}[d.name]||'';});
-    return o;}}}catch(e){}
+    return normalize(o);}}}catch(e){}
   return exampleState();
 }
 const noteOf=(sid,did)=>((S.notes||{})[sid]||{})[did]||'';
@@ -715,7 +796,31 @@ function setNote(sid,did,v){S.notes=S.notes||{};S.notes[sid]=S.notes[sid]||{};if
 const LVK=['low','lv2','lv3','lv4','high'];
 function defText(d){const parts=[];if(d.desc)parts.push(d.desc);LVK.forEach((k,i)=>{if(d[k])parts.push((i+1)+' = '+d[k]);});return parts.join('\n');}
 function defHTML(d){return (d.desc?esc(d.desc)+'<br>':'')+(d.low?'<b>1</b> '+esc(d.low)+'<br>':'')+(d.high?'<b>5</b> '+esc(d.high):'');}
-function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
+function save(){try{const o=Object.assign({},S);delete o.suppliers;localStorage.setItem(STORE,JSON.stringify(o));}catch(e){}}
+/* ---------- subcategories (Category L3) ---------- */
+const catOf=s=>((s.facts&&s.facts.cat)||'').trim()||'Unassigned';
+function catNames(){const n=[...new Set(S.sup.map(catOf))];return n.sort((a,b)=>(a==='Unassigned')-(b==='Unassigned')||a.localeCompare(b));}
+const nIn=pid=>Math.max(1,S.dims.filter(d=>d.pid===pid).length);
+// a perspective weight is shared equally by the criteria inside it
+function dimWFor(pw){const o={};S.dims.forEach(d=>o[d.id]=(+pw[d.pid]||0)/nIn(d.pid));return o;}
+function ensureCat(c){S.cats=S.cats||{};if(!S.cats[c]){const pw={};S.persp.forEach(p=>pw[p.id]=5);const sc=S.scenarios&&S.scenarios[0];if(sc&&sc.pw)Object.assign(pw,sc.pw);S.cats[c]={pw,ovr:{}};}
+  const C=S.cats[c];C.ovr=C.ovr||{};S.persp.forEach(p=>{if(C.pw[p.id]===undefined)C.pw[p.id]=5;});return C;}
+const curPW=()=>ensureCat(S.curCat).pw;
+function syncW(){const pw=curPW();S.dims.forEach(d=>d.weight=(+pw[d.pid]||0)/nIn(d.pid));}
+function applyCat(){const names=catNames();if(!names.includes(S.curCat))S.curCat=names[0]||'Unassigned';ensureCat(S.curCat);
+  S.suppliers=S.sup.filter(s=>catOf(s)===S.curCat);syncW();}
+function normalize(o){
+  if(!o.sup)o.sup=o.suppliers||[];o.cats=o.cats||{};o.closeGap=o.closeGap===undefined?0.25:o.closeGap;
+  o.scenarios=(o.scenarios||[]).map(sc=>{if(sc.pw)return sc;const pw={};o.persp.forEach(p=>{pw[p.id]=o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+((sc.weights||{})[d.id])||0),0);});return {id:sc.id,name:sc.name,pw};});
+  if(!Object.keys(o.cats).length){const pw={};o.persp.forEach(p=>{pw[p.id]=Math.min(10,Math.round(o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+d.weight||0),0)*10)/10);});
+    [...new Set(o.sup.map(s=>((s.facts&&s.facts.cat)||'').trim()||'Unassigned'))].forEach(c=>o.cats[c]={pw:Object.assign({},pw),ovr:{}});}
+  if(!o.final){const pw={};o.persp.forEach(p=>pw[p.id]=5);o.final={pw,sel:{}};}o.final.sel=o.final.sel||{};
+  return o;}
+function catEval(c){return evaluate(dimWFor(ensureCat(c).pw),S.sup.filter(s=>catOf(s)===c));}
+// who goes to the final round from a subcategory: the winner, plus #2 and #3 when within closeGap of the winner; the room can override
+function finalistsOf(c){const ev=catEval(c);const inRun=ev.sorted.filter(r=>!r.out);const top=inRun[0];if(!top)return [];const ovr=ensureCat(c).ovr;
+  return inRun.slice(0,3).map((r,i)=>{const gap=top.total-r.total;const auto=i===0||gap<=S.closeGap+1e-9;const inc=ovr[r.s.id]!==undefined?!!ovr[r.s.id]:auto;return {r,i,gap,auto,inc,cat:c};});}
+const fmtW=w=>Number.isInteger(+w)?String(+w):(+w).toFixed(1);
 const pIndex=pid=>S.persp.findIndex(p=>p.id===pid);
 const dimsOf=pid=>S.dims.filter(d=>d.pid===pid);
 
@@ -726,9 +831,9 @@ function axisScore(sid,axis,weights){
 }
 function segmentOf(x,y){if(x===null||y===null)return null;const hx=x>=S.thr,hy=y>=S.thr;return hx?(hy?'hh':'hl'):(hy?'lh':'ll');}
 function weightsNow(){const o={};S.dims.forEach(d=>o[d.id]=+d.weight||0);return o;}
-function evaluate(weights){
+function evaluate(weights,list){
   const sumW=S.dims.reduce((a,d)=>a+(+weights[d.id]||0),0);
-  const rows=S.suppliers.map(s=>{
+  const rows=(list||S.suppliers).map(s=>{
     const parts={};let total=0;const failed=[];
     S.dims.forEach(d=>{const sc=+(S.scores[s.id]||{})[d.id]||0;const nw=sumW>0?(+weights[d.id]||0)/sumW:0;parts[d.id]=nw*sc;total+=nw*sc;if(d.min>0&&sc<d.min)failed.push(d.name);});
     const x=axisScore(s.id,'x',weights),y=axisScore(s.id,'y',weights);
@@ -750,20 +855,20 @@ function buildWeights(){
     const g=document.createElement('div');g.className='pgroup';g.dataset.pid=p.id;
     const head=document.createElement('div');head.className='phead';head.style.borderLeftColor=col(pi);
     head.innerHTML=`<span class="pname">${pi+1}. ${esc(p.name)}</span><span class="share num" data-share></span><span class="pdesc">${esc(p.desc||'')}</span>
+      <span class="pw"><input type="range" min="0" max="10" step="1" value="${curPW()[p.id]||0}" aria-label="Weight for ${esc(p.name)}"><span class="num" data-pwv>${curPW()[p.id]||0}</span></span>
       <span class="axis">Map axis <button data-ax="x" aria-pressed="${p.axis==='x'}">X</button><button data-ax="y" aria-pressed="${p.axis==='y'}">Y</button><button data-ax="" aria-pressed="${!p.axis}">none</button></span>`;
+    head.querySelector('.pw input').addEventListener('input',e=>{curPW()[p.id]=+e.target.value;head.querySelector('[data-pwv]').textContent=e.target.value;syncW();markScnDirty();renderResults();save();});
     head.querySelectorAll('[data-ax]').forEach(b=>b.addEventListener('click',()=>{p.axis=b.dataset.ax;head.querySelectorAll('[data-ax]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();save();}));
     g.appendChild(head);
     dimsOf(p.id).forEach(d=>{
       const row=document.createElement('div');row.className='wrow';row.dataset.id=d.id;
       row.innerHTML=`<div class="name"><input value="${esc(d.name)}" title="${esc(d.name)}" aria-label="Criterion name"></div>
-        <input type="range" min="0" max="10" step="1" value="${d.weight}" aria-label="Weight for ${esc(d.name)}">
-        <div class="pct num" data-pct></div>
+        <div class="pct num" data-pct title="Share of the total score; criteria in a dimension share its weight equally"></div>
         <div class="min"><span>Knock-out below</span><select aria-label="Knock-out threshold for ${esc(d.name)}"><option value="0">none</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select><button class="small ghost" title="Remove this criterion" aria-label="Remove ${esc(d.name)}">remove</button></div>`;
       row.querySelector('select').value=String(d.min||0);
-      row.querySelector('input[type=range]').addEventListener('input',e=>{d.weight=+e.target.value;markScnDirty();renderResults();save();});
       row.querySelector('.name input').addEventListener('change',e=>{d.name=e.target.value.trim()||d.name;d.short=shorten(d.name);e.target.value=d.name;renderAll();save();});
       row.querySelector('select').addEventListener('change',e=>{d.min=+e.target.value;renderResults();buildMatrix();save();});
-      row.querySelector('button').addEventListener('click',()=>{if(S.dims.length<=2)return;S.dims=S.dims.filter(x=>x!==d);S.scenarios.forEach(sc=>delete sc.weights[d.id]);renderAll();save();});
+      row.querySelector('button').addEventListener('click',()=>{if(S.dims.length<=2)return;S.dims=S.dims.filter(x=>x!==d);syncW();renderAll();save();});
       g.appendChild(row);
     });
     host.appendChild(g);
@@ -773,9 +878,10 @@ function updateWeightLabels(sumW){
   document.querySelectorAll('#weights .wrow').forEach(row=>{
     const d=S.dims.find(x=>x.id===row.dataset.id);if(!d)return;
     row.querySelector('[data-pct]').textContent=sumW>0?pct((+d.weight||0)/sumW):'0%';
-    const r=row.querySelector('input[type=range]');if(+r.value!==+d.weight)r.value=d.weight;
   });
-  document.querySelectorAll('#weights .pgroup').forEach(g=>{const w=dimsOf(g.dataset.pid).reduce((a,d)=>a+(+d.weight||0),0);g.querySelector('[data-share]').textContent=sumW>0?pct(w/sumW):'0%';});
+  document.querySelectorAll('#weights .pgroup').forEach(g=>{const w=dimsOf(g.dataset.pid).reduce((a,d)=>a+(+d.weight||0),0);g.querySelector('[data-share]').textContent=sumW>0?pct(w/sumW):'0%';
+    const r=g.querySelector('.pw input'),v=curPW()[g.dataset.pid]||0;if(r&&+r.value!==+v){r.value=v;g.querySelector('[data-pwv]').textContent=v;}});
+  const t=document.getElementById('wTitle');if(t)t.textContent='Weights: '+S.curCat;
 }
 
 /* ---------- tooltip ---------- */
@@ -788,13 +894,15 @@ function attachTip(el,html){el.addEventListener('mouseenter',e=>showTip(e,html))
 /* ---------- ranking ---------- */
 function baseScn(){return S.scenarios.find(x=>x.id===S.baseScn)||null;}
 function renderRanking(c){
+  document.getElementById('rankTitle').textContent='Ranking: '+S.curCat;
   renderRankInto(c,document.getElementById('rank'));
   renderInsight(c);
 }
 function renderRankInto(c,host){
   host.innerHTML='';
   // when weights differ from a saved scenario, show how far each supplier moved against it
-  const base=!S.activeScn&&baseScn()?evaluate(baseScn().weights):null;
+  const base=!S.activeScn&&baseScn()?evaluate(dimWFor(baseScn().pw)):null;
+  const fin=new Set(finalistsOf(S.curCat).filter(x=>x.inc).map(x=>x.r.s.id));
   c.sorted.forEach(r=>{
     const row=document.createElement('div');row.className='rrow'+(r.out?' out':'');
     const mvCell=r=>{if(!base)return '<div class="mv"></div>';const b=base.rows.find(x=>x.s.id===r.s.id);
@@ -803,7 +911,7 @@ function renderRankInto(c,host){
       return `<div class="mv ${d>0?'up':'down'}" title="${d>0?'Up':'Down'} ${Math.abs(d)} vs ${esc(baseScn().name)}">${d>0?'▲':'▼'}${Math.abs(d)}</div>`;};
     let segs='';
     S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);ds.forEach((d,k)=>{const v=r.parts[d.id];if(v<=0)return;segs+=`<div class="seg${k===ds.length-1?' pend':''}" style="width:${(v/5*100).toFixed(2)}%;background:${col(pi)}" data-dim="${d.id}"></div>`;});});
-    row.innerHTML=`<div class="pos num">${r.rank?r.rank:'–'}</div><div class="sname" title="${esc(r.s.name+(supNoteOf(r.s.id)?'\n\n'+supNoteOf(r.s.id):''))}">${esc(r.s.name)}${noteCount(r.s.id)?'<span class="nt" aria-label="has comments">✎</span>':''}</div>
+    row.innerHTML=`<div class="pos num">${r.rank?r.rank:'–'}</div><div class="sname${fin.has(r.s.id)?' isfin':''}" title="${esc(r.s.name+(supNoteOf(r.s.id)?'\n\n'+supNoteOf(r.s.id):''))}">${esc(r.s.name)}${noteCount(r.s.id)?'<span class="nt" aria-label="has comments">✎</span>':''}</div>
       <div class="track" role="img" aria-label="${esc(r.s.name)}: ${f2(r.total)} of 5">${segs}</div>
       <div class="score num">${r.out?'knocked out':f2(r.total)}</div>${mvCell(r)}`;
     row.querySelectorAll('.seg').forEach(seg=>{
@@ -821,14 +929,14 @@ function renderInsight(c){
   const a=inRun[0],b=inRun[1];const gap=a.total-b.total;
   let bestD=null,bestV=-Infinity;S.dims.forEach(d=>{const v=a.parts[d.id]-b.parts[d.id];if(v>bestV){bestV=v;bestD=d;}});
   let flip=null;
-  S.dims.forEach(d=>{
-    const base=+d.weight;
-    for(let dist=1;dist<=10&&!flip;dist++){for(const w of [base-dist,base+dist]){if(w<0||w>10)continue;const ws=weightsNow();ws[d.id]=w;const ev=evaluate(ws);const top=ev.sorted.find(r=>!r.out);
-      if(top&&top.s.id===b.s.id){if(!flip||dist<flip.dist)flip={d,w,dist};break;}}}
+  S.persp.forEach(p=>{
+    const base=+curPW()[p.id]||0;
+    for(let dist=1;dist<=10;dist++){if(flip&&dist>=flip.dist)break;for(const w of [base-dist,base+dist]){if(w<0||w>10)continue;const pw=Object.assign({},curPW(),{[p.id]:w});const ev=evaluate(dimWFor(pw));const top=ev.sorted.find(r=>!r.out);
+      if(top&&top.s.id===b.s.id){if(!flip||dist<flip.dist)flip={p,base,w,dist};break;}}}
   });
   const out=c.sorted.filter(r=>r.out).length;
   ins.innerHTML=`<strong>${esc(a.s.name)}</strong> leads <strong>${esc(b.s.name)}</strong> by ${f2(gap)} points, mostly on ${esc(bestD.name)} (+${f2(bestV)}). `+
-    (flip?`Moving <em>${esc(flip.d.name)}</em> from ${flip.d.weight} to ${flip.w} would put ${esc(b.s.name)} first.`:`No single weight change flips the top two.`)+
+    (flip?`Moving <em>${esc(flip.p.name)}</em> from ${flip.base} to ${flip.w} would put ${esc(b.s.name)} first.`:`No single dimension weight change flips the top two.`)+
     (out?` ${out} supplier${out>1?'s':''} knocked out.`:'');
 }
 
@@ -873,6 +981,7 @@ document.getElementById('thr').addEventListener('input',e=>{S.thr=+e.target.valu
 
 /* ---------- suppliers list (setup) ---------- */
 function buildSuppliers(){
+  document.getElementById('supTitle').textContent='Suppliers in '+S.curCat;
   const host=document.getElementById('supList');
   host.innerHTML=S.suppliers.map((s,i)=>`<div class="sup-row" data-sid="${s.id}"><i style="background:${col(i)}"></i><input value="${esc(s.name)}" aria-label="Supplier name"><button class="small notes-btn" data-notes>Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button><button class="small ghost" data-remove aria-label="Remove ${esc(s.name)}">remove</button></div>`).join('');
   host.querySelectorAll('.sup-row').forEach(r=>{const s=S.suppliers.find(x=>x.id===r.dataset.sid);
@@ -880,7 +989,7 @@ function buildSuppliers(){
     r.querySelector('[data-notes]').addEventListener('click',()=>openNotes(s.id));
     r.querySelector('[data-remove]').addEventListener('click',()=>removeSupplier(s));});
 }
-function removeSupplier(s){if(S.suppliers.length<=2)return;S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.notes)delete S.notes[s.id];if(S.supNotes)delete S.supNotes[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();}
+function removeSupplier(s){if(S.suppliers.length<=2)return;S.sup=S.sup.filter(x=>x!==s);S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.notes)delete S.notes[s.id];if(S.supNotes)delete S.supNotes[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();}
 
 /* ---------- matrix ---------- */
 // grow a textarea to fit its text
@@ -891,7 +1000,7 @@ function buildMatrix(){
   const c=compute();const t=document.getElementById('matrix');
   const h1=`<tr><th class="sup" rowspan="2" style="text-align:left;vertical-align:bottom">Supplier</th>${S.persp.map((p,i)=>{const n=dimsOf(p.id).length;return n?`<th class="pg" colspan="${n}" style="border-bottom-color:${col(i)}">${esc(p.name)}</th>`:'';}).join('')}<th rowspan="2" style="vertical-align:bottom">Weighted</th><th rowspan="2" style="vertical-align:bottom">Rank</th><th rowspan="2" style="vertical-align:bottom">Segment</th><th rowspan="2" style="vertical-align:bottom">Comments</th></tr>`;
   const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
-  const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name+(defText(d)?'\n\n'+defText(d):''))}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${d.weight}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
+  const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name+(defText(d)?'\n\n'+defText(d):''))}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${fmtW(d.weight)}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
   const body=`<tbody>${S.suppliers.map(s=>{const r=c.rows.find(x=>x.s===s);return `<tr data-sup="${s.id}"><td class="sup"><input value="${esc(s.name)}" aria-label="Supplier name"></td>`+
     ordered.map(d=>{const v=S.scores[s.id][d.id];const fail=d.min>0&&v<d.min;const nt=noteOf(s.id,d.id);return `<td class="cell${fail?' fail':''}${nt?' noted':''}" data-dim="${d.id}"${nt?` title="${esc(nt)}"`:''} style="background:rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})"><input type="number" min="1" max="5" step="1" value="${v}" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
     `<td class="total num" data-total>${r.out?'–':f2(r.total)}</td><td class="num" data-rank>${r.rank||'out'}</td><td class="small" data-seg>${r.seg?SEGMENTS[r.seg]:'–'}</td><td style="white-space:nowrap"><button class="small notes-btn" data-notes title="Comments for ${esc(s.name)}">Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button> <button class="small ghost" data-remove title="Remove supplier" aria-label="Remove ${esc(s.name)}">remove</button></td></tr>`;}).join('')}</tbody>`;
@@ -912,7 +1021,7 @@ function buildMatrix(){
 function updateMatrixTotals(c){
   document.querySelectorAll('#matrix tbody tr').forEach(tr=>{const r=c.rows.find(x=>x.s.id===tr.dataset.sup);if(!r)return;
     tr.querySelector('[data-total]').textContent=r.out?'–':f2(r.total);tr.querySelector('[data-rank]').textContent=r.rank||'out';tr.querySelector('[data-seg]').textContent=r.seg?SEGMENTS[r.seg]:'–';});
-  document.querySelectorAll('#matrix [data-w]').forEach(el=>{const d=S.dims.find(x=>x.id===el.dataset.w);if(d)el.textContent=`weight ${d.weight}${d.min?' · min '+d.min:''}`;});
+  document.querySelectorAll('#matrix [data-w]').forEach(el=>{const d=S.dims.find(x=>x.id===el.dataset.w);if(d)el.textContent=`weight ${fmtW(d.weight)}${d.min?' · min '+d.min:''}`;});
 }
 
 /* ---------- notes dialog ---------- */
@@ -968,7 +1077,7 @@ function renderRadar(){
 }
 
 /* ---------- scenarios ---------- */
-function scnMatches(sc){return S.dims.every(d=>(+sc.weights[d.id]||0)===(+d.weight||0));}
+function scnMatches(sc){const pw=curPW();return S.persp.every(p=>(+sc.pw[p.id]||0)===(+pw[p.id]||0));}
 function markScnDirty(){const sc=S.scenarios.find(x=>x.id===S.activeScn);if(sc&&!scnMatches(sc))S.activeScn=null;}
 function renderScnSelect(){
   const sel=document.getElementById('scnSel');
@@ -976,23 +1085,23 @@ function renderScnSelect(){
   sel.value=S.activeScn||'';
   const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
 }
-function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;S.dims.forEach(d=>{if(sc.weights[d.id]!==undefined)d.weight=+sc.weights[d.id];});S.activeScn=id;S.baseScn=id;renderResults();save();}
+function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;const pw=curPW();S.persp.forEach(p=>{if(sc.pw[p.id]!==undefined)pw[p.id]=+sc.pw[p.id];});syncW();S.activeScn=id;S.baseScn=id;renderResults();save();}
 function renderScenarios(){
   const t=document.getElementById('cmp');
-  const cols=S.scenarios.map(sc=>({name:sc.name,ev:evaluate(sc.weights),id:sc.id}));
+  const cols=S.scenarios.map(sc=>({name:sc.name,ev:evaluate(dimWFor(sc.pw)),id:sc.id}));
   if(!S.activeScn)cols.unshift({name:'Current',ev:evaluate(weightsNow()),id:''});
   t.innerHTML=`<thead><tr><th class="sup">Supplier</th>${cols.map(c=>`<th>${esc(c.name)}${c.id===S.activeScn?' ●':''}</th>`).join('')}</tr></thead><tbody>`+
     S.suppliers.map(s=>`<tr><td class="sup">${esc(s.name)}</td>${cols.map(c=>{const r=c.ev.rows.find(x=>x.s===s);return `<td><span class="r num${r.rank===1?' top':''}">${r.rank?'#'+r.rank:'out'}</span><span class="sc num">${f2(r.total)}${r.seg?' · '+SEGMENTS[r.seg]:''}</span></td>`;}).join('')}</tr>`).join('')+`</tbody>`;
   const list=document.getElementById('scnList');list.innerHTML='';
   S.scenarios.forEach(sc=>{const row=document.createElement('div');row.className='scn-row';
-    row.innerHTML=`<span class="nm">${esc(sc.name)}</span><button class="small">Apply</button><button class="small ghost">Delete</button><span class="w">${S.dims.map(d=>`${esc(d.short||shorten(d.name))} ${+sc.weights[d.id]||0}`).join(' · ')}</span>`;
+    row.innerHTML=`<span class="nm">${esc(sc.name)}</span><button class="small">Apply</button><button class="small ghost">Delete</button><span class="w">${S.persp.map(p=>`${esc(p.name)} ${+sc.pw[p.id]||0}`).join(' · ')}</span>`;
     const b=row.querySelectorAll('button');b[0].addEventListener('click',()=>applyScn(sc.id));b[1].addEventListener('click',()=>{S.scenarios=S.scenarios.filter(x=>x!==sc);if(S.activeScn===sc.id)S.activeScn=null;renderResults();save();});
     list.appendChild(row);});
 }
 document.getElementById('btnSaveScn').addEventListener('click',()=>{
   const inp=document.getElementById('scnName');const name=inp.value.trim()||('Scenario '+(S.scenarios.length+1));
   const existing=S.scenarios.find(x=>x.name.toLowerCase()===name.toLowerCase());
-  if(existing){existing.weights=weightsNow();S.activeScn=existing.id;}else{const sc={id:nid(),name,weights:weightsNow()};S.scenarios.push(sc);S.activeScn=sc.id;}
+  if(existing){existing.pw=Object.assign({},curPW());S.activeScn=existing.id;}else{const sc={id:nid(),name,pw:Object.assign({},curPW())};S.scenarios.push(sc);S.activeScn=sc.id;}
   S.baseScn=S.activeScn;
   inp.value='';renderResults();save();
 });
@@ -1039,16 +1148,16 @@ function guessDecimal(cells){let c=0,d=0;cells.forEach(v=>{const t=String(v||'')
 function buildFacts(){
   const t=document.getElementById('factsTbl');if(!t)return;
   t.innerHTML=`<thead><tr>${FCOLS.map(c=>`<th class="${c.num||c.calc?'n':''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>`+
-    S.suppliers.map(s=>{const f=factsOf(s);const w=hasFacts(f)&&factWarn(f);return `<tr data-sid="${s.id}"${w?' class="warn"':''}>`+FCOLS.map(c=>{
+    S.sup.map(s=>{const f=factsOf(s);const w=hasFacts(f)&&factWarn(f);return `<tr data-sid="${s.id}"${w?' class="warn"':''}>`+FCOLS.map(c=>{
       if(c.k==='name')return `<td class="sup">${esc(s.name)}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`;
       if(c.k==='revEur')return `<td class="calc" data-calc="revEur">${eurM(revEur(f))}</td>`;
       if(c.k==='share')return `<td class="calc" data-calc="share">${pctS(shareOf(f))}</td>`;
       return `<td><input data-k="${c.k}" class="${c.num?'n':''}" value="${esc(f[c.k]===undefined?'':f[c.k])}" aria-label="${esc(s.name)}: ${esc(c.h)}" style="min-width:${({country:'96px',cat:'130px',spend:'96px',parent:'150px',rev:'64px',cur:'48px',fx:'56px',period:'80px',caveat:'170px',status:'90px',url:'170px'})[c.k]||'60px'}"></td>`;}).join('')+`</tr>`;}).join('')+`</tbody>`;
-  t.querySelectorAll('tbody tr').forEach(tr=>{const s=S.suppliers.find(x=>x.id===tr.dataset.sid);
+  t.querySelectorAll('tbody tr').forEach(tr=>{const s=S.sup.find(x=>x.id===tr.dataset.sid);
     tr.querySelectorAll('input[data-k]').forEach(inp=>inp.addEventListener('change',()=>{const c=FCOLS.find(x=>x.k===inp.dataset.k);s.facts=s.facts||{};
       s.facts[c.k]=c.num?parseNum(inp.value):inp.value.trim();if(c.num)inp.value=s.facts[c.k];
       tr.querySelector('[data-calc=revEur]').textContent=eurM(revEur(s.facts));tr.querySelector('[data-calc=share]').textContent=pctS(shareOf(s.facts));
-      save();renderDep();renderScoring();}));});
+      save();if(c.k==='cat'){applyCat();renderAll();}else{renderDep();renderScoring();}}));});
 }
 const HMAP={'supplier (consolidated)':'name','supplier':'name','supplier name':'name','supplier country':'country','country':'country','category l3':'cat','category':'cat',
   'novonesis spend (eur)':'spend','spend (eur)':'spend','spend':'spend','parent / revenue basis':'parent','parent':'parent',
@@ -1073,20 +1182,20 @@ function importFacts(text,addNew){
   rows.slice(1).forEach(r=>{const f={};map.forEach((k,j)=>{if(!k)return;const v=r[j]===undefined?'':r[j];
       f[k]=NUMK.includes(k)?parseNum(v,dec):v;});
     const name=(f.name||'').trim();if(!name)return;delete f.name;
-    let s=S.suppliers.find(x=>x.name.trim().toLowerCase()===name.toLowerCase());
-    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);added++;}else upd++;
+    let s=S.sup.find(x=>x.name.trim().toLowerCase()===name.toLowerCase());
+    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.sup.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);added++;}else upd++;
     s.facts=f;});
   S.example=false;
   return {upd,added,skipped};
 }
 function factsCSV(){const q=v=>/[",;\t\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
   const L=[FCOLS.map(c=>q(c.h)).join(',')];
-  S.suppliers.forEach(s=>{const f=factsOf(s);L.push(FCOLS.map(c=>c.k==='name'?q(s.name):c.k==='revEur'?(revEur(f)===null?'':Math.round(revEur(f))):c.k==='share'?(shareOf(f)===null?'':shareOf(f).toFixed(6)):q(f[c.k]===undefined?'':f[c.k])).join(','));});
+  S.sup.forEach(s=>{const f=factsOf(s);L.push(FCOLS.map(c=>c.k==='name'?q(s.name):c.k==='revEur'?(revEur(f)===null?'':Math.round(revEur(f))):c.k==='share'?(shareOf(f)===null?'':shareOf(f).toFixed(6)):q(f[c.k]===undefined?'':f[c.k])).join(','));});
   return L.join('\n');}
 const dlgF=document.getElementById('dlgFacts');
 document.getElementById('btnPasteFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
 document.getElementById('btnDoFacts').addEventListener('click',()=>{const m=document.getElementById('factsMsg');
-  try{const r=importFacts(document.getElementById('factsText').value,document.getElementById('factsAdd').checked);renderAll();save();
+  try{const r=importFacts(document.getElementById('factsText').value,document.getElementById('factsAdd').checked);applyCat();renderAll();save();
     m.className='small ok';m.textContent=`Updated ${r.upd} supplier${r.upd===1?'':'s'}${r.added?`, added ${r.added}`:''}${r.skipped.length?`. Not in scope, skipped: ${r.skipped.join(', ')}`:''}.`;}
   catch(e){m.className='small err';m.textContent=e.message;}});
 document.getElementById('btnFactsCsv').addEventListener('click',()=>{saveFile('supplier-facts.csv',factsCSV()).catch(()=>{});});
@@ -1170,7 +1279,7 @@ function renderScoring(){
   document.querySelectorAll('#scDots button').forEach(b=>b.addEventListener('click',()=>{S.curDim=b.dataset.id;renderScoring();save();}));
   document.getElementById('scPrev').disabled=idx<=0;const nx=document.getElementById('scNext');nx.disabled=idx>=o.length-1;nx.textContent=idx>=o.length-1?'Last criterion':'Next ›';
   // main: title, definition, rubric, supplier rows
-  let h=`<div class="sc-title"><h2>${idx+1}. ${esc(d.name)}</h2><span class="meta"><span style="color:${col(pi)}">■</span> ${esc(p?p.name:'')} · weight ${d.weight} (${sumW>0?pct((+d.weight||0)/sumW):'0%'})${d.min?' · knock-out below '+d.min:''}</span></div>`;
+  let h=`<div class="sc-title"><h2>${idx+1}. ${esc(d.name)}</h2><span class="meta"><span style="color:${col(pi)}">■</span> ${esc(p?p.name:'')} · weight ${fmtW(d.weight)} (${sumW>0?pct((+d.weight||0)/sumW):'0%'})${d.min?' · knock-out below '+d.min:''}</span></div>`;
   h+=`<div class="sc-desc"><textarea rows="1" data-k="desc" placeholder="What does this criterion measure?" aria-label="What ${esc(d.name)} measures">${esc(d.desc||'')}</textarea></div>`;
   h+=`<div class="sc-ev"><label for="scEv">Evidence beside the comparison:</label><select id="scEv">${[['','none'],['spend','Novonesis spend'],['share','Share of supplier revenue'],['both','Spend and share']].map(([v,l])=>`<option value="${v}"${(d.ev||'')===v?' selected':''}>${l}</option>`).join('')}</select></div>`;
   h+=`<div class="sc-table"><div class="hd">Score</div>`;
@@ -1248,7 +1357,7 @@ const FSTEPS=[
    q:['Have we agreed a segment and next step for every supplier?','Who validates the open criteria, and by when?']}
 ];
 let fIdx=0;
-function facNote(k){return ((S.facil||{})[k])||'';}
+function facNote(k){return (((S.facil||{})[S.curCat])||{})[k]||'';}
 function talkingPoints(k){
   const c=compute();const inRun=c.sorted.filter(r=>!r.out);const out=c.sorted.filter(r=>r.out);const pts=[];
   if(k==='rank'){
@@ -1258,7 +1367,7 @@ function talkingPoints(k){
     const bare=S.suppliers.filter(s=>!noteCount(s.id)).map(s=>esc(s.name));if(bare.length)pts.push(`No comments recorded yet for ${bare.join(', ')}. Ask what the scores are based on.`);
   }
   if(k==='scn'){
-    const evs=S.scenarios.map(sc=>({sc,ev:evaluate(sc.weights)}));
+    const evs=S.scenarios.map(sc=>({sc,ev:evaluate(dimWFor(sc.pw))}));
     if(evs.length<2)pts.push('Fewer than two saved scenarios. Save a few weight sets on Setup &amp; weighting to test robustness.');
     else{let moved=0;S.suppliers.forEach(s=>{const rs=evs.map(e=>e.ev.rows.find(r=>r.s===s).rank).filter(Boolean);if(rs.length&&Math.max(...rs)-Math.min(...rs)>=2){moved++;pts.push(`<b>${esc(s.name)}</b> moves between #${Math.min(...rs)} and #${Math.max(...rs)} across scenarios.`);}});
       const tops=[...new Set(evs.map(e=>{const t=e.ev.sorted.find(r=>!r.out);return t?t.s.name:'';}))].filter(Boolean);
@@ -1306,7 +1415,7 @@ function renderFacil(){
   h+=`<div class="lab"><label for="fNote">${st.k==='wrap'?'Final decisions and actions (who, what, by when)':'Decisions and actions from the room'}</label></div><textarea id="fNote" placeholder="Agreed: …\nAction: … (owner, date)">${esc(facNote(st.k))}</textarea>`;
   if(st.k==='wrap')h+=`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="primary" id="fSum">Download workshop summary .md</button><span class="small" id="fSumMsg"></span></div>`;
   const body=document.getElementById('fBody');body.innerHTML=h;body.scrollTop=0;
-  body.querySelector('#fNote').addEventListener('input',e=>{S.facil=S.facil||{};S.facil[st.k]=e.target.value;save();
+  body.querySelector('#fNote').addEventListener('input',e=>{S.facil=S.facil||{};S.facil[S.curCat]=S.facil[S.curCat]||{};S.facil[S.curCat][st.k]=e.target.value;save();
     const b=document.querySelector(`#fSteps button[data-i="${fIdx}"]`);if(b)b.classList.toggle('has',!!e.target.value.trim());});
   const sb=body.querySelector('#fSum');if(sb)sb.addEventListener('click',async()=>{const m=document.getElementById('fSumMsg');
     try{const r=await saveFile(fileBase().replace('supplier-ranking','workshop-summary')+'.md',workshopSummary());m.textContent=r==='saved'?'Saved.':'';}catch(e){m.textContent='Could not save here.';}});
@@ -1334,9 +1443,10 @@ document.getElementById('fPrev').addEventListener('click',()=>goFacil(fIdx-1));
 document.getElementById('fNext').addEventListener('click',()=>goFacil(fIdx+1));
 function workshopSummary(){
   const c=compute();const sc=S.scenarios.find(x=>x.id===S.activeScn);const L=[];
-  L.push(`# Supplier workshop summary`,``,`${new Date().toLocaleDateString()} · ${sc?'Weights: '+sc.name:'Weights: custom'}${S.example?' · example data':''}`,``,`## Ranking`,``);
+  L.push(`# Supplier workshop summary: ${S.curCat}`,``,`${new Date().toLocaleDateString()} · ${sc?'Weights: '+sc.name:'Weights: custom'}${S.example?' · example data':''}`,``,`## Ranking`,``);
   c.sorted.forEach(r=>L.push(`${r.rank?r.rank+'.':'–'} ${r.s.name}: ${r.out?'knocked out ('+r.failed.join(', ')+')':r.total.toFixed(2)}${r.seg?' · '+SEGMENTS[r.seg]:''}`));
   L.push(``,`## Segments`,``);['hh','lh','hl','ll'].forEach(k=>{const n=c.sorted.filter(r=>r.seg===k).map(r=>r.s.name);L.push(`- **${SEGMENTS[k]}**: ${n.length?n.join(', '):'none'}`);});
+  const fl=finalistsOf(S.curCat).filter(x=>x.inc);L.push(``,`## Going to the final round`,``);fl.forEach(x=>L.push(`- ${x.r.s.name} (${x.i===0?'winner':'within '+x.gap.toFixed(2)+' of the winner'}${x.auto?'':', chosen by the room'})`));if(!fl.length)L.push('- none');
   L.push(``,`## Decisions and actions`,``);
   FSTEPS.forEach(x=>{const t=facNote(x.k).trim();if(t)L.push(`### ${x.t}`,``,t,``);});
   if(!FSTEPS.some(x=>facNote(x.k).trim()))L.push(`_None captured._`,``);
@@ -1346,14 +1456,73 @@ function workshopSummary(){
   return L.join('\n')+'\n';
 }
 
+/* ---------- final selection across subcategories ---------- */
+function dimScore(sid,pid){const ds=S.dims.filter(d=>d.pid===pid);if(!ds.length)return null;return ds.reduce((t,d)=>t+(+(S.scores[sid]||{})[d.id]||0),0)/ds.length;}
+function finalRows(){
+  const pw=S.final.pw;const sumW=S.persp.reduce((t,p)=>t+(+pw[p.id]||0),0);
+  const rows=[];catNames().forEach(c=>finalistsOf(c).filter(x=>x.inc).forEach(x=>{const ds={};let tot=0;
+    S.persp.forEach(p=>{const v=dimScore(x.r.s.id,p.id);ds[p.id]=v;tot+=sumW>0?(+pw[p.id]||0)/sumW*(v||0):0;});rows.push({...x,s:x.r.s,ds,tot});}));
+  rows.sort((a,b)=>b.tot-a.tot||a.s.name.localeCompare(b.s.name));rows.forEach((r,i)=>r.rank=i+1);return rows;}
+function renderFinal(){
+  const host=document.getElementById('finTbl');if(!host)return;
+  // weights
+  const fw=document.getElementById('finW');
+  if(!fw.dataset.built||fw.dataset.built!==S.persp.map(p=>p.id).join()){fw.dataset.built=S.persp.map(p=>p.id).join();
+    fw.innerHTML=S.persp.map((p,pi)=>`<div class="fw" style="border-left-color:${col(pi)}"><div class="nm"><span>${esc(p.name)}</span></div><div class="pw"><input type="range" min="0" max="10" step="1" data-pid="${p.id}" aria-label="Final weight for ${esc(p.name)}"><span class="num"></span></div></div>`).join('');
+    fw.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{S.final.pw[i.dataset.pid]=+i.value;i.nextElementSibling.textContent=i.value;renderFinal();save();}));}
+  fw.querySelectorAll('input').forEach(i=>{const v=+S.final.pw[i.dataset.pid]||0;if(document.activeElement!==i)i.value=v;i.nextElementSibling.textContent=v;});
+  const g=document.getElementById('finGap');if(document.activeElement!==g)g.value=S.closeGap;document.getElementById('finGapV').textContent=(+S.closeGap).toFixed(2);
+  // table
+  const rows=finalRows();const sel=S.final.sel;Object.keys(sel).forEach(id=>{if(!rows.some(r=>r.s.id===id))delete sel[id];});
+  const nSel=Object.keys(sel).length;
+  const sw=S.persp.reduce((t,p)=>t+(+S.final.pw[p.id]||0),0);
+  host.innerHTML=`<thead><tr><th>#</th><th class="l">Supplier</th><th class="l">Subcategory</th><th class="l">Route</th>${S.persp.map((p,pi)=>`<th style="border-bottom:3px solid ${col(pi)}">${esc(p.name)}<br><span class="muted" style="font-weight:400">${sw>0?pct((+S.final.pw[p.id]||0)/sw):'0%'}</span></th>`).join('')}<th class="l">Final score</th><th>Spend</th><th>Share of their revenue</th><th>Select</th></tr></thead><tbody>`+
+    rows.map(r=>{const f=factsOf(r.s);const w=hasFacts(f)&&factWarn(f);const on=sel[r.s.id]!==undefined;
+      return `<tr data-sid="${r.s.id}"${on?' class="sel"':''}><td class="num">${r.rank}</td><td class="l nm">${esc(r.s.name)}</td><td class="l small">${esc(r.cat)}</td>`+
+        `<td class="l why">${r.i===0?'Winner':`#${r.i+1}, ${f2(r.gap)} behind`}${r.auto?'':' · added by room'}</td>`+
+        S.persp.map(p=>{const v=r.ds[p.id];return `<td class="num" style="background:rgba(var(--seq),${v===null?0:(0.05+(v-1)/4*0.4).toFixed(2)})">${v===null?'–':f1(v)}</td>`;}).join('')+
+        `<td class="l tot"><b class="num">${f2(r.tot)}</b><div class="bar"><i style="width:${(r.tot/5*100).toFixed(1)}%"></i></div></td>`+
+        `<td class="num">${f.spend===''||f.spend===undefined?'–':eurM(+f.spend)}</td><td class="num">${pctS(shareOf(f))}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`+
+        `<td><input type="checkbox"${on?' checked':''}${!on&&nSel>=3?' disabled title="Already 3 selected"':''} aria-label="Select ${esc(r.s.name)}"></td></tr>`;}).join('')+`</tbody>`;
+  host.querySelectorAll('tbody input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{const id=cb.closest('tr').dataset.sid;if(cb.checked)sel[id]=sel[id]||'';else delete sel[id];renderFinal();save();}));
+  document.getElementById('finCount').textContent=`${rows.length} finalist${rows.length===1?'':'s'} from ${catNames().length} subcategor${catNames().length===1?'y':'ies'}`;
+  document.getElementById('selCount').textContent=`${nSel} of max 3 selected`;
+  // decision list
+  const sl=document.getElementById('selList');const chosen=rows.filter(r=>sel[r.s.id]!==undefined);
+  sl.innerHTML=chosen.length?chosen.map((r,i)=>`<div class="sel-item" data-sid="${r.s.id}"><span class="no">${i+1}</span><div><b>${esc(r.s.name)}</b> <span class="small muted">· ${esc(r.cat)} · final score ${f2(r.tot)}</span></div><textarea placeholder="Why this supplier? Next step, owner, timing">${esc(sel[r.s.id]||'')}</textarea></div>`).join(''):'<div class="small muted">Tick up to three finalists in the table above.</div>';
+  sl.querySelectorAll('.sel-item textarea').forEach(ta=>ta.addEventListener('input',()=>{sel[ta.closest('.sel-item').dataset.sid]=ta.value;save();}));
+  // how finalists were picked
+  document.getElementById('finPick').innerHTML=catNames().map(c=>{const fl=finalistsOf(c);
+    return `<div class="pick-cat"><h3>${esc(c)}</h3>`+(fl.length?fl.map(x=>`<label class="pick-row"><input type="checkbox" data-cat="${esc(c)}" data-sid="${x.r.s.id}"${x.inc?' checked':''}><span>#${x.i+1} ${esc(x.r.s.name)} <span class="m">${f2(x.r.total)}${x.i?` · ${f2(x.gap)} behind`:''}</span></span><span class="m">${x.auto?(x.i===0?'winner':'close call'):(x.i===0?'':'not close')}</span><span class="m">${x.inc===x.auto?'':'changed by room'}</span></label>`).join(''):'<div class="small muted">No supplier clears the knock-outs.</div>')+`</div>`;}).join('');
+  document.querySelectorAll('#finPick input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{const C=ensureCat(cb.dataset.cat);const x=finalistsOf(cb.dataset.cat).find(y=>y.r.s.id===cb.dataset.sid);
+    if(x&&cb.checked===x.auto)delete C.ovr[cb.dataset.sid];else C.ovr[cb.dataset.sid]=cb.checked;renderFinal();renderResults();save();}));
+}
+document.getElementById('finGap').addEventListener('input',e=>{S.closeGap=+e.target.value;renderFinal();renderResults();save();});
+function finalSummary(){const rows=finalRows();const sel=S.final.sel;const L=[`# Supplier partnership decision`,``,new Date().toLocaleDateString()+(S.example?' · example data':''),``,`## Final round weights`,``];
+  S.persp.forEach(p=>L.push(`- ${p.name}: ${+S.final.pw[p.id]||0}`));
+  L.push(``,`## Selected suppliers`,``);const ch=rows.filter(r=>sel[r.s.id]!==undefined);
+  if(!ch.length)L.push('_None selected yet._');ch.forEach((r,i)=>L.push(`${i+1}. **${r.s.name}** (${r.cat}, final score ${r.tot.toFixed(2)})${(sel[r.s.id]||'').trim()?`: ${sel[r.s.id].trim()}`:''}`));
+  L.push(``,`## All finalists`,``,`| # | Supplier | Subcategory | Route | ${S.persp.map(p=>p.name).join(' | ')} | Final |`,`|${'---|'.repeat(5+S.persp.length)}`);
+  rows.forEach(r=>L.push(`| ${r.rank} | ${r.s.name} | ${r.cat} | ${r.i===0?'Winner':'#'+(r.i+1)+', '+r.gap.toFixed(2)+' behind'}${r.auto?'':' (room)'} | ${S.persp.map(p=>r.ds[p.id]===null?'–':r.ds[p.id].toFixed(1)).join(' | ')} | ${r.tot.toFixed(2)} |`));
+  L.push(``,`Runner-ups joined when within ${(+S.closeGap).toFixed(2)} points of their subcategory winner.`);
+  return L.join('\n')+'\n';}
+document.getElementById('btnFinalMd').addEventListener('click',()=>{saveFile(`supplier-decision-${new Date().toISOString().slice(0,10)}.md`,finalSummary()).catch(()=>{});});
+
+/* ---------- subcategory picker ---------- */
+function renderCatSel(){const sel=document.getElementById('catSel');
+  sel.innerHTML=catNames().map(c=>{const n=S.sup.filter(s=>catOf(s)===c).length;return `<option value="${esc(c)}"${c===S.curCat?' selected':''}>${esc(c)} (${n})</option>`;}).join('');}
+document.getElementById('catSel').addEventListener('change',e=>{S.curCat=e.target.value;applyCat();S.h2h=null;S.picks=null;S.activeScn=null;
+  const m=S.scenarios.find(sc=>scnMatches(sc));if(m)S.activeScn=m.id;renderAll();if(S.page==='scoring')setScView(S.scView||'crit');if(S.facilOn)goFacil(0);save();});
+
 /* ---------- pages ---------- */
 function showPage(pg){
-  if(pg!=='results'&&pg!=='scoring')pg='input';S.page=pg;
+  if(!['results','scoring','final'].includes(pg))pg='input';S.page=pg;
   document.querySelectorAll('[data-pagebody]').forEach(el=>el.hidden=el.dataset.pagebody!==pg);
   document.querySelectorAll('nav.pages [data-page]').forEach(b=>{if(b.dataset.page===pg)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   document.body.dataset.page=pg;
   if(pg==='scoring'){setScView(S.scView||'crit');}
   if(pg==='results'&&S.facilOn)renderFacil();
+  if(pg==='final')renderFinal();
   save();
 }
 document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListener('click',()=>{showPage(b.dataset.page||b.dataset.goto);window.scrollTo(0,0);}));
@@ -1361,14 +1530,14 @@ document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListen
 /* ---------- add / reset ---------- */
 document.getElementById('btnAddDim').addEventListener('click',()=>{
   if(S.dims.length>=12)return;const p=S.persp[S.persp.length-1];const d={id:nid(),pid:p.id,name:'New criterion',short:'New criterion',weight:5,min:0,desc:'',low:'',lv2:'',lv3:'',lv4:'',high:''};S.dims.push(d);
-  S.suppliers.forEach(s=>S.scores[s.id][d.id]=3);S.scenarios.forEach(sc=>sc.weights[d.id]=5);renderAll();save();
+  S.sup.forEach(s=>S.scores[s.id][d.id]=3);syncW();renderAll();save();
   const last=document.querySelector('#weights .pgroup:last-child .wrow:last-child .name input');if(last){last.focus();last.select();}
 });
 document.getElementById('btnAddSup').addEventListener('click',()=>{
-  const s={id:nid(),name:'New supplier'};S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
+  const s={id:nid(),name:'New supplier',facts:S.curCat==='Unassigned'?{}:{cat:S.curCat}};S.sup.push(s);S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
   const last=document.querySelector('#supList .sup-row:last-child input');if(last){last.focus();last.select();}
 });
-document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;renderAll();save();});
+document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();save();});
 
 /* ---------- import / export ---------- */
 function toCSV(){
@@ -1407,7 +1576,7 @@ function importCSV(text){
     const defKey={'definition':'desc','description':'desc','score 1 means':'low','1 means':'low','low':'low','score 5 means':'high','5 means':'high','high':'high','score 2 means':'lv2','score 3 means':'lv3','score 4 means':'lv4'}[key];
     if(defKey){dims.forEach(d=>{d[defKey]=r[d.col]||'';});return;}
     if(key==='stakeholders'||key==='stakeholder'){dims.forEach(d=>{d.stake=stakeFromText(r[d.col]);});return;}
-    if(key==='weight'||key==='weights'){dims.forEach(d=>{const v=Math.round(+r[d.col]);d.weight=isFinite(v)?Math.max(0,Math.min(10,v)):5;});return;}
+    if(key==='weight'||key==='weights'){dims.forEach(d=>{const v=Math.round(+r[d.col]*100)/100;d.weight=isFinite(v)?Math.max(0,Math.min(10,v)):5;});return;}
     if(key==='knock-out'||key==='knockout'||key==='min'||key==='minimum'){dims.forEach(d=>{const v=Math.round(+r[d.col]);d.min=(v>=2&&v<=5)?v:0;});return;}
     if(!r[0])return;
     const id=nid();suppliers.push({id,name:r[0]});scores[id]={};
@@ -1420,7 +1589,7 @@ function importCSV(text){
   dims.forEach(d=>{if(!d.pid)d.pid=perspByName('Other').id;});
   if(persp.length>8)throw new Error('At most 8 perspectives.');
   const w={};dims.forEach(d=>{w[d.id]=d.weight;delete d.col;});
-  S={example:false,persp,dims,suppliers,scores,notes,supNotes,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=S.scenarios[0].id;S.baseScn=S.activeScn;
+  S={example:false,persp,dims,sup:suppliers,scores,notes,supNotes,scenarios:[{id:nid(),name:'As imported',weights:w}],activeScn:null,picks:null,thr:3};S.activeScn=null;S.baseScn=null;S.scenarios=[];S.cats=null;S=normalize(S);S.curCat='Unassigned';applyCat();
 }
 const dlgI=document.getElementById('dlgImport'),dlgE=document.getElementById('dlgExport');
 document.querySelectorAll('dialog [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('dialog').close()));
@@ -1428,7 +1597,7 @@ document.getElementById('btnImport').addEventListener('click',()=>{document.getE
 document.getElementById('file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{document.getElementById('importText').value=fr.result;};fr.readAsText(f);});
 document.getElementById('btnDoImport').addEventListener('click',()=>{
   const msg=document.getElementById('importMsg');
-  try{importCSV(document.getElementById('importText').value);renderAll();save();dlgI.close();}catch(err){msg.textContent=err.message;}
+  try{importCSV(document.getElementById('importText').value);applyCat();renderAll();save();dlgI.close();}catch(err){msg.textContent=err.message;}
 });
 document.getElementById('btnExport').addEventListener('click',()=>{
   document.getElementById('pngMsg').textContent='';const csv=toCSV();document.getElementById('exportText').value=csv;document.getElementById('exportMsg').textContent='';
@@ -1499,7 +1668,7 @@ document.getElementById('h2hSwap').addEventListener('click',()=>{S.h2h=[S.h2h[1]
 const EXP={bg:'#ffffff',fg:'#173630',fg2:'#3d5a52',muted:'#6b8079',track:'#e0f2ee',line:'#b3ded6',crit:'#c0503e',soft:'#dee3ff',accent:'#3958fe',
   s:['#173630','#3b9746','#67bead','#a1b0ff','#3958fe','#d47969','#7a600f','#73c87e'],s0:'#8a9a94'};
 const expCol=i=>i<EXP.s.length?EXP.s[i]:EXP.s0;
-function scnLabel(){const sc=S.scenarios.find(x=>x.id===S.activeScn);return sc?`Weights: ${sc.name}`:'Weights: custom';}
+function scnLabel(){const sc=S.scenarios.find(x=>x.id===S.activeScn);return `${S.curCat} · `+(sc?`Weights: ${sc.name}`:'Weights: custom');}
 function wrapText(t,n){const words=t.split(/\s+/);const lines=[];let cur='';words.forEach(w=>{if((cur+' '+w).trim().length>n){if(cur)lines.push(cur);cur=w;}else cur=(cur+' '+w).trim();});if(cur)lines.push(cur);return lines;}
 function rankingSVG(){
   const c=compute();const W=1200,PX=48,rowH=40,top=118;
@@ -1586,8 +1755,8 @@ function renderResults(){
   const c=compute();setTimeout(()=>{if(S.facilOn&&S.page==='results'&&!document.activeElement.closest('#facil'))renderFacil();},0);updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderDep();renderScnSelect();renderScenarios();
   document.getElementById('badge').hidden=!S.example;
 }
-function renderAll(){buildWeights();buildSuppliers();buildFacts();buildMatrix();renderResults();renderScoring();}
-S=load();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
+function renderAll(){renderCatSel();buildWeights();buildSuppliers();buildFacts();buildMatrix();renderResults();renderScoring();if(S.page==='final')renderFinal();}
+S=load();applyCat();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
 })();
 </script>
 </body>
