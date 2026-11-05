@@ -806,6 +806,8 @@ function dimWFor(pw){const o={};S.dims.forEach(d=>o[d.id]=(+pw[d.pid]||0)/nIn(d.
 function ensureCat(c){S.cats=S.cats||{};if(!S.cats[c]){const pw={};S.persp.forEach(p=>pw[p.id]=5);const sc=S.scenarios&&S.scenarios[0];if(sc&&sc.pw)Object.assign(pw,sc.pw);S.cats[c]={pw,ovr:{}};}
   const C=S.cats[c];C.ovr=C.ovr||{};S.persp.forEach(p=>{if(C.pw[p.id]===undefined)C.pw[p.id]=5;});return C;}
 const curPW=()=>ensureCat(S.curCat).pw;
+// stakeholders are kept per subcategory; new subcategories start from the imported/example list
+function stakeOf(d,c){const C=ensureCat(c||S.curCat);if(!C.stake)C.stake=JSON.parse(JSON.stringify(S.stakeSeed||{}));return C.stake[d.id]||(C.stake[d.id]=[]);}
 function syncW(){const pw=curPW();S.dims.forEach(d=>d.weight=(+pw[d.pid]||0)/nIn(d.pid));}
 function applyCat(){const names=catNames();if(!names.includes(S.curCat))S.curCat=names[0]||'Unassigned';ensureCat(S.curCat);
   S.suppliers=S.sup.filter(s=>catOf(s)===S.curCat);syncW();}
@@ -814,6 +816,8 @@ function normalize(o){
   o.scenarios=(o.scenarios||[]).map(sc=>{if(sc.pw)return sc;const pw={};o.persp.forEach(p=>{pw[p.id]=o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+((sc.weights||{})[d.id])||0),0);});return {id:sc.id,name:sc.name,pw};});
   if(!Object.keys(o.cats).length){const pw={};o.persp.forEach(p=>{pw[p.id]=Math.min(10,Math.round(o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+d.weight||0),0)*10)/10);});
     [...new Set(o.sup.map(s=>((s.facts&&s.facts.cat)||'').trim()||'Unassigned'))].forEach(c=>o.cats[c]={pw:Object.assign({},pw),ovr:{}});}
+  if(o.dims.some(d=>d.stake)){const seed={};o.dims.forEach(d=>{if(d.stake){seed[d.id]=d.stake;delete d.stake;}});o.stakeSeed=seed;
+    Object.values(o.cats).forEach(C=>{C.stake=C.stake||{};Object.keys(seed).forEach(k=>{if(!C.stake[k])C.stake[k]=JSON.parse(JSON.stringify(seed[k]));});});}
   if(!o.final){const pw={};o.persp.forEach(p=>pw[p.id]=5);o.final={pw,sel:{}};}o.final.sel=o.final.sel||{};
   return o;}
 function catEval(c){return evaluate(dimWFor(ensureCat(c).pw),S.sup.filter(s=>catOf(s)===c));}
@@ -1241,10 +1245,10 @@ document.getElementById('depCty').addEventListener('change',e=>{S.depCty=e.targe
 /* ---------- stakeholders per criterion ---------- */
 const ROLES=['Provide input','Consult','Validate','Inform'];
 function stakeHTML(d){
-  const list=(d.stake||[]).map((x,i)=>`<span class="stk-item${x.done?' done':''}" data-i="${i}"><span class="who" title="${esc(x.name)}">${esc(x.name)}</span>`+
+  const list=stakeOf(d).map((x,i)=>`<span class="stk-item${x.done?' done':''}" data-i="${i}"><span class="who" title="${esc(x.name)}">${esc(x.name)}</span>`+
     `<select aria-label="Role of ${esc(x.name)}">${ROLES.map(r=>`<option${r===x.role?' selected':''}>${r}</option>`).join('')}</select>`+
     `<label title="Tick when their input or validation is in"><input type="checkbox"${x.done?' checked':''}> done</label><button aria-label="Remove ${esc(x.name)}" title="Remove">×</button></span>`).join('');
-  const done=(d.stake||[]).filter(x=>x.done).length,n=(d.stake||[]).length;
+  const done=stakeOf(d).filter(x=>x.done).length,n=stakeOf(d).length;
   return `<div class="stk"><div class="stk-h"><h3>Stakeholders for this criterion</h3><span class="small muted">${n?`${done} of ${n} done`:'Who should give input, be consulted or validate the scores?'}</span></div>`+
     (n?`<div class="stk-list">${list}</div>`:'')+
     `<div class="stk-add"><input placeholder="Name or role, e.g. Head of Quality" aria-label="Stakeholder name"><select aria-label="Stakeholder role">${ROLES.map(r=>`<option>${r}</option>`).join('')}</select><button class="small">+ Add</button></div></div>`;
@@ -1252,16 +1256,16 @@ function stakeHTML(d){
 function wireStake(host,d){
   const box=host.querySelector('.stk');if(!box)return;
   const redraw=()=>{const nb=document.createElement('div');nb.innerHTML=stakeHTML(d);box.replaceWith(nb.firstChild);wireStake(host,d);save();};
-  box.querySelectorAll('.stk-item').forEach(el=>{const x=d.stake[+el.dataset.i];
+  box.querySelectorAll('.stk-item').forEach(el=>{const x=stakeOf(d)[+el.dataset.i];
     el.querySelector('select').addEventListener('change',e=>{x.role=e.target.value;save();});
     el.querySelector('input[type=checkbox]').addEventListener('change',e=>{x.done=e.target.checked;redraw();});
-    el.querySelector('button').addEventListener('click',()=>{d.stake.splice(+el.dataset.i,1);redraw();});});
+    el.querySelector('button').addEventListener('click',()=>{stakeOf(d).splice(+el.dataset.i,1);redraw();});});
   const inp=box.querySelector('.stk-add input'),sel=box.querySelector('.stk-add select');
-  const add=()=>{const v=inp.value.trim();if(!v)return;d.stake=d.stake||[];d.stake.push({name:v,role:sel.value,done:false});redraw();const ni=host.querySelector('.stk-add input');if(ni)ni.focus();};
+  const add=()=>{const v=inp.value.trim();if(!v)return;stakeOf(d).push({name:v,role:sel.value,done:false});redraw();const ni=host.querySelector('.stk-add input');if(ni)ni.focus();};
   box.querySelector('.stk-add button').addEventListener('click',add);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();add();}});
 }
-function stakeToText(d){return (d.stake||[]).map(x=>`${x.name} [${x.role}${x.done?', done':''}]`).join('; ');}
+function stakeToText(d){return stakeOf(d).map(x=>`${x.name} [${x.role}${x.done?', done':''}]`).join('; ');}
 function stakeFromText(t){return String(t||'').split(/\s*[;\n]\s*/).filter(Boolean).map(part=>{const m=/^(.*?)\s*\[([^\]]*)\]\s*$/.exec(part);
   if(!m)return {name:part,role:ROLES[0],done:false};const bits=m[2].split(',').map(b=>b.trim());const role=ROLES.find(r=>r.toLowerCase()===(bits[0]||'').toLowerCase())||ROLES[0];
   return {name:m[1],role,done:bits.slice(1).some(b=>/^done$/i.test(b))};});}
@@ -1392,9 +1396,9 @@ function talkingPoints(k){
   if(k==='profile'){inRun.slice(0,3).forEach(r=>{let lo=null;S.dims.forEach(d=>{const v=S.scores[r.s.id][d.id];if(!lo||v<lo.v)lo={d,v};});
     if(lo)pts.push(`<b>${esc(r.s.name)}</b>: weakest on ${esc(lo.d.name)} (${lo.v})${lo.v<=2?', a likely development area':''}.`);});}
   if(k==='wrap'){
-    const open=S.dims.filter(d=>(d.stake||[]).some(x=>!x.done));
+    const open=S.dims.filter(d=>stakeOf(d).some(x=>!x.done));
     pts.push(open.length?`Stakeholder input still open on: ${open.map(d=>esc(d.short||shorten(d.name))).join(', ')}.`:'All listed stakeholders are marked done.');
-    const none=S.dims.filter(d=>!(d.stake||[]).length);if(none.length)pts.push(`No stakeholders named yet for ${none.length} criteri${none.length>1?'a':'on'}.`);
+    const none=S.dims.filter(d=>!stakeOf(d).length);if(none.length)pts.push(`No stakeholders named yet for ${none.length} criteri${none.length>1?'a':'on'}.`);
   }
   return pts;
 }
@@ -1451,7 +1455,7 @@ function workshopSummary(){
   FSTEPS.forEach(x=>{const t=facNote(x.k).trim();if(t)L.push(`### ${x.t}`,``,t,``);});
   if(!FSTEPS.some(x=>facNote(x.k).trim()))L.push(`_None captured._`,``);
   L.push(`## Stakeholder input per criterion`,``);
-  S.dims.forEach(d=>{const st=d.stake||[];L.push(`- **${d.name}**: ${st.length?st.map(x=>`${x.name} (${x.role}${x.done?', done':', open'})`).join('; '):'none named'}`);});
+  S.dims.forEach(d=>{const st=stakeOf(d);L.push(`- **${d.name}**: ${st.length?st.map(x=>`${x.name} (${x.role}${x.done?', done':', open'})`).join('; '):'none named'}`);});
   const sn=S.suppliers.filter(s=>supNoteOf(s.id));if(sn.length){L.push(``,`## Supplier notes`,``);sn.forEach(s=>L.push(`- **${s.name}**: ${supNoteOf(s.id)}`));}
   return L.join('\n')+'\n';
 }
