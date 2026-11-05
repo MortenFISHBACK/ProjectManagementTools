@@ -164,6 +164,10 @@ td.r,th.r{text-align:right}
 .addrow{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
 .addrow .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
 .riskrow td:first-child{font-weight:600}
+tr.sel{background:var(--hl-soft)}
+tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--hl)}
+.star{border:0;background:transparent;padding:0 4px;font-size:1.15rem;line-height:1;color:var(--amber)}
+.star[aria-pressed="false"]{color:var(--muted)}
 
 /* Drawer + dialog */
 .overlay{position:fixed;inset:0;background:rgba(11,26,23,.45);z-index:30}
@@ -330,18 +334,18 @@ function seedData(){
 
 /* ---------- State ---------- */
 const KEY='portfolio-tracker-v1';
-const S={projects:null,f:{l1:'All',l2:'All',region:'All',status:'All',gcl:'All'},drill:null,sel:'all',search:'',focusOnly:false,author:'Morten'};
+const S={projects:null,f:{l1:'All',l2:'All',region:'All',status:'All',gcl:'All',focus:'All'},drill:null,sel:'all',search:'',showAll:false,author:'Morten'};
 try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(Array.isArray(d.projects))S.projects=d.projects;if(d.author)S.author=d.author}}catch(e){}
 if(!S.projects)S.projects=seedData();
 function save(){try{localStorage.setItem(KEY,JSON.stringify({projects:S.projects,author:S.author}))}catch(e){}}
 const P=id=>S.projects.find(p=>p.id===id);
-function inView(){const f=S.f;return S.projects.filter(p=>(f.l1==='All'||p.l1===f.l1)&&(f.l2==='All'||p.l2===f.l2)&&(f.region==='All'||p.region===f.region)&&(f.status==='All'||p.status===f.status)&&(f.gcl==='All'||p.gcl===f.gcl))}
+function inView(){const f=S.f;return S.projects.filter(p=>(f.l1==='All'||p.l1===f.l1)&&(f.l2==='All'||p.l2===f.l2)&&(f.region==='All'||p.region===f.region)&&(f.status==='All'||p.status===f.status)&&(f.gcl==='All'||p.gcl===f.gcl)&&(f.focus==='All'||(f.focus==='Focus only')===!!p.focus))}
 
 /* ---------- Filters ---------- */
 function uniq(k){return[...new Set(S.projects.map(p=>p[k]))].sort()}
 function renderFilters(){
   const sel=(id,label,opts,val)=>`<label for="f-${id}">${label}<select id="f-${id}" data-f="${id}">${['All',...opts].map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
-  $('#filters').innerHTML=sel('l1','L1 category',uniq('l1'),S.f.l1)+sel('l2','L2 category',uniq('l2'),S.f.l2)+sel('region','Region',uniq('region'),S.f.region)+sel('status','Status',['Active','Completed'],S.f.status)+sel('gcl','GCL',uniq('gcl'),S.f.gcl)
+  $('#filters').innerHTML=sel('l1','L1 category',uniq('l1'),S.f.l1)+sel('l2','L2 category',uniq('l2'),S.f.l2)+sel('region','Region',uniq('region'),S.f.region)+sel('status','Status',['Active','Completed'],S.f.status)+sel('gcl','GCL',uniq('gcl'),S.f.gcl)+sel('focus','Focus projects',['Focus only','Not focus'],S.f.focus)
    +`<span class="muted" style="font-size:.82rem;margin-left:auto">${inView().length} of ${S.projects.length} projects</span>`;
 }
 document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.f;if(k){S.f[k]=e.target.value;render()}});
@@ -446,27 +450,28 @@ function renderKPI(){
 function ragHtml(h){return`<span class="rag ${h}" title="${HEALTH[h]}"><i></i>${HEALTH[h]}</span>`}
 
 /* ---------- Board page ---------- */
-function boardList(){const q=S.search.toLowerCase();return inView().filter(p=>(!S.focusOnly||p.focus)&&(!q||(p.name+' '+p.id+' '+p.gcl).toLowerCase().includes(q)))}
+function rankVal(p){return p.benefits.filter(b=>b.year===2026&&b.type!=='co2').reduce((a,b)=>a+b.amount,0)}
+function boardList(){const q=S.search.toLowerCase();return inView().filter(p=>!q||(p.name+' '+p.id+' '+p.gcl).toLowerCase().includes(q)).sort((a,b)=>(b.focus-a.focus)||rankVal(b)-rankVal(a))}
 function renderBoard(){
   const el=$('#page-board');const list=boardList();
   if(S.sel!=='all'&&!P(S.sel))S.sel='all';
   const p=S.sel==='all'?null:P(S.sel);
+  const shown=S.showAll?list:list.slice(0,10);
+  if(p&&!shown.includes(p))shown.push(p);
   const scope=p?[p]:list;
   const allActions=scope.flatMap(x=>x.actions.map(a=>({...a,pid:x.id,pname:x.name})));
   const allRisks=scope.flatMap(x=>x.risks.map(r=>({...r,pid:x.id,pname:x.name}))).sort((a,b)=>(a.status==='Closed')-(b.status==='Closed')||LVL[riskSev(b)]-LVL[riskSev(a)]);
-  el.innerHTML=`<div class="board">
-   <aside class="rail">
-     <div class="tools">
-       <input id="search" type="search" placeholder="Search project, ID or GCL" value="${esc(S.search)}" aria-label="Search projects">
-       <label><input type="checkbox" id="focusOnly" ${S.focusOnly?'checked':''}> Focus projects only</label>
-     </div>
-     <div class="plist" role="list">
-       <button class="pitem" data-sel="all" aria-current="${S.sel==='all'}"><span></span><span class="nm">All projects in view</span><span class="chip">${list.length}</span><span class="meta">Every action and risk across the filtered portfolio</span></button>
-       ${list.map(x=>{const oa=x.actions.filter(a=>a.col!=='done').length;return`<button class="pitem" data-sel="${esc(x.id)}" aria-current="${S.sel===x.id}"><span class="rag ${x.health}" title="${HEALTH[x.health]}"><i></i></span><span class="nm">${esc(x.name)}</span><span class="chip ${x.gate===6?'ver':'gate'}">${GSHORT[x.gate]}</span><span class="meta">${esc(x.id)} · ${esc(x.gcl)} · ${oa} open action${oa===1?'':'s'}</span></button>`}).join('')}
-     </div>
-   </aside>
-   <div class="sheet">
-     ${p?sheetHtml(p):`<div class="panel"><div class="panel-head"><h2>All projects in view</h2><span class="hint">${list.length} projects · ${allActions.filter(a=>a.col!=='done').length} open actions · ${allRisks.filter(r=>r.status!=='Closed').length} open risks</span></div><div class="muted" style="font-size:.88rem">Pick a project on the left to see its status sheet and to add actions or risks. Cards here are tagged with their project.</div></div>`}
+  el.innerHTML=`<div class="sheet">
+   <div class="panel">
+     <div class="panel-head"><h2>${S.showAll||list.length<=10?'Projects':'Top 10 projects'}</h2><span class="hint">${shown.length} of ${list.length} shown. Focus projects first, then by 2026 value. Click a row to see its actions and risks.</span>
+       <input id="search" type="search" placeholder="Search project, ID or GCL" value="${esc(S.search)}" aria-label="Search projects" style="margin-left:auto;min-width:200px"></div>
+     <div class="tbl-wrap"><table class="summary"><thead><tr><th>Focus</th><th>Project</th><th>GCL</th><th>Stage</th><th>Status</th><th>Output</th><th class="r">Open actions</th><th class="r">Open risks</th><th>Finalization</th></tr></thead><tbody>
+     ${shown.map(x=>{const oa=x.actions.filter(a=>a.col!=='done').length,od=x.actions.filter(a=>a.col!=='done'&&a.due&&a.due<TODAY).length,or=x.risks.filter(r=>r.status!=='Closed').length;
+       return`<tr class="click ${S.sel===x.id?'sel':''}" data-sel="${esc(x.id)}" tabindex="0" aria-selected="${S.sel===x.id}"><td><button class="star" data-star="${esc(x.id)}" aria-pressed="${x.focus}" aria-label="${x.focus?'Remove from':'Mark as'} focus project" title="${x.focus?'Focus project':'Mark as focus project'}">${x.focus?'★':'☆'}</button></td><td><b>${esc(x.name)}</b><div class="muted" style="font-size:.78rem">${esc(x.id)} · ${esc(x.l2)}</div></td><td style="white-space:nowrap">${esc(x.gcl)}</td><td><span class="chip ${x.gate===6?'ver':'gate'}">${GSHORT[x.gate]}</span></td><td>${ragHtml(x.health)}</td><td style="min-width:160px">${esc(x.output)}</td><td class="r num">${oa}${od?` <span class="warn">(${od} overdue)</span>`:''}</td><td class="r num">${or}</td><td class="num">${esc(x.finalize)}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">No projects match these filters.</td></tr>'}
+     </tbody></table></div>
+     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">${list.length>10?`<button class="small" id="toggleAll">${S.showAll?'Show top 10':'Show all '+list.length}</button>`:''}${p?`<button class="small" data-sel="all">Show actions and risks for all ${list.length} projects</button>`:''}</div>
+   </div>
+     ${p?sheetHtml(p):`<div class="muted" style="font-size:.88rem">Showing actions and risks for all ${list.length} projects in view. Pick a project above to see its status sheet and to add actions or risks.</div>`}
      <div class="panel">
        <div class="panel-head"><h2>Actions</h2><span class="hint">Drag cards between columns, or open a card to move it, edit it and add comments.</span></div>
        <div class="kanban">${COLS.map(c=>{const cards=allActions.filter(a=>a.col===c.key).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
@@ -486,7 +491,7 @@ function renderBoard(){
          <select id="nr-lik" aria-label="Likelihood"><option value="High">Likelihood: High</option><option value="Medium" selected>Likelihood: Medium</option><option value="Low">Likelihood: Low</option></select>
          <button class="small primary" type="submit">Add risk</button></form>`:''}
      </div>
-   </div></div>`;
+   </div>`;
   wireBoard();
 }
 function cardHtml(a,showProj){const over=a.col!=='done'&&a.due&&a.due<TODAY;
@@ -510,8 +515,9 @@ function sheetHtml(p){
 function wireBoard(){
   const el=$('#page-board');
   const s=$('#search',el);s.addEventListener('input',()=>{S.search=s.value;const pos=s.selectionStart;renderBoard();const n=$('#search');n.focus();n.setSelectionRange(pos,pos)});
-  $('#focusOnly',el).addEventListener('change',e=>{S.focusOnly=e.target.checked;renderBoard()});
-  el.querySelectorAll('[data-sel]').forEach(b=>b.addEventListener('click',()=>{S.sel=b.dataset.sel;renderBoard();scrollTo({top:0})}));
+  const tg=$('#toggleAll',el);if(tg)tg.addEventListener('click',()=>{S.showAll=!S.showAll;renderBoard()});
+  el.querySelectorAll('[data-star]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const x=P(b.dataset.star);x.focus=!x.focus;save();render()}));
+  el.querySelectorAll('[data-sel]').forEach(b=>{const go=()=>{S.sel=(b.dataset.sel===S.sel&&b.tagName==='TR')?'all':b.dataset.sel;renderBoard()};b.addEventListener('click',go);b.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target===b)go()})});
   const p=S.sel==='all'?null:P(S.sel);
   if(p){
     el.querySelectorAll('[data-pf]').forEach(i=>i.addEventListener('change',()=>{const k=i.dataset.pf;
@@ -606,7 +612,7 @@ function openImport(){
   document.addEventListener('keydown',escClose);
   $('#layer').querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeLayer));
   $('#csvFile').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();
-    rd.onload=()=>{try{const res=importCSV(String(rd.result));if(!res.projects.length)throw new Error('No projects found.');S.projects=res.projects;S.sel='all';S.drill=null;S.f={l1:'All',l2:'All',region:'All',status:'All',gcl:'All'};save();closeLayer();render();toast(`Imported ${res.n} projects${res.skipped?`, skipped ${res.skipped} rows`:''}`)}
+    rd.onload=()=>{try{const res=importCSV(String(rd.result));if(!res.projects.length)throw new Error('No projects found.');S.projects=res.projects;S.sel='all';S.drill=null;S.f={l1:'All',l2:'All',region:'All',status:'All',gcl:'All',focus:'All'};save();closeLayer();render();toast(`Imported ${res.n} projects${res.skipped?`, skipped ${res.skipped} rows`:''}`)}
       catch(err){$('#impMsg').innerHTML=`<span class="warn">${esc(err.message)}</span>`}};rd.readAsText(file)});
 }
 
@@ -622,7 +628,7 @@ $('#monthLbl').textContent='Reporting month: '+REPORT_MONTH+' · compared with '
 addEventListener('hashchange',()=>{hideTip();render()});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(page()==='kpi')renderKPI()},150)});
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-open]');if(t){S.sel=t.dataset.open;S.search='';S.focusOnly=false;location.hash='board';return}
+  const t=e.target.closest('[data-open]');if(t){S.sel=t.dataset.open;S.search='';location.hash='board';return}
   if(e.target.closest('[data-act="clearDrill"]')){S.drill=null;renderKPI()}
 });
 document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-open]');if(t&&e.key==='Enter'){t.click()}});
