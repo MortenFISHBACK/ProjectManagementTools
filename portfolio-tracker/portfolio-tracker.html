@@ -1,0 +1,634 @@
+<title>Portfolio Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: dark-green header band with page tabs; KPI page = filters, stat tiles, two pipeline charts, savings small multiples, project table.
+   Board page = project list rail + project sheet (status, Sievo gate, PM checklist), action board, risk register. */
+/* Novonesis palette: greens carry the page, blue marks highlights and "in progress / active". */
+:root{
+  --bg:#f2fff3; --surface:#ffffff; --surface-2:#e0f2ee; --fg:#173630; --fg-2:#3d5a52; --muted:#6b8079;
+  --line:#b3ded6; --line-2:#e0f2ee; --accent:#173630; --accent-fg:#ffffff;
+  --brand:#173630; --brand-fg:#ffffff; --brand-soft:#bfe6c4;
+  --hl:#3958fe; --hl-soft:#dee3ff;
+  --good:#2f7d39; --good-soft:#dcf1df; --critical:#b4442f; --critical-soft:#f8e1dc; --amber:#b88a00; --amber-soft:#fbf0c6;
+  --c-completed:#173630; --c-active:#a1b0ff; --c-verified:#173630; --c-enabled:#73c87e; --c-progress:#a1b0ff;
+  --on-strong:#ffffff; --on-soft:#0b1a17;
+  --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --radius:8px; --shadow:0 1px 2px rgba(23,54,48,.06),0 4px 14px rgba(23,54,48,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e211d; --surface:#173630; --surface-2:#1f4239; --fg:#f2fff3; --fg-2:#b3ded6; --muted:#8fb3a9;
+    --line:#2d5a4f; --line-2:#23493f; --accent:#bfe6c4; --accent-fg:#173630;
+    --brand:#0b1a17; --brand-fg:#f2fff3; --brand-soft:#bfe6c4;
+    --hl:#a1b0ff; --hl-soft:#26305c;
+    --good:#73c87e; --good-soft:#1f4a2a; --critical:#ee9886; --critical-soft:#4a2620; --amber:#e3b93a; --amber-soft:#4a3d12;
+    --c-completed:#bfe6c4; --c-active:#667dff; --c-verified:#bfe6c4; --c-enabled:#3b9746; --c-progress:#667dff;
+    --on-strong:#0b1a17; --on-soft:#0b1a17;
+    --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e211d; --surface:#173630; --surface-2:#1f4239; --fg:#f2fff3; --fg-2:#b3ded6; --muted:#8fb3a9;
+  --line:#2d5a4f; --line-2:#23493f; --accent:#bfe6c4; --accent-fg:#173630;
+  --brand:#0b1a17; --brand-fg:#f2fff3; --brand-soft:#bfe6c4;
+  --hl:#a1b0ff; --hl-soft:#26305c;
+  --good:#73c87e; --good-soft:#1f4a2a; --critical:#ee9886; --critical-soft:#4a2620; --amber:#e3b93a; --amber-soft:#4a3d12;
+  --c-completed:#bfe6c4; --c-active:#667dff; --c-verified:#bfe6c4; --c-enabled:#3b9746; --c-progress:#667dff;
+  --on-strong:#0b1a17; --on-soft:#0b1a17;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45;padding-block:0 40px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.02rem;font-weight:600}
+h3{font-size:.92rem;font-weight:600}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 12px;line-height:1.2}
+button:hover{border-color:var(--hl)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.small{padding:3px 8px;font-size:.85rem}
+button.ghost{border-color:transparent;background:transparent;color:var(--fg-2)}
+button.danger{color:var(--critical)}
+input,select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+textarea{resize:vertical;width:100%}
+:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Header band */
+.band{background:var(--brand);color:var(--brand-fg)}
+.band .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:14px}
+.band h1{color:var(--brand-soft)}
+.band .month{font-size:.85rem;opacity:.85}
+.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tabs a{color:var(--brand-fg);text-decoration:none;padding:7px 14px;border-radius:6px;font-weight:600;font-size:.92rem;border:1px solid transparent}
+.tabs a:hover{border-color:var(--brand-soft)}
+.tabs a[aria-current="page"]{background:var(--brand-soft);color:#173630}
+.band button{background:transparent;color:var(--brand-fg);border-color:rgba(191,230,196,.5)}
+.band button:hover{border-color:var(--brand-soft)}
+.notice{font-size:.82rem;color:var(--fg-2);padding-block:8px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.notice b{color:var(--fg)}
+.pill-sample{background:var(--amber-soft);color:var(--fg);border-radius:99px;padding:1px 9px;font-weight:600;font-size:.75rem}
+
+/* Filters */
+.filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-block:6px 16px}
+.filters label{display:flex;flex-direction:column;gap:3px;font-size:.75rem;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.filters select{font-size:.9rem;text-transform:none;letter-spacing:0;color:var(--fg);font-weight:400;min-width:120px}
+
+/* Panels */
+.panel{background:var(--surface);border:1px solid var(--line-2);border-radius:12px;box-shadow:var(--shadow);padding:16px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:10px}
+.panel-head .hint{font-size:.8rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--fg-2);margin-left:auto}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tile .val{font-family:var(--font-display);font-size:1.6rem;font-weight:700;line-height:1.1}
+.tile .val small{font-size:.8rem;font-weight:500;color:var(--muted);margin-left:4px}
+.tile .sub{font-size:.8rem;color:var(--fg-2);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.delta{display:inline-flex;align-items:center;gap:3px;border-radius:99px;padding:0 8px;font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--fg)}
+.delta.up{background:var(--good-soft)} .delta.down{background:var(--critical-soft)} .delta.flat{background:var(--surface-2);color:var(--fg-2)}
+.delta.up::before{content:"▲";font-size:.62rem;color:var(--good)} .delta.down::before{content:"▼";font-size:.62rem;color:var(--critical)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.grid-sav{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px}
+.sav h3{display:flex;justify-content:space-between;gap:8px}
+.sav h3 span{font-family:var(--font-body);font-weight:400;color:var(--muted);font-size:.8rem}
+.chart{width:100%;min-height:40px}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{font-family:var(--font-body)}
+.hit{fill:transparent;cursor:pointer}
+.hit:hover{fill:var(--hl-soft);opacity:.45}
+.selcol{fill:var(--hl-soft);opacity:.7}
+
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line-2);vertical-align:top}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--surface-2)}
+td.r,th.r{text-align:right}
+.chip{display:inline-block;border-radius:99px;padding:1px 8px;font-size:.76rem;font-weight:600;background:var(--surface-2);color:var(--fg);white-space:nowrap}
+.chip.gate{background:var(--hl-soft)}
+.chip.ver{background:var(--brand-soft);color:#173630}
+.chip.drill{background:var(--hl-soft);display:inline-flex;gap:6px;align-items:center}
+.chip.drill button{border:0;background:transparent;padding:0 2px;font-size:.9rem;line-height:1;color:var(--fg)}
+.rag{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;white-space:nowrap}
+.rag i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.rag.green i{background:var(--good)} .rag.amber i{background:var(--amber);border-radius:2px;transform:rotate(45deg) scale(.85)} .rag.red i{background:var(--critical);border-radius:2px}
+.sev{display:inline-block;border-radius:4px;padding:1px 7px;font-size:.74rem;font-weight:700;letter-spacing:.03em}
+.sev.High{background:var(--critical-soft)} .sev.Medium{background:var(--amber-soft)} .sev.Low{background:var(--surface-2);color:var(--fg-2)}
+
+/* Board */
+.board{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:start}
+.rail{position:sticky;top:12px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 24px)}
+.rail .tools{display:flex;flex-direction:column;gap:6px}
+.rail .tools label{font-size:.82rem;display:flex;gap:6px;align-items:center;color:var(--fg-2)}
+.plist{overflow:auto;display:flex;flex-direction:column;gap:4px;padding-right:4px;min-height:0}
+.pitem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 8px;align-items:center;text-align:left;width:100%;padding:8px 10px;border-radius:8px;background:transparent;border:1px solid transparent}
+.pitem:hover{background:var(--surface);border-color:var(--line-2)}
+.pitem[aria-current="true"]{background:var(--surface);border-color:var(--hl);box-shadow:var(--shadow)}
+.pitem .nm{font-weight:600;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitem .meta{grid-column:2 / 4;font-size:.75rem;color:var(--muted)}
+.pitem .chip{font-size:.7rem}
+.sheet{display:flex;flex-direction:column;gap:16px;min-width:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 18px;margin-top:12px}
+.fact{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fact .eyebrow{font-size:.68rem}
+.checklist{display:flex;flex-direction:column;gap:5px}
+.checklist label{display:flex;gap:7px;align-items:flex-start;font-size:.88rem}
+.checklist input{margin-top:3px;accent-color:var(--good)}
+.warn{color:var(--critical);font-size:.76rem;font-weight:600}
+.kanban{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.col{background:var(--surface-2);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px;min-width:0;border:2px dashed transparent}
+.col.over{border-color:var(--hl)}
+.col-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-weight:600;font-size:.9rem}
+.col-head .n{font-family:var(--font-body);font-size:.78rem;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:6px;cursor:grab;box-shadow:0 1px 1px rgba(23,54,48,.05);text-align:left;width:100%}
+.card:hover{border-color:var(--hl)}
+.card.dragging{opacity:.4}
+.card .t{font-size:.9rem;font-weight:600;line-height:1.3}
+.card .m{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.76rem;color:var(--fg-2);align-items:center}
+.card .ptag{font-size:.72rem;color:var(--muted)}
+.avatar{width:22px;height:22px;border-radius:50%;background:var(--brand-soft);color:#173630;font-size:.66rem;font-weight:700;display:inline-grid;place-items:center}
+.due.over{color:var(--critical);font-weight:600}
+.addrow{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.addrow .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
+.riskrow td:first-child{font-weight:600}
+
+/* Drawer + dialog */
+.overlay{position:fixed;inset:0;background:rgba(11,26,23,.45);z-index:30}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--bg);z-index:31;box-shadow:-8px 0 30px rgba(0,0,0,.2);display:flex;flex-direction:column;
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) 18px;overflow:auto;gap:12px}
+.drawer .row{display:flex;flex-direction:column;gap:4px}
+.drawer .row label{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.drawer .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.drawer input,.drawer select{width:100%}
+.comments{display:flex;flex-direction:column;gap:8px}
+.cmt{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-size:.88rem}
+.cmt .who{font-weight:600;font-size:.8rem}
+.cmt .who span{color:var(--muted);font-weight:400;margin-left:6px}
+.dlg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;background:var(--bg);z-index:31;border-radius:12px;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:12px}
+code{font-size:.82rem;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--brand);color:var(--brand-fg);padding:8px 16px;border-radius:8px;z-index:40;font-size:.9rem}
+
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:8px 10px;font-size:.82rem;min-width:150px}
+#tip .tt{font-weight:600;margin-bottom:4px}
+#tip .tr{display:flex;align-items:center;gap:8px;justify-content:space-between}
+#tip .tr i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px}
+
+@media (max-width:900px){.grid2{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:minmax(0,1fr)}.rail{position:static;max-height:none}.plist{max-height:260px}}
+@media (max-width:700px){.kanban{grid-template-columns:minmax(0,1fr)}.tabs{margin-left:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <div>
+      <h1>Portfolio Tracker</h1>
+      <div class="month" id="monthLbl"></div>
+    </div>
+    <nav class="tabs" aria-label="Pages">
+      <a href="#kpi" id="tab-kpi">KPI overview</a>
+      <a href="#board" id="tab-board">Projects board</a>
+    </nav>
+    <button id="importBtn" class="small">Import Sievo export</button>
+  </div>
+</header>
+<div class="wrap notice">
+  <span class="pill-sample">Sample data</span>
+  <span>Mock-up with invented projects and figures. Changes are saved in this browser only.</span>
+  <button class="small ghost" id="resetBtn">Reset sample data</button>
+</div>
+
+<main class="wrap">
+  <div class="filters" id="filters"></div>
+  <section id="page-kpi" hidden></section>
+  <section id="page-board" hidden></section>
+</main>
+<div id="tip" hidden></div>
+<div id="layer"></div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+const REPORT_MONTH='October 2026', PREV_MONTH='September 2026';
+const GATES=['G0 Pipeline','G1 Sign-off','G2 Evaluate','G3 Sign-off','G4 Sign-off','G5 Evaluate','Verified'];
+const GSHORT=['G0','G1','G2','G3','G4','G5','Verified'];
+const CHECK=[
+  {key:'charter',label:'Project charter',gate:1,note:'Scope, stakeholders, governance and project plan. Needed to move on from G1.'},
+  {key:'strategy',label:'Sourcing strategy',gate:3,note:'Initiatives, business case and project plan. Needed to move on from G3.'},
+  {key:'finance',label:'Approved by Finance',gate:4,note:'Expected outputs documented and approved. Needed to move on from G4.'}];
+const BEN=[
+  {key:'dcfg',label:'DCFG',unit:'mEUR'},
+  {key:'realized',label:'Realized savings',unit:'mEUR'},
+  {key:'avoid',label:'Cost avoidance',unit:'mEUR'},
+  {key:'co2',label:'CO2e reductions',unit:'t'},
+  {key:'risk',label:'Risk mitigation',unit:'mEUR'}];
+const YEARS=[2026,2027,2028];
+const STATES=[
+  {key:'Verified',color:'var(--c-verified)',ink:'var(--on-strong)'},
+  {key:'Enabled',color:'var(--c-enabled)',ink:'var(--on-soft)'},
+  {key:'In progress',color:'var(--c-progress)',ink:'var(--on-soft)'}];
+const STATUS=[
+  {key:'Completed',color:'var(--c-completed)',ink:'var(--on-strong)'},
+  {key:'Active',color:'var(--c-active)',ink:'var(--on-soft)'}];
+const COLS=[{key:'todo',label:'To do'},{key:'doing',label:'In progress'},{key:'done',label:'Done'}];
+const RISK_STATUS=['Open','Mitigating','Closed'];
+const LVL={High:3,Medium:2,Low:1};
+const HEALTH={green:'On track',amber:'At risk',red:'Off track'};
+const QUARTERS=['2026 Q4','2027 Q1','2027 Q2','2027 Q3','2027 Q4'];
+const TODAY=new Date().toISOString().slice(0,10);
+
+function fmt(v,unit){
+  if(unit==='t'){const a=Math.abs(v);return a>=1000?(v/1000).toFixed(1)+'K':Math.round(v).toLocaleString('en-US')}
+  return (Math.abs(v)<0.005?0:v).toFixed(2);
+}
+function fmtDelta(v,unit){const s=fmt(v,unit);return (v>0.0049||(unit==='t'&&v>=0.5)?'+':'')+s}
+function dcls(v,unit){const eps=unit==='t'?0.5:0.005;return v>eps?'up':v<-eps?'down':'flat'}
+function dateLbl(d){if(!d)return'No date';const x=new Date(d+'T00:00:00');return x.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function initials(n){return String(n||'?').replace(/[^A-Za-z .]/g,'').split(/[ .]+/).filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase()}
+function uid(){return Math.random().toString(36).slice(2,9)}
+function stateOf(p,year){if(p.gate===6)return year===2026?'Verified':'Enabled';if(p.gate>=4)return year===2026?'Enabled':'In progress';return'In progress'}
+function riskSev(r){const s=LVL[r.impact]*LVL[r.likelihood];return s>=6?'High':s>=3?'Medium':'Low'}
+
+/* ---------- Sample data ---------- */
+const SUBJECTS=[
+ ['Glycerol CO2 roadmap','Direct','Chemicals',true],['Caustic soda index pricing','Direct','Chemicals',true],['Contract coverage: solvents','Direct','Chemicals',true],
+ ['Sulphuric acid dual sourcing','Direct','Chemicals'],['Antifoam spec harmonisation','Direct','Chemicals'],['Phosphates volume consolidation','Direct','Chemicals'],
+ ['Filter aids qualification','Direct','Chemicals'],['Enzyme stabilisers second source','Direct','Chemicals'],
+ ['Dextrose contract renewal','Direct','Agri raw materials',true],['Soy peptone alternative source','Direct','Agri raw materials'],['Yeast extract CO2 reduction','Direct','Agri raw materials',true],
+ ['Glucose syrup regional supply','Direct','Agri raw materials'],['Ethanol supply security','Direct','Agri raw materials'],
+ ['Corrugated boxes tender','Direct','Packaging'],['IBC reconditioning loop','Direct','Packaging',true],['Plastic drums lightweighting','Direct','Packaging'],['Pallet pooling','Direct','Packaging'],
+ ['Ocean freight Asia to EU','Indirect','Logistics',true],['Road freight Nordics','Indirect','Logistics'],['Warehousing Germany','Indirect','Logistics'],['Courier services consolidation','Indirect','Logistics'],
+ ['Green electricity PPA','Indirect','Energy & utilities',true],['Steam supply contract','Indirect','Energy & utilities'],['Nitrogen supply','Indirect','Energy & utilities'],['Process water treatment','Indirect','Energy & utilities'],
+ ['Lab consumables catalogue','Indirect','Lab & MRO'],['Stainless spare parts','Indirect','Lab & MRO'],['Calibration services','Indirect','Lab & MRO']];
+const GCLS=['A. Jensen','L. Moreau','K. Sato','M. Okafor','S. Lindqvist','R. Patel'];
+const REGIONS=['EMEA','North America','LATAM','APAC'];
+const ACTIONS=['Establish governance and stakeholders','Prepare supplier workshop','Confirm date for first SteerCo','Align Legal and Quality on contract terms','Draft sourcing strategy','Pull baseline spend from Sievo','Submit business case to Finance','Run RFQ round 1','Negotiate index clause','Update project charter','Book quarterly supplier review','Write one-pager on sole-supply risk','Validate CO2 baseline with supplier','Finalize quality appendix','Agree volume forecast with Planning','Collect samples for qualification'];
+const RISKS=[
+ ['Stakeholder resources (especially Quality)','Agree named Quality contact and time box with site QA lead'],
+ ['Governance and SteerCo structure unclear','Propose SteerCo members and cadence at next category review'],
+ ['Sole-supply dependency','Start qualification of a second source; add safety stock'],
+ ['Price index volatility','Index-linked pricing with cap and floor'],
+ ['Supplier capacity constraint','Secure capacity reservation in contract'],
+ ['Finance approval delayed','Pre-align business case with BU controller'],
+ ['Long qualification time for new supplier','Run lab trials in parallel with commercial talks'],
+ ['Data gaps in CO2 baseline','Request product carbon footprint data from supplier']];
+const CMTS=['Discussed in monthly review, owner confirmed.','Waiting for input from Quality.','Supplier came back with a first draft.','Moved to next month, see SteerCo notes.','Done for EMEA, NA still open.'];
+
+function seedData(){
+  const r=rng(20261105), pick=a=>a[Math.floor(r()*a.length)];
+  const gateDist=[0,0,0,0,1,2,3,3,3,4,4,5,5,6,6,6,6];
+  const base={dcfg:.9,realized:1.1,avoid:.45,co2:2600,risk:4};
+  const addDays=n=>{const d=new Date('2026-11-05T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+  return SUBJECTS.map(([name,l1,l2,focus],i)=>{
+    const gate=pick(gateDist);
+    const cr=r();const status=(gate===6&&i%4!==0)||(gate>=4&&gate<6&&cr<.3)?'Completed':'Active';
+    const types=[];const pool=['dcfg','dcfg','realized','realized','avoid','co2','risk'];
+    const n=1+Math.floor(r()*2.4);
+    while(types.length<n){const t=pick(pool);if(!types.includes(t))types.push(t)}
+    const benefits=[];
+    types.forEach(t=>{
+      const b=base[t]*(.4+r()*1.4);
+      [[2026,1],[2027,r()<.6?.2+r()*.6:0],[2028,r()<.25?.05+r()*.2:0]].forEach(([y,f])=>{
+        if(!f)return;const amount=+(b*f).toFixed(t==='co2'?0:3);
+        const prev=r()<.3?+(amount*(1+(r()-.55)*.4)).toFixed(t==='co2'?0:3):amount;
+        benefits.push({type:t,year:y,amount,prev});
+      });
+    });
+    const gcl=GCLS[i%GCLS.length];
+    const health=gate===6?'green':pick(['green','green','green','amber','amber','red']);
+    const out=types.slice(0,2).map(t=>{const s=benefits.filter(b=>b.type===t).reduce((a,b)=>a+b.amount,0);const B=BEN.find(x=>x.key===t);return fmt(s,B.unit)+' '+(B.unit==='t'?'t CO2e':'mEUR '+B.label)}).join(' · ');
+    const actions=[];const na=2+Math.floor(r()*4);const usedA=new Set();
+    for(let k=0;k<na;k++){let t=pick(ACTIONS);if(usedA.has(t))continue;usedA.add(t);
+      const col=gate===6?pick(['done','done','doing']):pick(['todo','todo','doing','doing','done']);
+      const comments=r()<.4?[{who:pick(GCLS),when:addDays(-Math.floor(r()*20)),text:pick(CMTS)}]:[];
+      actions.push({id:uid(),title:t,owner:r()<.6?gcl:pick(GCLS),due:addDays(Math.floor(r()*70)-25),col,comments});}
+    const risks=[];const nr=gate===6?Math.floor(r()*2):1+Math.floor(r()*2);const usedR=new Set();
+    for(let k=0;k<nr;k++){const rr=pick(RISKS);if(usedR.has(rr[0]))continue;usedR.add(rr[0]);
+      risks.push({id:uid(),title:rr[0],mitigation:rr[1],impact:pick(['High','Medium','Medium','Low']),likelihood:pick(['High','Medium','Low']),owner:r()<.7?gcl:pick(GCLS),status:gate===6?'Closed':pick(['Open','Open','Mitigating']),comments:[]});}
+    return{ id:'#'+(2610+i*37), name,l1,l2,region:pick(REGIONS),gcl,gate,status,health,focus:!!focus,output:out,
+      finalize:gate===6?'2026 Q4':pick(QUARTERS),
+      checklist:{charter:gate>1||r()<.4,strategy:gate>3?r()<.85:r()<.15,finance:gate>4?r()<.85:false},
+      benefits,actions,risks};
+  });
+}
+
+/* ---------- State ---------- */
+const KEY='portfolio-tracker-v1';
+const S={projects:null,f:{l1:'All',l2:'All',region:'All',status:'All',gcl:'All'},drill:null,sel:'all',search:'',focusOnly:false,author:'Morten'};
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(Array.isArray(d.projects))S.projects=d.projects;if(d.author)S.author=d.author}}catch(e){}
+if(!S.projects)S.projects=seedData();
+function save(){try{localStorage.setItem(KEY,JSON.stringify({projects:S.projects,author:S.author}))}catch(e){}}
+const P=id=>S.projects.find(p=>p.id===id);
+function inView(){const f=S.f;return S.projects.filter(p=>(f.l1==='All'||p.l1===f.l1)&&(f.l2==='All'||p.l2===f.l2)&&(f.region==='All'||p.region===f.region)&&(f.status==='All'||p.status===f.status)&&(f.gcl==='All'||p.gcl===f.gcl))}
+
+/* ---------- Filters ---------- */
+function uniq(k){return[...new Set(S.projects.map(p=>p[k]))].sort()}
+function renderFilters(){
+  const sel=(id,label,opts,val)=>`<label for="f-${id}">${label}<select id="f-${id}" data-f="${id}">${['All',...opts].map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+  $('#filters').innerHTML=sel('l1','L1 category',uniq('l1'),S.f.l1)+sel('l2','L2 category',uniq('l2'),S.f.l2)+sel('region','Region',uniq('region'),S.f.region)+sel('status','Status',['Active','Completed'],S.f.status)+sel('gcl','GCL',uniq('gcl'),S.f.gcl)
+   +`<span class="muted" style="font-size:.82rem;margin-left:auto">${inView().length} of ${S.projects.length} projects</span>`;
+}
+document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.f;if(k){S.f[k]=e.target.value;render()}});
+
+/* ---------- Tooltip ---------- */
+const tip=$('#tip');
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'}
+function hideTip(){tip.hidden=true}
+function tipHtml(title,keys,parts,f){let tot=0;const rows=keys.map(k=>{const v=parts[k.key]||0;tot+=v;return`<div class="tr"><span><i style="background:${k.color}"></i>${esc(k.key)}</span><b class="num">${f(v)}</b></div>`}).reverse().join('');
+  return`<div class="tt">${esc(title)}</div>${rows}<div class="tr" style="border-top:1px solid var(--line-2);margin-top:4px;padding-top:4px"><span>Total</span><b class="num">${f(tot)}</b></div>`}
+
+/* ---------- Charts (hand-drawn SVG, one scale per chart) ---------- */
+function topRounded(x,y,w,h,r){r=Math.min(r,h,w/2);return`M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`}
+function rightRounded(x,y,w,h,r){r=Math.min(r,w,h/2);return`M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`}
+
+function colChart(el,{cols,keys,height=220,f=v=>String(v),deltas=null,unit,onClick,selected,labelLines=1}){
+  const W=Math.max(220,el.clientWidth||300);const padT=22,labH=labelLines*14+10,dH=deltas?26:0,H=height;
+  const plotH=H-padT-labH-dH;const n=cols.length;const band=W/n;const bw=Math.min(band*.58,54);
+  const max=Math.max(1e-9,...cols.map(c=>keys.reduce((a,k)=>a+(c.parts[k.key]||0),0)));
+  let s=`<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  s+=`<line x1="0" x2="${W}" y1="${padT+plotH+.5}" y2="${padT+plotH+.5}" style="stroke:var(--line)"/>`;
+  cols.forEach((c,i)=>{
+    const cx=band*i+band/2,x=cx-bw/2;let y=padT+plotH,tot=0;
+    if(selected!=null&&selected===i)s+=`<rect class="selcol" x="${band*i+2}" y="0" width="${band-4}" height="${padT+plotH}" rx="6"/>`;
+    const segs=keys.map(k=>({k,v:c.parts[k.key]||0})).filter(o=>o.v>0);
+    segs.forEach((o,j)=>{const h=o.v/max*plotH;tot+=o.v;const top=j===segs.length-1;const hh=top?h:Math.max(h-2,0.5);const yy=y-h;
+      s+=top?`<path d="${topRounded(x,yy,bw,hh,4)}" style="fill:${o.k.color}"/>`:`<rect x="${x}" y="${yy+(h-hh)}" width="${bw}" height="${hh}" style="fill:${o.k.color}"/>`;
+      if(hh>=16&&bw>=26&&segs.length>1)s+=`<text x="${cx}" y="${yy+hh/2+4+(top?0:h-hh)}" text-anchor="middle" font-size="11" font-weight="600" style="fill:${o.k.ink}" class="num">${f(o.v)}</text>`;
+      y-=h;});
+    s+=`<text x="${cx}" y="${y-6}" text-anchor="middle" font-size="12" font-weight="600" style="fill:var(--fg)" class="num">${f(tot)}</text>`;
+    const lines=String(c.label).split('\n');
+    lines.forEach((ln,li)=>{s+=`<text x="${cx}" y="${padT+plotH+16+li*13}" text-anchor="middle" font-size="11.5" style="fill:var(--fg-2)">${esc(ln)}</text>`});
+    if(deltas){const d=deltas[i],cl=dcls(d,unit);const t=fmtDelta(d,unit);const tw=Math.min(band-6,t.length*7+20);const dy=H-22;
+      s+=`<rect x="${cx-tw/2}" y="${dy}" width="${tw}" height="18" rx="9" style="fill:var(--${cl==='up'?'good-soft':cl==='down'?'critical-soft':'surface-2'})"/>`;
+      s+=`<text x="${cx}" y="${dy+13}" text-anchor="middle" font-size="11" font-weight="600" style="fill:var(--fg)" class="num">${cl==='up'?'▲ ':cl==='down'?'▼ ':''}${t}</text>`;}
+    s+=`<rect class="hit" data-i="${i}" x="${band*i}" y="0" width="${band}" height="${padT+plotH+labH}"/>`;
+  });
+  s+='</svg>';el.innerHTML=s;
+  el.querySelectorAll('.hit').forEach(h=>{const c=cols[+h.dataset.i];
+    h.addEventListener('mousemove',e=>showTip(e,tipHtml(c.title||c.label.replace('\n',' '),keys,c.parts,f)));h.addEventListener('mouseleave',hideTip);
+    if(onClick)h.addEventListener('click',()=>onClick(+h.dataset.i));else h.style.cursor='default';});
+}
+function barChart(el,{rows,keys,f=v=>String(v),onClick,selected}){
+  const W=Math.max(260,el.clientWidth||300);const labW=Math.min(150,W*.36),rowH=34,padR=34,H=rows.length*rowH+18;
+  const max=Math.max(1e-9,...rows.map(r=>keys.reduce((a,k)=>a+(r.parts[k.key]||0),0)));const plotW=W-labW-padR;
+  let s=`<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  [0,.5,1].forEach(t=>{const gx=labW+plotW*t;s+=`<line x1="${gx}" x2="${gx}" y1="0" y2="${H-18}" style="stroke:var(--line-2)" stroke-dasharray="2 3"/><text x="${gx}" y="${H-4}" text-anchor="middle" font-size="10.5" style="fill:var(--muted)">${Math.round(max*t)}</text>`});
+  rows.forEach((r,i)=>{const y=i*rowH+7,bh=20;let x=labW,tot=0;
+    if(selected!=null&&selected===i)s+=`<rect class="selcol" x="0" y="${i*rowH+1}" width="${W}" height="${rowH-2}" rx="6"/>`;
+    s+=`<text x="${labW-8}" y="${y+bh/2+4}" text-anchor="end" font-size="12" style="fill:var(--fg-2)">${esc(r.label)}</text>`;
+    const segs=keys.map(k=>({k,v:r.parts[k.key]||0})).filter(o=>o.v>0);
+    segs.forEach((o,j)=>{const w=o.v/max*plotW;tot+=o.v;const last=j===segs.length-1;const ww=last?w:Math.max(w-2,.5);
+      s+=last?`<path d="${rightRounded(x,y,ww,bh,4)}" style="fill:${o.k.color}"/>`:`<rect x="${x}" y="${y}" width="${ww}" height="${bh}" style="fill:${o.k.color}"/>`;
+      if(ww>=22&&segs.length>1)s+=`<text x="${x+ww/2}" y="${y+bh/2+4}" text-anchor="middle" font-size="11" font-weight="600" style="fill:${o.k.ink}" class="num">${f(o.v)}</text>`;x+=w;});
+    s+=`<text x="${x+6}" y="${y+bh/2+4}" font-size="12" font-weight="600" style="fill:var(--fg)" class="num">${f(tot)}</text>`;
+    s+=`<rect class="hit" data-i="${i}" x="0" y="${i*rowH}" width="${W}" height="${rowH}"/>`;});
+  s+='</svg>';el.innerHTML=s;
+  el.querySelectorAll('.hit').forEach(h=>{const r=rows[+h.dataset.i];
+    h.addEventListener('mousemove',e=>showTip(e,tipHtml(r.label,keys,r.parts,f)));h.addEventListener('mouseleave',hideTip);
+    if(onClick)h.addEventListener('click',()=>onClick(+h.dataset.i));});
+}
+const legend=keys=>`<div class="legend">${keys.map(k=>`<span><i style="background:${k.color}"></i>${esc(k.key)}</span>`).join('')}</div>`;
+
+/* ---------- KPI page ---------- */
+function sumBen(ps,type,year,field='amount'){let s=0;ps.forEach(p=>p.benefits.forEach(b=>{if(b.type===type&&(year==null||b.year===year))s+=+b[field]||0}));return s}
+function renderKPI(){
+  const ps=inView(),el=$('#page-kpi');
+  const act=ps.filter(p=>p.status==='Active').length;
+  let tiles=`<div class="tile"><span class="eyebrow">Projects in pipeline</span><span class="val num">${ps.length}</span><span class="sub">${act} active · ${ps.length-act} completed</span></div>`;
+  BEN.forEach(B=>{const v=sumBen(ps,B.key,2026),d=v-sumBen(ps,B.key,2026,'prev');
+    tiles+=`<div class="tile"><span class="eyebrow">${B.label} 2026</span><span class="val num">${fmt(v,B.unit)}<small>${B.unit}</small></span><span class="sub"><span class="delta ${dcls(d,B.unit)}">${fmtDelta(d,B.unit)}</span> vs ${PREV_MONTH.split(' ')[0]}</span></div>`});
+  const drillTxt=S.drill?(S.drill.kind==='gate'?'Gate: '+GATES[S.drill.val]:'Benefit: '+BEN[S.drill.val].label):'';
+  let rows=ps;if(S.drill){rows=S.drill.kind==='gate'?ps.filter(p=>p.gate===S.drill.val):ps.filter(p=>p.benefits.some(b=>b.type===BEN[S.drill.val].key))}
+  rows=[...rows].sort((a,b)=>(b.focus-a.focus)||(b.gate-a.gate));
+  el.innerHTML=`
+  <div class="tiles">${tiles}</div>
+  <div class="grid2">
+    <div class="panel"><div class="panel-head"><h2>Projects by benefit type</h2>${legend(STATUS.slice().reverse())}</div><div class="chart" id="ch-ben"></div><div class="hint muted" style="font-size:.78rem">A project with several benefit types counts once per type. Click a bar to list its projects.</div></div>
+    <div class="panel"><div class="panel-head"><h2>Projects by maturity</h2>${legend(STATUS.slice().reverse())}</div><div class="chart" id="ch-gate"></div><div class="hint muted" style="font-size:.78rem">Stage in Sievo. Click a column to list its projects.</div></div>
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-head"><h2>Savings by year</h2><span class="hint">Chips show the change from ${PREV_MONTH} to ${REPORT_MONTH}</span>${legend(STATES)}</div>
+    <div class="grid-sav">${BEN.map(B=>`<div class="sav"><h3>${B.label}<span>${B.unit}</span></h3><div class="chart" id="sav-${B.key}"></div></div>`).join('')}</div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h2>Projects</h2>${S.drill?`<span class="chip drill">${esc(drillTxt)}<button data-act="clearDrill" aria-label="Clear selection">×</button></span>`:''}<span class="hint">${rows.length} shown. Click a project to open it on the board.</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Project</th><th>Category</th><th>GCL</th><th>Stage</th><th>Status</th><th>Output</th><th class="r">Open actions</th><th class="r">Open risks</th><th>Finalization</th></tr></thead><tbody>
+    ${rows.map(p=>{const oa=p.actions.filter(a=>a.col!=='done').length,od=p.actions.filter(a=>a.col!=='done'&&a.due&&a.due<TODAY).length,or=p.risks.filter(r=>r.status!=='Closed').length;
+      return`<tr class="click" data-open="${esc(p.id)}" tabindex="0"><td><b>${esc(p.name)}</b>${p.focus?' <span class="chip">Focus</span>':''}<div class="muted" style="font-size:.78rem">${esc(p.id)} · ${esc(p.region)}</div></td><td>${esc(p.l2)}<div class="muted" style="font-size:.78rem">${esc(p.l1)}</div></td><td>${esc(p.gcl)}</td><td><span class="chip ${p.gate===6?'ver':'gate'}">${GSHORT[p.gate]}</span></td><td>${ragHtml(p.health)}<div class="muted" style="font-size:.78rem">${p.status}</div></td><td style="min-width:160px">${esc(p.output)}</td><td class="r num">${oa}${od?` <span class="warn">(${od} overdue)</span>`:''}</td><td class="r num">${or}</td><td class="num">${esc(p.finalize)}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">No projects match these filters.</td></tr>'}
+    </tbody></table></div>
+  </div>`;
+  barChart($('#ch-ben'),{rows:BEN.map(B=>({label:B.label,parts:{Active:ps.filter(p=>p.status==='Active'&&p.benefits.some(b=>b.type===B.key)).length,Completed:ps.filter(p=>p.status==='Completed'&&p.benefits.some(b=>b.type===B.key)).length}})),keys:STATUS,
+    selected:S.drill&&S.drill.kind==='ben'?S.drill.val:null,onClick:i=>{S.drill=S.drill&&S.drill.kind==='ben'&&S.drill.val===i?null:{kind:'ben',val:i};renderKPI()}});
+  colChart($('#ch-gate'),{cols:GATES.map((g,i)=>{const sp=g.split(' ');return{label:sp[0]+'\n'+(sp[1]||''),title:g,parts:{Completed:ps.filter(p=>p.gate===i&&p.status==='Completed').length,Active:ps.filter(p=>p.gate===i&&p.status==='Active').length}}}),
+    keys:STATUS,height:250,labelLines:2,selected:S.drill&&S.drill.kind==='gate'?S.drill.val:null,onClick:i=>{S.drill=S.drill&&S.drill.kind==='gate'&&S.drill.val===i?null:{kind:'gate',val:i};renderKPI()}});
+  BEN.forEach(B=>{
+    const cols=YEARS.map(y=>{const parts={};ps.forEach(p=>p.benefits.forEach(b=>{if(b.type===B.key&&b.year===y){const st=stateOf(p,y);parts[st]=(parts[st]||0)+b.amount}}));return{label:String(y),title:B.label+' '+y+' ('+B.unit+')',parts}});
+    const deltas=YEARS.map(y=>sumBen(ps,B.key,y)-sumBen(ps,B.key,y,'prev'));
+    colChart($('#sav-'+B.key),{cols,keys:STATES,height:210,f:v=>fmt(v,B.unit),deltas,unit:B.unit});
+  });
+}
+function ragHtml(h){return`<span class="rag ${h}" title="${HEALTH[h]}"><i></i>${HEALTH[h]}</span>`}
+
+/* ---------- Board page ---------- */
+function boardList(){const q=S.search.toLowerCase();return inView().filter(p=>(!S.focusOnly||p.focus)&&(!q||(p.name+' '+p.id+' '+p.gcl).toLowerCase().includes(q)))}
+function renderBoard(){
+  const el=$('#page-board');const list=boardList();
+  if(S.sel!=='all'&&!P(S.sel))S.sel='all';
+  const p=S.sel==='all'?null:P(S.sel);
+  const scope=p?[p]:list;
+  const allActions=scope.flatMap(x=>x.actions.map(a=>({...a,pid:x.id,pname:x.name})));
+  const allRisks=scope.flatMap(x=>x.risks.map(r=>({...r,pid:x.id,pname:x.name}))).sort((a,b)=>(a.status==='Closed')-(b.status==='Closed')||LVL[riskSev(b)]-LVL[riskSev(a)]);
+  el.innerHTML=`<div class="board">
+   <aside class="rail">
+     <div class="tools">
+       <input id="search" type="search" placeholder="Search project, ID or GCL" value="${esc(S.search)}" aria-label="Search projects">
+       <label><input type="checkbox" id="focusOnly" ${S.focusOnly?'checked':''}> Focus projects only</label>
+     </div>
+     <div class="plist" role="list">
+       <button class="pitem" data-sel="all" aria-current="${S.sel==='all'}"><span></span><span class="nm">All projects in view</span><span class="chip">${list.length}</span><span class="meta">Every action and risk across the filtered portfolio</span></button>
+       ${list.map(x=>{const oa=x.actions.filter(a=>a.col!=='done').length;return`<button class="pitem" data-sel="${esc(x.id)}" aria-current="${S.sel===x.id}"><span class="rag ${x.health}" title="${HEALTH[x.health]}"><i></i></span><span class="nm">${esc(x.name)}</span><span class="chip ${x.gate===6?'ver':'gate'}">${GSHORT[x.gate]}</span><span class="meta">${esc(x.id)} · ${esc(x.gcl)} · ${oa} open action${oa===1?'':'s'}</span></button>`}).join('')}
+     </div>
+   </aside>
+   <div class="sheet">
+     ${p?sheetHtml(p):`<div class="panel"><div class="panel-head"><h2>All projects in view</h2><span class="hint">${list.length} projects · ${allActions.filter(a=>a.col!=='done').length} open actions · ${allRisks.filter(r=>r.status!=='Closed').length} open risks</span></div><div class="muted" style="font-size:.88rem">Pick a project on the left to see its status sheet and to add actions or risks. Cards here are tagged with their project.</div></div>`}
+     <div class="panel">
+       <div class="panel-head"><h2>Actions</h2><span class="hint">Drag cards between columns, or open a card to move it, edit it and add comments.</span></div>
+       <div class="kanban">${COLS.map(c=>{const cards=allActions.filter(a=>a.col===c.key).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+         return`<div class="col" data-col="${c.key}"><div class="col-head">${c.label}<span class="n">${cards.length}</span></div>
+         ${c.key==='todo'&&p?`<form class="addrow" id="addAction"><input id="na-title" placeholder="New action" required aria-label="New action"><div class="two"><input id="na-owner" placeholder="Owner" value="${esc(p.gcl)}" aria-label="Owner"><input id="na-due" type="date" aria-label="Due date"></div><button class="small primary" type="submit">Add action</button></form>`:''}
+         ${cards.map(a=>cardHtml(a,!p)).join('')}</div>`}).join('')}</div>
+     </div>
+     <div class="panel">
+       <div class="panel-head"><h2>Risks and mitigations</h2><span class="hint">Severity = impact × likelihood. Click a row to edit and comment.</span></div>
+       <div class="tbl-wrap"><table><thead><tr><th>Risk / issue</th>${p?'':'<th>Project</th>'}<th>Severity</th><th>Mitigation</th><th>Owner</th><th>Status</th></tr></thead><tbody>
+       ${allRisks.map(r=>`<tr class="click riskrow" data-risk="${r.id}" data-pid="${esc(r.pid)}" tabindex="0"><td>${esc(r.title)}${r.comments.length?` <span class="muted" style="font-weight:400;font-size:.78rem">💬 ${r.comments.length}</span>`:''}</td>${p?'':`<td class="muted" style="font-size:.84rem">${esc(r.pname)}</td>`}<td><span class="sev ${riskSev(r)}">${riskSev(r)}</span><div class="muted" style="font-size:.72rem">I: ${r.impact} · L: ${r.likelihood}</div></td><td style="min-width:180px">${esc(r.mitigation)}</td><td style="white-space:nowrap">${esc(r.owner)}</td><td>${r.status==='Closed'?'<span class="chip ver">Closed</span>':r.status==='Mitigating'?'<span class="chip gate">Mitigating</span>':'<span class="chip">Open</span>'}</td></tr>`).join('')||`<tr><td colspan="6" class="muted">No risks logged.</td></tr>`}
+       </tbody></table></div>
+       ${p?`<form id="addRisk" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px;align-items:end">
+         <input id="nr-title" placeholder="New risk or issue" required aria-label="New risk" style="grid-column:span 2">
+         <input id="nr-mit" placeholder="Mitigation" aria-label="Mitigation" style="grid-column:span 2">
+         <select id="nr-imp" aria-label="Impact"><option value="High">Impact: High</option><option value="Medium" selected>Impact: Medium</option><option value="Low">Impact: Low</option></select>
+         <select id="nr-lik" aria-label="Likelihood"><option value="High">Likelihood: High</option><option value="Medium" selected>Likelihood: Medium</option><option value="Low">Likelihood: Low</option></select>
+         <button class="small primary" type="submit">Add risk</button></form>`:''}
+     </div>
+   </div></div>`;
+  wireBoard();
+}
+function cardHtml(a,showProj){const over=a.col!=='done'&&a.due&&a.due<TODAY;
+  return`<div class="card" draggable="true" data-card="${a.id}" data-pid="${esc(a.pid)}" tabindex="0" role="button" aria-label="${esc(a.title)}">
+   ${showProj?`<span class="ptag">${esc(a.pname)}</span>`:''}<span class="t">${esc(a.title)}</span>
+   <span class="m"><span class="avatar" title="${esc(a.owner)}">${initials(a.owner)}</span><span>${esc(a.owner)}</span><span class="due ${over?'over':''}">${over?'Overdue · ':''}${dateLbl(a.due)}</span>${a.comments.length?`<span>💬 ${a.comments.length}</span>`:''}</span></div>`}
+function sheetHtml(p){
+  const warns=CHECK.filter(c=>p.gate>c.gate&&!p.checklist[c.key]);
+  return`<div class="panel">
+   <div class="panel-head"><div><span class="eyebrow">${esc(p.id)} · ${esc(p.l1)} / ${esc(p.l2)} · ${esc(p.region)}</span><h2 style="font-size:1.25rem;margin-top:2px">${esc(p.name)}</h2></div>
+   <label style="margin-left:auto;font-size:.85rem;display:flex;gap:6px;align-items:center"><input type="checkbox" data-pf="focus" ${p.focus?'checked':''}> Focus project</label></div>
+   <div class="facts">
+     <div class="fact"><span class="eyebrow">Current status</span><select data-pf="health" aria-label="Current status">${Object.keys(HEALTH).map(h=>`<option value="${h}" ${p.health===h?'selected':''}>${HEALTH[h]}</option>`).join('')}</select>${ragHtml(p.health)}</div>
+     <div class="fact"><span class="eyebrow">Stage in Sievo</span><select data-pf="gate" aria-label="Stage in Sievo">${GATES.map((g,i)=>`<option value="${i}" ${p.gate===i?'selected':''}>${g}</option>`).join('')}</select><span class="muted" style="font-size:.78rem">${p.status}</span></div>
+     <div class="fact"><span class="eyebrow">Output</span><span>${esc(p.output)}</span></div>
+     <div class="fact"><span class="eyebrow">Planned finalization</span><select data-pf="finalize" aria-label="Planned finalization">${[...new Set([...QUARTERS,p.finalize])].map(q=>`<option ${p.finalize===q?'selected':''}>${q}</option>`).join('')}</select></div>
+     <div class="fact"><span class="eyebrow">GCL</span><span>${esc(p.gcl)}</span></div>
+     <div class="fact" style="grid-column:span 2;min-width:0"><span class="eyebrow">Project management checklist</span><div class="checklist">${CHECK.map(c=>`<label title="${esc(c.note)}"><input type="checkbox" data-ck="${c.key}" ${p.checklist[c.key]?'checked':''}><span>${c.label} <span class="muted" style="font-size:.76rem">(gate G${c.gate})</span>${p.gate>c.gate&&!p.checklist[c.key]?' <span class="warn">Missing, project is past G'+c.gate+'</span>':''}</span></label>`).join('')}</div></div>
+   </div></div>`;
+}
+function wireBoard(){
+  const el=$('#page-board');
+  const s=$('#search',el);s.addEventListener('input',()=>{S.search=s.value;const pos=s.selectionStart;renderBoard();const n=$('#search');n.focus();n.setSelectionRange(pos,pos)});
+  $('#focusOnly',el).addEventListener('change',e=>{S.focusOnly=e.target.checked;renderBoard()});
+  el.querySelectorAll('[data-sel]').forEach(b=>b.addEventListener('click',()=>{S.sel=b.dataset.sel;renderBoard();scrollTo({top:0})}));
+  const p=S.sel==='all'?null:P(S.sel);
+  if(p){
+    el.querySelectorAll('[data-pf]').forEach(i=>i.addEventListener('change',()=>{const k=i.dataset.pf;
+      if(k==='focus')p.focus=i.checked;else if(k==='gate'){p.gate=+i.value;if(p.gate<6&&p.status==='Completed'&&p.gate<4)p.status='Active'}else p[k]=i.value;save();renderBoard()}));
+    el.querySelectorAll('[data-ck]').forEach(i=>i.addEventListener('change',()=>{p.checklist[i.dataset.ck]=i.checked;save();renderBoard()}));
+    $('#addAction',el).addEventListener('submit',e=>{e.preventDefault();const t=$('#na-title').value.trim();if(!t)return;
+      p.actions.push({id:uid(),title:t,owner:$('#na-owner').value.trim()||p.gcl,due:$('#na-due').value,col:'todo',comments:[]});save();renderBoard();toast('Action added')});
+    $('#addRisk',el).addEventListener('submit',e=>{e.preventDefault();const t=$('#nr-title').value.trim();if(!t)return;
+      p.risks.push({id:uid(),title:t,mitigation:$('#nr-mit').value.trim(),impact:$('#nr-imp').value,likelihood:$('#nr-lik').value,owner:p.gcl,status:'Open',comments:[]});save();renderBoard();toast('Risk added')});
+  }
+  el.querySelectorAll('.card').forEach(c=>{
+    c.addEventListener('click',()=>openItem('action',c.dataset.pid,c.dataset.card));
+    c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openItem('action',c.dataset.pid,c.dataset.card)}});
+    c.addEventListener('dragstart',e=>{c.classList.add('dragging');e.dataTransfer.setData('text/plain',c.dataset.pid+'|'+c.dataset.card);e.dataTransfer.effectAllowed='move'});
+    c.addEventListener('dragend',()=>c.classList.remove('dragging'));});
+  el.querySelectorAll('.col').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over')});
+    col.addEventListener('dragleave',e=>{if(!col.contains(e.relatedTarget))col.classList.remove('over')});
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');const[pid,id]=(e.dataTransfer.getData('text/plain')||'').split('|');const pp=P(pid);const a=pp&&pp.actions.find(x=>x.id===id);
+      if(a&&a.col!==col.dataset.col){a.col=col.dataset.col;save();renderBoard()}});});
+  el.querySelectorAll('[data-risk]').forEach(r=>{const go=()=>openItem('risk',r.dataset.pid,r.dataset.risk);r.addEventListener('click',go);r.addEventListener('keydown',e=>{if(e.key==='Enter')go()})});
+}
+
+/* ---------- Drawer: edit action or risk, comment thread ---------- */
+function closeLayer(){$('#layer').innerHTML='';document.removeEventListener('keydown',escClose)}
+function escClose(e){if(e.key==='Escape')closeLayer()}
+function openItem(kind,pid,id){
+  const p=P(pid);if(!p)return;const list=kind==='action'?p.actions:p.risks;const it=list.find(x=>x.id===id);if(!it)return;
+  const fields=kind==='action'?`
+    <div class="row"><label for="d-title">Action</label><textarea id="d-title" rows="2">${esc(it.title)}</textarea></div>
+    <div class="two"><div class="row"><label for="d-owner">Owner</label><input id="d-owner" value="${esc(it.owner)}"></div><div class="row"><label for="d-due">Due</label><input id="d-due" type="date" value="${esc(it.due)}"></div></div>
+    <div class="row"><label for="d-col">Column</label><select id="d-col">${COLS.map(c=>`<option value="${c.key}" ${it.col===c.key?'selected':''}>${c.label}</option>`).join('')}</select></div>`:`
+    <div class="row"><label for="d-title">Risk or issue</label><textarea id="d-title" rows="2">${esc(it.title)}</textarea></div>
+    <div class="row"><label for="d-mit">Mitigation</label><textarea id="d-mit" rows="3">${esc(it.mitigation)}</textarea></div>
+    <div class="two"><div class="row"><label for="d-imp">Impact</label><select id="d-imp">${['High','Medium','Low'].map(v=>`<option ${it.impact===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="row"><label for="d-lik">Likelihood</label><select id="d-lik">${['High','Medium','Low'].map(v=>`<option ${it.likelihood===v?'selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="two"><div class="row"><label for="d-owner">Owner</label><input id="d-owner" value="${esc(it.owner)}"></div><div class="row"><label for="d-status">Status</label><select id="d-status">${RISK_STATUS.map(v=>`<option ${it.status===v?'selected':''}>${v}</option>`).join('')}</select></div></div>`;
+  $('#layer').innerHTML=`<div class="overlay" data-close></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="Edit ${kind}">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><span class="eyebrow">${kind==='action'?'Action':'Risk'} · ${esc(p.id)}</span><h2>${esc(p.name)}</h2></div><button class="small ghost" data-close aria-label="Close">✕</button></div>
+    ${fields}
+    <div style="display:flex;gap:8px;justify-content:space-between"><button class="small ghost danger" id="d-del">Delete</button><button class="primary" id="d-save">Save changes</button></div>
+    <hr style="border:0;border-top:1px solid var(--line);width:100%">
+    <h3>Discussion</h3>
+    <div class="comments">${it.comments.map(c=>`<div class="cmt"><div class="who">${esc(c.who)}<span>${dateLbl(c.when)}</span></div>${esc(c.text)}</div>`).join('')||'<div class="muted" style="font-size:.88rem">No comments yet.</div>'}</div>
+    <form id="d-cform" class="row"><label for="d-ctext">Add a comment</label><textarea id="d-ctext" rows="2" required></textarea>
+      <div style="display:flex;gap:8px;align-items:center"><label for="d-author" style="text-transform:none;letter-spacing:0;font-weight:400">As</label><input id="d-author" value="${esc(S.author)}" style="flex:1"><button class="small primary" type="submit">Post</button></div></form>
+  </aside>`;
+  document.addEventListener('keydown',escClose);
+  $('#layer').querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeLayer));
+  $('#d-title').focus();
+  $('#d-save').addEventListener('click',()=>{it.title=$('#d-title').value.trim()||it.title;it.owner=$('#d-owner').value.trim();
+    if(kind==='action'){it.due=$('#d-due').value;it.col=$('#d-col').value}else{it.mitigation=$('#d-mit').value.trim();it.impact=$('#d-imp').value;it.likelihood=$('#d-lik').value;it.status=$('#d-status').value}
+    save();closeLayer();render();toast('Saved')});
+  let armed=false;$('#d-del').addEventListener('click',e=>{if(!armed){armed=true;e.target.textContent='Click again to delete';return}
+    const i=list.indexOf(it);list.splice(i,1);save();closeLayer();render();toast('Deleted')});
+  $('#d-cform').addEventListener('submit',e=>{e.preventDefault();const t=$('#d-ctext').value.trim();if(!t)return;S.author=$('#d-author').value.trim()||'Anonymous';
+    it.comments.push({who:S.author,when:TODAY,text:t});save();render();openItem(kind,pid,id)});
+}
+let toastT;function toast(m){clearTimeout(toastT);let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=m;toastT=setTimeout(()=>t.remove(),1800)}
+
+/* ---------- Sievo CSV import ---------- */
+const COLMAP={id:['project id','id','project number','project no'],name:['project name','project','name'],l1:['category l1','l1 category','l1'],l2:['category l2','l2 category','l2'],region:['region'],gcl:['owner','gcl','project owner'],
+  gate:['stage','stage in sievo','gate','maturity'],status:['status','project status'],type:['benefit type','benefit','savings type'],year:['year','fiscal year'],amount:['amount','value','savings'],prev:['previous amount','last month','prev amount']};
+function parseCSV(txt){const d=(txt.split('\n')[0].match(/;/g)||[]).length>(txt.split('\n')[0].match(/,/g)||[]).length?';':',';const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<txt.length;i++){const c=txt[i];if(q){if(c==='"'){if(txt[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===d){row.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&txt[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f=''}else f+=c}
+  if(f||row.length){row.push(f);rows.push(row)}return rows.filter(r=>r.some(x=>x.trim()))}
+function importCSV(txt){
+  const rows=parseCSV(txt);if(rows.length<2)throw new Error('The file has no data rows.');
+  const head=rows[0].map(h=>h.trim().toLowerCase());const ix={};Object.entries(COLMAP).forEach(([k,al])=>{ix[k]=head.findIndex(h=>al.includes(h))});
+  const missing=['id','name','gate','type','year','amount'].filter(k=>ix[k]<0);if(missing.length)throw new Error('Missing columns: '+missing.map(k=>COLMAP[k][0]).join(', ')+'.');
+  const num=s=>parseFloat(String(s).replace(/\s/g,'').replace(',','.'))||0;
+  const byId=new Map();let n=0,skipped=0;
+  rows.slice(1).forEach(r=>{const g=k=>ix[k]>=0?(r[ix[k]]||'').trim():'';const id=g('id');if(!id){skipped++;return}const pid=id.startsWith('#')?id:'#'+id;
+    const gs=g('gate').toLowerCase();const gate=gs.includes('verif')?6:Math.min(6,Math.max(0,parseInt((gs.match(/g\s*(\d)/)||[])[1]??'0',10)));
+    const bt=g('type').toLowerCase();const B=BEN.find(b=>bt.includes(b.label.toLowerCase())||bt.startsWith(b.key)||(b.key==='co2'&&bt.includes('co2'))||(b.key==='risk'&&bt.includes('risk'))||(b.key==='avoid'&&bt.includes('avoid'))||(b.key==='realized'&&bt.includes('realiz')));
+    if(!byId.has(pid)){const old=P(pid);byId.set(pid,{id:pid,name:g('name')||old?.name||pid,l1:g('l1')||old?.l1||'Direct',l2:g('l2')||old?.l2||'Other',region:g('region')||old?.region||'Global',gcl:g('gcl')||old?.gcl||'Unassigned',
+      gate,status:/complet|closed|done/i.test(g('status'))?'Completed':'Active',health:old?.health||'green',focus:old?.focus||false,output:old?.output||'',finalize:old?.finalize||'2027 Q1',
+      checklist:old?.checklist||{charter:gate>1,strategy:gate>3,finance:gate>4},benefits:[],actions:old?.actions||[],risks:old?.risks||[]});n++}
+    if(!B){skipped++;return}const amt=num(g('amount'));byId.get(pid).benefits.push({type:B.key,year:parseInt(g('year'),10)||2026,amount:amt,prev:ix.prev>=0&&g('prev')!==''?num(g('prev')):amt});});
+  byId.forEach(p=>{if(!p.output)p.output=p.benefits.slice(0,2).map(b=>{const B=BEN.find(x=>x.key===b.type);return fmt(b.amount,B.unit)+' '+(B.unit==='t'?'t CO2e':'mEUR '+B.label)}).join(' · ')});
+  return{projects:[...byId.values()],n,skipped};
+}
+function openImport(){
+  $('#layer').innerHTML=`<div class="overlay" data-close></div><div class="dlg" role="dialog" aria-modal="true" aria-label="Import Sievo export">
+   <div style="display:flex;justify-content:space-between;gap:8px"><h2>Import Sievo export</h2><button class="small ghost" data-close aria-label="Close">✕</button></div>
+   <p style="margin:0;font-size:.9rem">Choose a CSV export with one row per project, benefit type and year. The import replaces the projects and savings. Actions, risks and checklists stay for projects with the same ID.</p>
+   <div style="font-size:.85rem">Columns it looks for (comma or semicolon separated):<br>
+   <code>Project ID</code> <code>Project name</code> <code>Stage</code> (G0 to G5 or Verified) <code>Benefit type</code> <code>Year</code> <code>Amount</code><br>
+   Optional: <code>Category L1</code> <code>Category L2</code> <code>Region</code> <code>Owner</code> <code>Status</code> <code>Previous amount</code> (last month, for the change chips)</div>
+   <p class="muted" style="margin:0;font-size:.8rem">The real Sievo column names are not known yet, so this mapping is a first guess to adjust once we see an export.</p>
+   <input type="file" id="csvFile" accept=".csv,text/csv,.txt">
+   <div id="impMsg" style="font-size:.88rem"></div></div>`;
+  document.addEventListener('keydown',escClose);
+  $('#layer').querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeLayer));
+  $('#csvFile').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const rd=new FileReader();
+    rd.onload=()=>{try{const res=importCSV(String(rd.result));if(!res.projects.length)throw new Error('No projects found.');S.projects=res.projects;S.sel='all';S.drill=null;S.f={l1:'All',l2:'All',region:'All',status:'All',gcl:'All'};save();closeLayer();render();toast(`Imported ${res.n} projects${res.skipped?`, skipped ${res.skipped} rows`:''}`)}
+      catch(err){$('#impMsg').innerHTML=`<span class="warn">${esc(err.message)}</span>`}};rd.readAsText(file)});
+}
+
+/* ---------- Router ---------- */
+function page(){return location.hash==='#board'?'board':'kpi'}
+function render(){
+  const pg=page();renderFilters();
+  $('#tab-kpi').setAttribute('aria-current',pg==='kpi'?'page':'false');$('#tab-board').setAttribute('aria-current',pg==='board'?'page':'false');
+  $('#page-kpi').hidden=pg!=='kpi';$('#page-board').hidden=pg!=='board';
+  pg==='kpi'?renderKPI():renderBoard();
+}
+$('#monthLbl').textContent='Reporting month: '+REPORT_MONTH+' · compared with '+PREV_MONTH;
+addEventListener('hashchange',()=>{hideTip();render()});
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(page()==='kpi')renderKPI()},150)});
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-open]');if(t){S.sel=t.dataset.open;S.search='';S.focusOnly=false;location.hash='board';return}
+  if(e.target.closest('[data-act="clearDrill"]')){S.drill=null;renderKPI()}
+});
+document.addEventListener('keydown',e=>{const t=e.target.closest&&e.target.closest('[data-open]');if(t&&e.key==='Enter'){t.click()}});
+$('#importBtn').addEventListener('click',openImport);
+let resetArmed=false;$('#resetBtn').addEventListener('click',e=>{if(!resetArmed){resetArmed=true;e.target.textContent='Click again to reset';setTimeout(()=>{resetArmed=false;e.target.textContent='Reset sample data'},3000);return}
+  resetArmed=false;e.target.textContent='Reset sample data';S.projects=seedData();S.sel='all';S.drill=null;save();render();toast('Sample data restored')});
+render();
+})();
+</script>
