@@ -593,7 +593,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="small muted" style="margin-top:8px">Revenue (EUR) = Supplier revenue (million) × FX to EUR. Share = Novonesis spend ÷ Supplier revenue (EUR). <span class="flag">!</span> marks a row whose research status isn't final or that has a caveat.</div></div>
   </section>
     <section class="panel wide-w" aria-label="Weights">
-      <div class="head"><h2 id="wTitle">Weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
+      <div class="head"><h2 id="wTitle">Weights</h2></div>
       <div class="body">
         <div class="small muted" style="margin-bottom:10px">Weights are set per subcategory, on the four dimensions (0 = ignore, 10 = critical). The criteria inside a dimension share its weight equally; the % shows each one's share of the score. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
         <div id="weights"></div>
@@ -1726,11 +1726,6 @@ function showPage(pg){
 document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListener('click',()=>{showPage(b.dataset.page||b.dataset.goto);window.scrollTo(0,0);}));
 
 /* ---------- add / reset ---------- */
-document.getElementById('btnAddDim').addEventListener('click',()=>{
-  if(S.dims.length>=12)return;const p=S.persp[S.persp.length-1];const d={id:nid(),pid:p.id,name:'New criterion',short:'New criterion',weight:5,min:0,desc:'',low:'',lv2:'',lv3:'',lv4:'',high:''};S.dims.push(d);
-  S.sup.forEach(s=>S.scores[s.id][d.id]=3);syncW();renderAll();save();
-  const last=document.querySelector('#weights .pgroup:last-child .wrow:last-child .name input');if(last){last.focus();last.select();}
-});
 document.getElementById('btnAddSup').addEventListener('click',()=>{
   const s={id:nid(),name:'New supplier',facts:S.curCat==='Unassigned'?{}:{cat:S.curCat}};S.sup.push(s);S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
   const last=document.querySelector('#supList .sup-row:last-child input');if(last){last.focus();last.select();}
