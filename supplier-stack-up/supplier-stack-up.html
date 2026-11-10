@@ -589,8 +589,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="body"><div class="sup-list" id="supList"></div></div>
       </section>
   <section class="panel" aria-label="Supplier facts">
-    <div class="head"><div><h2>Supplier facts</h2><div class="small muted">Spend, revenue and research status per supplier. Shown as evidence when scoring and in the Dependency view; they never change a score.</div></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="small primary" id="btnPasteFacts">Paste from Excel</button><button class="small" id="btnFactsCsv">Download facts .csv</button></div></div>
+    <div class="head"><div><h2>Supplier facts</h2><div class="small muted">Spend, revenue and research status per supplier. Shown as evidence when scoring and in the Dependency view; they never change a score.</div></div></div>
     <div class="body"><div class="scroll"><table class="facts" id="factsTbl"></table></div>
       <div class="small muted" style="margin-top:8px">Revenue (EUR) = Supplier revenue (million) × FX to EUR. Share = Novonesis spend ÷ Supplier revenue (EUR). <span class="flag">!</span> marks a row whose research status isn't final or that has a caveat.</div></div>
   </section>
@@ -1311,12 +1310,11 @@ function factsCSV(){const q=v=>/[",;\t\n]/.test(String(v))?'"'+String(v).replace
   S.sup.forEach(s=>{const f=factsOf(s);L.push(FCOLS.map(c=>c.k==='name'?q(s.name):c.k==='revEur'?(revEur(f)===null?'':Math.round(revEur(f))):c.k==='share'?(shareOf(f)===null?'':shareOf(f).toFixed(6)):q(f[c.k]===undefined?'':f[c.k])).join(','));});
   return L.join('\n');}
 const dlgF=document.getElementById('dlgFacts');
-document.getElementById('btnPasteFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
+document.getElementById('btnUpFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
 document.getElementById('btnDoFacts').addEventListener('click',()=>{const m=document.getElementById('factsMsg');
   try{const r=importFacts(document.getElementById('factsText').value,document.getElementById('factsAdd').checked);applyCat();renderAll();save();
     m.className='small ok';m.textContent=`Updated ${r.upd} supplier${r.upd===1?'':'s'}${r.added?`, added ${r.added}`:''}${r.skipped.length?`. Not in scope, skipped: ${r.skipped.join(', ')}`:''}.`;}
   catch(e){m.className='small err';m.textContent=e.message;}});
-document.getElementById('btnFactsCsv').addEventListener('click',()=>{saveFile('supplier-facts.csv',factsCSV()).catch(()=>{});});
 
 /* dependency view: spend vs share of supplier revenue */
 function renderDep(){
@@ -1718,7 +1716,7 @@ function renderOverall(){
     return `<tr class="go${c===S.curCat?' curcat':''}" data-cat="${esc(c)}"><td class="sup">${esc(c)}</td><td>${cell(run[0])}</td><td>${cell(run[1])}</td><td>${cell(run[2])}</td><td class="small">${out.length?out.map(r=>esc(shorten(r.s.name))).join(', '):'–'}</td><td class="small">${fl.length?fl.map(x=>esc(shorten(x.r.s.name))).join(', '):'–'}</td></tr>`;}).join('')+`</tbody>`;
   t.querySelectorAll('tr.go').forEach(r=>r.addEventListener('click',()=>{if(r.dataset.cat!==S.curCat)setCat(r.dataset.cat);document.getElementById('resWrap').scrollIntoView({behavior:'smooth',block:'start'});}));
 }
-document.getElementById('btnUpFacts').addEventListener('click',()=>document.getElementById('btnPasteFacts').click());
+
 
 /* ---------- pages ---------- */
 function showPage(pg){
