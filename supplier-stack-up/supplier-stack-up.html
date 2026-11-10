@@ -418,6 +418,8 @@ table.fin input[type=checkbox]{width:18px;height:18px;accent-color:var(--hl)}
 .stk-add select{padding:5px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:.88rem}
 
 /* workshop flow */
+.sc-cat{display:grid;line-height:1.15;max-width:220px;min-width:0}
+.sc-cat b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-display)}
 .intro-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px}
 @media (max-width:1000px){.intro-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.intro-steps{grid-template-columns:1fr}}
@@ -505,8 +507,6 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="sub">Supplier partnership segmentation across four perspectives. Nothing is sent anywhere. <span id="saveNote"></span></div>
     </div>
     <div class="toolbar">
-      <label for="catSel">Subcategory</label>
-      <select id="catSel" aria-label="Subcategory" style="max-width:260px"></select>
       <button id="btnExport">Export</button>
       <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
       <label class="savetog" title="When off, nothing is kept after you close or reload the tab"><input type="checkbox" id="chkSave"> Save in this browser</label>
@@ -615,6 +615,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <div data-pagebody="scoring" hidden>
   <div class="sc-wrap" id="scWrap">
     <div class="sc-step">
+      <span class="sc-cat" title="Subcategory being scored. Pick another one in step 1."><span class="eyebrow">Subcategory</span><b id="scCat"></b></span>
       <button id="scPrev" aria-label="Previous criterion">‹ Prev</button>
       <div class="sc-dots" id="scDots" role="tablist" aria-label="Criteria"></div>
       <button id="scNext" class="primary" aria-label="Next criterion">Next ›</button>
@@ -1704,11 +1705,9 @@ document.getElementById('btnSumMd').addEventListener('click',async()=>{const m=d
 document.getElementById('btnSumCopy').addEventListener('click',()=>{const m=document.getElementById('sumMsg');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(sumMd).then(()=>{m.textContent='Copied.';}).catch(()=>{m.textContent='Copy is blocked here; use Download.';});else m.textContent='Copy is blocked here; use Download.';});
 
 /* ---------- subcategory picker ---------- */
-function renderCatSel(){const sel=document.getElementById('catSel');
-  sel.innerHTML=catNames().map(c=>{const n=S.sup.filter(s=>catOf(s)===c).length;return `<option value="${esc(c)}"${c===S.curCat?' selected':''}>${esc(c)} (${n})</option>`;}).join('');}
+function renderCatSel(){document.getElementById('scCat').textContent=S.curCat;}
 function setCat(c){S.curCat=c;applyCat();S.h2h=null;S.picks=null;S.activeScn=null;
   const m=S.scenarios.find(sc=>scnMatches(sc));if(m)S.activeScn=m.id;renderAll();if(S.page==='scoring')setScView(S.scView||'crit');if(S.facilOn)goFacil(0);save();}
-document.getElementById('catSel').addEventListener('change',e=>setCat(e.target.value));
 
 /* ---------- workshop flow: subcategory checklist, locked steps ---------- */
 const catDone=c=>!!ensureCat(c).done;
