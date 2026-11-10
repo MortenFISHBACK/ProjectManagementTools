@@ -70,6 +70,9 @@ header.top .sub{color:var(--brand-soft);margin-top:2px;max-width:70ch;font-size:
 header.top button{background:transparent;color:var(--brand-fg);border-color:rgba(191,230,196,.45)}
 header.top button:hover{border-color:var(--brand-soft)}
 header.top button.ghost{border-color:transparent;color:var(--brand-soft)}
+header.top button.danger{background:var(--critical);border-color:var(--critical);color:#fff}
+.toolbar label.savetog{display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.toolbar label.savetog input{accent-color:var(--brand-soft);margin:0}
 .badge{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn);color:#3a2f00;vertical-align:middle;margin-left:8px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .toolbar label{font-size:.85rem;color:var(--brand-soft)}
@@ -457,7 +460,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   <div class="bar">
     <div>
       <h1>Supplier Stack-Up <span class="badge" id="badge">Example data</span></h1>
-      <div class="sub">Supplier partnership segmentation across four perspectives. Everything stays in this browser; nothing is sent anywhere.</div>
+      <div class="sub">Supplier partnership segmentation across four perspectives. Nothing is sent anywhere. <span id="saveNote"></span></div>
     </div>
     <div class="toolbar">
       <label for="catSel">Subcategory</label>
@@ -467,6 +470,8 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <button id="btnImport">Import data</button>
       <button id="btnExport">Export</button>
       <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
+      <label class="savetog" title="When off, nothing is kept after you close or reload the tab"><input type="checkbox" id="chkSave"> Save in this browser</label>
+      <button id="btnClear" class="ghost" title="Delete everything this tool has stored in this browser">Clear my data</button>
     </div>
   </div>
   <nav class="pages" aria-label="Pages">
@@ -787,7 +792,7 @@ function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slic
 
 let S;
 function load(){
-  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp){
+  if(persist)try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp){
     if(!o.sup)o.sup=o.suppliers||[];o.notes=o.notes||{};o.supNotes=o.supNotes||{};
     o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});
       if(d.ev===undefined)d.ev={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'}[d.name]||'';});
@@ -801,7 +806,10 @@ function setNote(sid,did,v){S.notes=S.notes||{};S.notes[sid]=S.notes[sid]||{};if
 const LVK=['low','lv2','lv3','lv4','high'];
 function defText(d){const parts=[];if(d.desc)parts.push(d.desc);LVK.forEach((k,i)=>{if(d[k])parts.push((i+1)+' = '+d[k]);});return parts.join('\n');}
 function defHTML(d){return (d.desc?esc(d.desc)+'<br>':'')+(d.low?'<b>1</b> '+esc(d.low)+'<br>':'')+(d.high?'<b>5</b> '+esc(d.high):'');}
-function save(){try{const o=Object.assign({},S);delete o.suppliers;localStorage.setItem(STORE,JSON.stringify(o));}catch(e){}}
+// Saving can be switched off; the on/off flag itself is the only thing kept then.
+let persist=true;try{persist=localStorage.getItem(STORE+'-nosave')!=='1';}catch(_){}
+function save(){if(!persist)return;try{const o=Object.assign({},S);delete o.suppliers;localStorage.setItem(STORE,JSON.stringify(o));}catch(e){}}
+function wipeStored(){try{localStorage.removeItem(STORE);localStorage.removeItem(STORE+'-wopen');}catch(_){}}
 /* ---------- subcategories (Category L3) ---------- */
 const catOf=s=>((s.facts&&s.facts.cat)||'').trim()||'Unassigned';
 function catNames(){const n=[...new Set(S.sup.map(catOf))];return n.sort((a,b)=>(a==='Unassigned')-(b==='Unassigned')||a.localeCompare(b));}
@@ -859,7 +867,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 /* ---------- weights rail ---------- */
 // which dimensions show their sub-criteria on the setup page (collapsed by default, remembered per browser)
-let wOpen={};try{wOpen=JSON.parse(localStorage.getItem(STORE+'-wopen'))||{};}catch(_){}
+let wOpen={};if(persist){try{wOpen=JSON.parse(localStorage.getItem(STORE+'-wopen'))||{};}catch(_){}}
 function buildWeights(){
   const host=document.getElementById('weights');host.innerHTML='';
   S.persp.forEach((p,pi)=>{
@@ -869,7 +877,7 @@ function buildWeights(){
       <span class="pw"><input type="range" min="0" max="10" step="1" value="${curPW()[p.id]||0}" aria-label="Weight for ${esc(p.name)}"><span class="num" data-pwv>${curPW()[p.id]||0}</span></span>
       <span class="axis">Map axis <button data-ax="x" aria-pressed="${p.axis==='x'}">X</button><button data-ax="y" aria-pressed="${p.axis==='y'}">Y</button><button data-ax="" aria-pressed="${!p.axis}">none</button></span>
       <button class="subtog" aria-expanded="${!!wOpen[p.id]}"><span class="chev" aria-hidden="true"></span>${nd} sub-criteri${nd===1?'on':'a'}</button>`;
-    head.querySelector('.subtog').addEventListener('click',e=>{wOpen[p.id]=!wOpen[p.id];g.classList.toggle('collapsed',!wOpen[p.id]);e.currentTarget.setAttribute('aria-expanded',String(!!wOpen[p.id]));try{localStorage.setItem(STORE+'-wopen',JSON.stringify(wOpen));}catch(_){}});
+    head.querySelector('.subtog').addEventListener('click',e=>{wOpen[p.id]=!wOpen[p.id];g.classList.toggle('collapsed',!wOpen[p.id]);e.currentTarget.setAttribute('aria-expanded',String(!!wOpen[p.id]));if(persist){try{localStorage.setItem(STORE+'-wopen',JSON.stringify(wOpen));}catch(_){}}});
     head.querySelector('.pw input').addEventListener('input',e=>{curPW()[p.id]=+e.target.value;head.querySelector('[data-pwv]').textContent=e.target.value;syncW();markScnDirty();renderResults();save();});
     head.querySelectorAll('[data-ax]').forEach(b=>b.addEventListener('click',()=>{p.axis=b.dataset.ax;head.querySelectorAll('[data-ax]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();save();}));
     g.appendChild(head);
@@ -1551,6 +1559,24 @@ document.getElementById('btnAddSup').addEventListener('click',()=>{
   const last=document.querySelector('#supList .sup-row:last-child input');if(last){last.focus();last.select();}
 });
 document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();save();});
+
+/* ---------- saving on/off, clear my data ---------- */
+const chkSave=document.getElementById('chkSave'),btnClear=document.getElementById('btnClear');
+function showSaveNote(){chkSave.checked=persist;document.getElementById('saveNote').textContent=persist
+  ?'Your data is saved only in this browser, so it is still here next time.'
+  :'Saving is off: your data is gone when you close or reload this tab.';}
+chkSave.addEventListener('change',()=>{persist=chkSave.checked;
+  try{if(persist)localStorage.removeItem(STORE+'-nosave');else localStorage.setItem(STORE+'-nosave','1');}catch(_){}
+  if(persist)save();else wipeStored();showSaveNote();});
+let clearArm=null;
+btnClear.addEventListener('click',()=>{
+  if(!clearArm){btnClear.textContent='Click again to clear';btnClear.classList.add('danger');
+    clearArm=setTimeout(()=>{clearArm=null;btnClear.textContent='Clear my data';btnClear.classList.remove('danger');},4000);return;}
+  clearTimeout(clearArm);clearArm=null;btnClear.classList.remove('danger');
+  wipeStored();wOpen={};const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();
+  btnClear.textContent='Cleared';setTimeout(()=>{btnClear.textContent='Clear my data';},2000);
+});
+showSaveNote();
 
 /* ---------- import / export ---------- */
 function toCSV(){
