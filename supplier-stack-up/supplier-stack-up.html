@@ -585,6 +585,12 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="head"><h2 id="supTitle">Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
         <div class="body"><div class="sup-list" id="supList"></div></div>
       </section>
+  <section class="panel" aria-label="Supplier facts">
+    <div class="head"><div><h2>Supplier facts</h2><div class="small muted">Spend, revenue and research status per supplier. Shown as evidence when scoring and in the Dependency view; they never change a score.</div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="small primary" id="btnPasteFacts">Paste from Excel</button><button class="small" id="btnFactsCsv">Download facts .csv</button></div></div>
+    <div class="body"><div class="scroll"><table class="facts" id="factsTbl"></table></div>
+      <div class="small muted" style="margin-top:8px">Revenue (EUR) = Supplier revenue (million) × FX to EUR. Share = Novonesis spend ÷ Supplier revenue (EUR). <span class="flag">!</span> marks a row whose research status isn't final or that has a caveat.</div></div>
+  </section>
     <section class="panel wide-w" aria-label="Weights">
       <div class="head"><h2 id="wTitle">Weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
       <div class="body">
@@ -594,12 +600,6 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       </div>
     </section>
   </div>
-  <section class="panel" aria-label="Supplier facts" style="margin-top:20px">
-    <div class="head"><div><h2>Supplier facts</h2><div class="small muted">Spend, revenue and research status per supplier. Shown as evidence when scoring and in the Dependency view; they never change a score.</div></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="small primary" id="btnPasteFacts">Paste from Excel</button><button class="small" id="btnFactsCsv">Download facts .csv</button></div></div>
-    <div class="body"><div class="scroll"><table class="facts" id="factsTbl"></table></div>
-      <div class="small muted" style="margin-top:8px">Revenue (EUR) = Supplier revenue (million) × FX to EUR. Share = Novonesis spend ÷ Supplier revenue (EUR). <span class="flag">!</span> marks a row whose research status isn't final or that has a caveat.</div></div>
-  </section>
 </div>
 
 <div data-pagebody="scoring" hidden>
