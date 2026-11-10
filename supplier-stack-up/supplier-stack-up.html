@@ -106,6 +106,9 @@ nav.pages button[aria-current=page] .n{background:var(--hl);color:#fff}
 .phead .pname{font-family:var(--font-display);font-weight:600;font-size:.9rem}
 .phead .pdesc{grid-column:1/-1;font-size:.86rem;color:var(--fg-2);line-height:1.4}
 .phead .pdesc .when{display:block;margin-top:4px;color:var(--muted);font-style:italic}
+.wrow .cdesc{grid-column:1/-1;font-size:.84rem;color:var(--fg-2);line-height:1.35;padding-bottom:4px}
+.wrow .cdesc .lohi{display:block;margin-top:3px;color:var(--muted);font-size:.8rem}
+.wide-w .wrow .name{grid-column:1}
 .w-why{max-width:95ch;margin-bottom:12px;font-size:.92rem;color:var(--fg-2)}.w-why p{margin:0 0 6px}
 .phead .share{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right}
 .phead .pw{grid-column:1/-1;display:flex;align-items:center;gap:8px}
@@ -995,11 +998,8 @@ function buildWeights(){
       const row=document.createElement('div');row.className='wrow';row.dataset.id=d.id;
       row.innerHTML=`<div class="name"><input value="${esc(d.name)}" title="${esc(d.name)}" aria-label="Criterion name"></div>
         <div class="pct num" data-pct title="Share of the total score; criteria in a dimension share its weight equally"></div>
-        <div class="min"><span>Knock-out below</span><select aria-label="Knock-out threshold for ${esc(d.name)}"><option value="0">none</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select><button class="small ghost" title="Remove this criterion" aria-label="Remove ${esc(d.name)}">remove</button></div>`;
-      row.querySelector('select').value=String(d.min||0);
+        <div class="cdesc">${d.desc?esc(d.desc):'<span class="muted">No description yet. Add one on the scoring page.</span>'}${d.low||d.high?`<span class="lohi">${d.low?'<b>1</b> '+esc(d.low):''}${d.low&&d.high?' &nbsp;·&nbsp; ':''}${d.high?'<b>5</b> '+esc(d.high):''}</span>`:''}</div>`;
       row.querySelector('.name input').addEventListener('change',e=>{d.name=e.target.value.trim()||d.name;d.short=shorten(d.name);e.target.value=d.name;renderAll();save();});
-      row.querySelector('select').addEventListener('change',e=>{d.min=+e.target.value;renderResults();buildMatrix();save();});
-      row.querySelector('button').addEventListener('click',()=>{if(S.dims.length<=2)return;S.dims=S.dims.filter(x=>x!==d);syncW();renderAll();save();});
       g.appendChild(row);
     });
     host.appendChild(g);
@@ -1409,7 +1409,7 @@ function renderScoring(){
   host.innerHTML=h;
   wireStake(host,d);
   host.querySelector('#scEv').addEventListener('change',e=>{d.ev=e.target.value;renderScoreCmp(d);save();});
-  host.querySelectorAll('textarea[data-k]').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();});});
+  host.querySelectorAll('textarea[data-k]').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();buildWeights();updateWeightLabels(S.dims.reduce((t,x)=>t+(+x.weight||0),0));});});
   host.querySelectorAll('.srow').forEach(r=>{const sid=r.dataset.sid;
     r.querySelectorAll('.lvb').forEach(b=>b.addEventListener('click',()=>{S.scores[sid][d.id]=+b.dataset.v;scFocusSid=sid;
       r.querySelectorAll('.lvb').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));markScnDirty();buildMatrix();renderResults();renderScoreCmp(d);save();}));
