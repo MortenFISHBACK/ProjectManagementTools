@@ -591,17 +591,6 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="head"><h2 id="supTitle">Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
         <div class="body"><div class="sup-list" id="supList"></div></div>
       </section>
-      <section class="panel" aria-label="Scenarios">
-        <div class="head"><h2>Saved weight scenarios</h2></div>
-        <div class="body">
-          <div class="small muted">Save the current dimension weights under a name. Scenarios can be applied to any subcategory and compared on Supplier evaluations.</div>
-          <div class="saveas">
-            <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
-            <button class="primary" id="btnSaveScn">Save current weights</button>
-          </div>
-          <div class="scn-list" id="scnList"></div>
-        </div>
-      </section>
     </main>
   </div>
   <section class="panel" aria-label="Supplier facts" style="margin-top:20px">
@@ -1226,19 +1215,7 @@ function renderScenarios(){
   if(!S.activeScn)cols.unshift({name:'Current',ev:evaluate(weightsNow()),id:''});
   t.innerHTML=`<thead><tr><th class="sup">Supplier</th>${cols.map(c=>`<th>${esc(c.name)}${c.id===S.activeScn?' ●':''}</th>`).join('')}</tr></thead><tbody>`+
     S.suppliers.map(s=>`<tr><td class="sup">${esc(s.name)}</td>${cols.map(c=>{const r=c.ev.rows.find(x=>x.s===s);return `<td><span class="r num${r.rank===1?' top':''}">${r.rank?'#'+r.rank:'out'}</span><span class="sc num">${f2(r.total)}${r.seg?' · '+SEGMENTS[r.seg]:''}</span></td>`;}).join('')}</tr>`).join('')+`</tbody>`;
-  const list=document.getElementById('scnList');list.innerHTML='';
-  S.scenarios.forEach(sc=>{const row=document.createElement('div');row.className='scn-row';
-    row.innerHTML=`<span class="nm">${esc(sc.name)}</span><button class="small">Apply</button><button class="small ghost">Delete</button><span class="w">${S.persp.map(p=>`${esc(p.name)} ${+sc.pw[p.id]||0}`).join(' · ')}</span>`;
-    const b=row.querySelectorAll('button');b[0].addEventListener('click',()=>applyScn(sc.id));b[1].addEventListener('click',()=>{S.scenarios=S.scenarios.filter(x=>x!==sc);if(S.activeScn===sc.id)S.activeScn=null;renderResults();save();});
-    list.appendChild(row);});
 }
-document.getElementById('btnSaveScn').addEventListener('click',()=>{
-  const inp=document.getElementById('scnName');const name=inp.value.trim()||('Scenario '+(S.scenarios.length+1));
-  const existing=S.scenarios.find(x=>x.name.toLowerCase()===name.toLowerCase());
-  if(existing){existing.pw=Object.assign({},curPW());S.activeScn=existing.id;}else{const sc={id:nid(),name,pw:Object.assign({},curPW())};S.scenarios.push(sc);S.activeScn=sc.id;}
-  S.baseScn=S.activeScn;
-  inp.value='';renderResults();save();
-});
 document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.value)applyScn(e.target.value);else{S.activeScn=null;renderResults();save();}});
 
 /* ---------- tabs ---------- */
