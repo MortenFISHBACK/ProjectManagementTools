@@ -568,6 +568,9 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
     </div>
     <div class="toolbar">
       <button id="btnExport">Export</button>
+      <button id="btnSesSave" title="Save the whole workshop (data, weights, scores, comments, decisions) as a file you can load again later">Save session</button>
+      <button id="btnSesLoad" title="Continue from a session file saved earlier">Load session</button><input type="file" id="sesFile" accept=".json,application/json" hidden aria-label="Choose a session file">
+      <span class="small" id="sesMsg" style="color:#fff"></span>
       <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
       <button id="btnFull" aria-pressed="false" title="Show the tool on the whole screen. Press Esc to leave.">⛶ Full screen</button>
       <label class="savetog" title="When off, nothing is kept after you close or reload the tab"><input type="checkbox" id="chkSave"> Save in this browser</label>
@@ -616,6 +619,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <li><b>In the room:</b> a facilitator, and the people who know the suppliers (category, quality, R&amp;D, supply chain).</li>
         <li><b>Scores</b> start empty for every supplier and are set by the room in step 2. An empty score counts as 0 until it is set.</li>
         <li><b>Your data stays in this browser.</b> Nothing is sent anywhere. Use "Clear my data" in the top bar when you are done.</li>
+        <li><b>Stopping halfway?</b> Use "Save session" in the top bar to get a file with everything in it. "Load session" brings it all back later, on this or another computer.</li>
         <li><b>Example data</b> is loaded so you can try the flow first. Uploading your own supplier list replaces it.</li>
       </ul></div>
     </section>
@@ -629,7 +633,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="head"><h2>A. Upload the supplier data</h2></div>
       <div class="body">
         <div class="small muted">Paste the supplier sheet from Excel, including the header row. Columns are matched by name: Supplier, Global Spend (EUR), the region split, materials and single-source figures, Supplier total Revenue and the rest. A <b>Subcategory</b> column splits the suppliers into subcategories; without it you can type the subcategory in the Supplier facts table.</div>
-        <div class="uprow"><button class="primary" id="btnUpFacts">Paste supplier data from Excel</button><button id="btnImport">Import scores from CSV</button></div>
+        <div class="uprow"><button class="primary" id="btnUpFacts">Paste supplier data from Excel</button><button id="btnImport">Import scores from CSV</button><button id="btnSesLoad2" title="Load a session file saved earlier and carry on where you stopped">Continue an earlier session</button></div>
         <div class="small" id="upStat"></div>
       </div>
     </section>
@@ -824,7 +828,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </dialog>
 
 <dialog id="dlgSummary">
-  <div class="dh"><h3>Workshop summary</h3><div class="row" style="display:flex;gap:6px"><button class="small primary" id="btnSumMd">Download .md</button><button class="small" id="btnSumCopy">Copy</button><span class="small ok" id="sumMsg"></span><button class="small ghost" data-close>Close</button></div></div>
+  <div class="dh"><h3>Workshop summary</h3><div class="row" style="display:flex;gap:6px"><button class="small primary" id="btnSumPdf">Download .pdf</button><button class="small" id="btnSumMd">Download .md</button><button class="small" id="btnSumSes" title="A file you can load into the tool later to continue this workshop">Save session file</button><button class="small" id="btnSumCopy">Copy</button><span class="small ok" id="sumMsg"></span><button class="small ghost" data-close>Close</button></div></div>
   <div class="db md" id="sumBody"></div>
 </dialog>
 
@@ -961,8 +965,7 @@ function exampleState(){
 function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slice(0,24);const sp=cut.lastIndexOf(' ');return (sp>10?cut.slice(0,sp):cut)+'…';}
 
 let S;
-function load(){
-  if(persist)try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp){
+function hydrate(o){if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp&&o.scores){
     if(!o.sup)o.sup=o.suppliers||[];o.notes=o.notes||{};o.supNotes=o.supNotes||{};
     o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});
       if(d.ev===undefined)d.ev=EVDEF[d.name]||'';});
@@ -971,7 +974,10 @@ function load(){
     // uploaded suppliers used to start at 3 on every criterion: clear rows that were never touched
     if(!o.example&&!o.z0){o.sup.forEach(x=>{const sc=o.scores[x.id];if(!sc)return;const nt=o.notes[x.id]||{};if(o.dims.every(d=>sc[d.id]===3)&&!Object.values(nt).some(v=>v))o.dims.forEach(d=>sc[d.id]=0);});}
     o.z0=1;
-    return normalize(o);}}}catch(e){}
+    return normalize(o);}
+  return null;}
+function load(){
+  if(persist)try{const raw=localStorage.getItem(STORE);if(raw){const o=hydrate(JSON.parse(raw));if(o)return o;}}catch(e){}
   return exampleState();
 }
 const noteOf=(sid,did)=>((S.notes||{})[sid]||{})[did]||'';
@@ -1840,6 +1846,38 @@ function mdToHtml(md){
 }
 let sumMd='';
 document.getElementById('btnFinish').addEventListener('click',()=>{sumMd=fullSummary();document.getElementById('sumBody').innerHTML=mdToHtml(sumMd);document.getElementById('sumMsg').textContent='';const dl=document.getElementById('dlgSummary');dl.showModal();document.getElementById('sumBody').scrollTop=0;});
+/* summary as PDF: a small Markdown layout (headings, paragraphs, lists, tables) drawn with jsPDF */
+function summaryPdf(md){
+  const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});const W=210,H=297,M=16,CW=W-2*M;let y=M;
+  const clean=t=>String(t).replace(/✓/g,'Yes').replace(/→/g,'->').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/≥/g,'>=').replace(/≤/g,'<=').replace(/…/g,'...').replace(/[^\x00-\xff–—·•]/g,'').replace(/—/g,'–');
+  const plain=t=>clean(t).replace(/\*\*(.+?)\*\*/g,'$1').replace(/(^|\s)_(.+?)_(?=\s|$)/g,'$1$2');
+  const need=h=>{if(y+h>H-M){pdf.addPage();y=M;}};
+  const text=(t,size,style,color,indent,gap)=>{pdf.setFont('helvetica',style||'normal');pdf.setFontSize(size);pdf.setTextColor(...(color||[30,40,36]));const lh=size*0.44;
+    pdf.splitTextToSize(t,CW-(indent||0)).forEach(l=>{need(lh);pdf.text(l,M+(indent||0),y+lh*0.78);y+=lh;});y+=gap||0;};
+  const G=[23,62,48];let tb=null;
+  const flush=()=>{if(!tb)return;const rows=tb;tb=null;const n=rows[0].length;pdf.setFontSize(8);
+    // column widths from content, within limits
+    pdf.setFont('helvetica','bold');const want=rows[0].map((h,j)=>Math.max(...String(h).split(/\s+/).map(w=>pdf.getTextWidth(w)+4),Math.min(70,Math.max(10,...rows.map(r=>pdf.getTextWidth(r[j]||'')+4)))));const tot=want.reduce((a,b)=>a+b,0);const cw=want.map(w=>w/tot*CW);
+    rows.forEach((r,ri)=>{pdf.setFont('helvetica',ri?'normal':'bold');pdf.setFontSize(8);const cells=r.map((c,j)=>pdf.splitTextToSize(c||'',cw[j]-3));const h=Math.max(...cells.map(c=>c.length))*3.6+2.4;
+      need(h);if(!ri){pdf.setFillColor(232,240,236);pdf.rect(M,y,CW,h,'F');}
+      pdf.setTextColor(...(ri?[30,40,36]:G));let x=M;cells.forEach((c,j)=>{pdf.text(c,x+1.5,y+3.9);x+=cw[j];});
+      pdf.setDrawColor(205,214,209);pdf.setLineWidth(0.15);pdf.line(M,y+h,M+CW,y+h);y+=h;});y+=4;};
+  md.split('\n').forEach(l=>{let m;
+    if(/^\|/.test(l)){if(/^\|[-| ]+\|$/.test(l))return;(tb=tb||[]).push(l.replace(/^\||\|$/g,'').split('|').map(x=>plain(x.trim())));return;}
+    flush();
+    if((m=/^# (.*)$/.exec(l))){text(plain(m[1]),18,'bold',G,0,3);}
+    else if((m=/^## (.*)$/.exec(l))){y+=3;need(14);text(plain(m[1]),13,'bold',G,0,1);pdf.setDrawColor(...G);pdf.setLineWidth(0.3);pdf.line(M,y,M+CW,y);y+=3;}
+    else if((m=/^### (.*)$/.exec(l))){y+=1.5;need(12);text(plain(m[1]),10.5,'bold',[30,40,36],0,1.5);}
+    else if((m=/^(- |\d+\. )(.*)$/.exec(l))){const b=m[1]==='- '?'•':m[1].trim();pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);need(4.2);pdf.setTextColor(30,40,36);pdf.text(b,M+1,y+4.2*0.78);text(plain(m[2]),9.5,'normal',null,6,0.8);}
+    else if(l.trim()){text(plain(l),9.5,'normal',null,0,2);}
+    else y+=1;});
+  flush();
+  const np=pdf.getNumberOfPages();for(let i=1;i<=np;i++){pdf.setPage(i);pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);pdf.setTextColor(120,130,125);pdf.text(`Page ${i} of ${np}`,W-M,H-8,{align:'right'});}
+  return pdf.output('blob');
+}
+document.getElementById('btnSumPdf').addEventListener('click',async()=>{const m=document.getElementById('sumMsg');
+  if(!window.jspdf){m.textContent='PDF needs an internet connection the first time. Use Download .md instead.';return;}
+  try{const r=await saveFile(`workshop-summary-${new Date().toISOString().slice(0,10)}.pdf`,summaryPdf(sumMd));m.textContent=r==='saved'?'Saved.':'';}catch(e){console.error(e);m.textContent='Could not create the PDF. Use Download .md instead.';}});
 document.getElementById('btnSumMd').addEventListener('click',async()=>{const m=document.getElementById('sumMsg');try{const r=await saveFile(`workshop-summary-${new Date().toISOString().slice(0,10)}.md`,sumMd);m.textContent=r==='saved'?'Saved.':'';}catch(e){m.textContent='Could not save here.';}});
 document.getElementById('btnSumCopy').addEventListener('click',()=>{const m=document.getElementById('sumMsg');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(sumMd).then(()=>{m.textContent='Copied.';}).catch(()=>{m.textContent='Copy is blocked here; use Download.';});else m.textContent='Copy is blocked here; use Download.';});
 
@@ -1917,6 +1955,26 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
     if(!req||document.fullscreenEnabled===false){blocked();return;}
     try{const r=req.call(de);if(r&&r.catch)r.catch(blocked);}catch(e){blocked();}});
   document.addEventListener('fullscreenchange',sync);document.addEventListener('webkitfullscreenchange',sync);})();
+/* ---------- session file: save everything and load it again ---------- */
+(function(){const msg=document.getElementById('sesMsg'),fi=document.getElementById('sesFile');
+  const say=(t,el)=>{(el||msg).textContent=t;if(!el)setTimeout(()=>{if(msg.textContent===t)msg.textContent='';},6000);};
+  async function saveSes(el){try{const o=Object.assign({},S);delete o.suppliers;
+      const r=await saveFile(`workshop-session-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({app:'supplier-workshop-session',v:1,saved:new Date().toISOString(),state:o},null,1));
+      say(r==='saved'?'Session saved.':'',el);}catch(e){say('Could not save here.',el);}}
+  document.getElementById('btnSesSave').addEventListener('click',()=>saveSes());
+  document.getElementById('btnSumSes').addEventListener('click',()=>saveSes(document.getElementById('sumMsg')));
+  const pick=()=>{fi.value='';fi.click();};
+  document.getElementById('btnSesLoad').addEventListener('click',pick);document.getElementById('btnSesLoad2').addEventListener('click',pick);
+  fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];if(!f)return;const rd=new FileReader();
+    rd.onerror=()=>say('Could not read the file.');
+    rd.onload=()=>{let o=null;try{const j=JSON.parse(rd.result);if(j&&j.app==='supplier-workshop-session'&&j.state)o=hydrate(j.state);}catch(e){}
+      if(!o){say('That is not a workshop session file.');return;}
+      if(!confirm('Load this session? It replaces what is in the tool now.'))return;
+      S=o;applyCat();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page==='intro'?'input':S.page);save();window.scrollTo(0,0);
+      say('Session loaded'+(j_saved(rd.result)?' (saved '+j_saved(rd.result)+')':'')+'.');};
+    rd.readAsText(f);});
+  function j_saved(t){try{return new Date(JSON.parse(t).saved).toLocaleDateString();}catch(e){return '';}}
+})();
 const chkSave=document.getElementById('chkSave'),btnClear=document.getElementById('btnClear');
 function showSaveNote(){chkSave.checked=persist;document.getElementById('saveNote').textContent=persist
   ?'Your data is saved only in this browser, so it is still here next time.'
