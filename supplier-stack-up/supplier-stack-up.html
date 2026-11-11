@@ -952,6 +952,8 @@ function load(){
     if(!o.sup)o.sup=o.suppliers||[];o.notes=o.notes||{};o.supNotes=o.supNotes||{};
     o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});
       if(d.ev===undefined)d.ev=EVDEF[d.name]||'';});
+    // example data saved by an older version lacks the newer columns: fill them in from the current example
+    if(o.example&&!o.sup.some(x=>x.facts&&x.facts.tier)){const ex=exampleState();o.sup.forEach(x=>{const e=ex.sup.find(y=>y.name===x.name);if(e&&e.facts)x.facts=Object.assign({},e.facts,x.facts||{});});}
     return normalize(o);}}}catch(e){}
   return exampleState();
 }
