@@ -634,7 +634,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="body">
         <div class="small muted">Paste the supplier sheet from Excel, including the header row. Columns are matched by name: Supplier, Global Spend (EUR), the region split, materials and single-source figures, Supplier total Revenue and the rest. A <b>Subcategory</b> column splits the suppliers into subcategories; without it you can type the subcategory in the Supplier facts table.</div>
         <div class="uprow"><button class="primary" id="btnUpFacts">Paste supplier data from Excel</button><button id="btnImport">Import scores from CSV</button><button id="btnSesLoad2" title="Load a session file saved earlier and carry on where you stopped">Continue an earlier session</button></div>
-        <div class="small muted" style="margin-top:10px"><b>Score offline:</b> download an Excel file with one sheet per criterion, each listing every included subcategory and supplier. Fill in the scores (1 to 5) and comments, then upload it again.</div>
+        <div class="small muted" style="margin-top:10px"><b>Score offline:</b> download an Excel file with one sheet per criterion: suppliers down the side, scores 1 to 5 across, and a notes column. Mark each supplier's score with an x, then upload it again.</div>
         <div class="uprow"><button id="btnXlDown">Download scoring sheet (Excel)</button><button id="btnXlUp">Upload filled-in scoring sheet</button><input type="file" id="xlFile" accept=".xlsx" hidden aria-label="Choose a filled-in scoring sheet"></div>
         <div class="small" id="xlMsg"></div>
         <div class="small" id="upStat"></div>
@@ -1981,15 +1981,18 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
   const crit=d=>{const o=orderedDims();return `${o.indexOf(d)+1}. ${d.name}`;};
   const shName=(d,i)=>`${i+1} ${(d.short||d.name)}`.replace(/[\[\]:*?\/\\]/g,' ').slice(0,31).trim();
   function build(){const o=orderedDims();const sup=[];activeCats().forEach(c=>S.sup.filter(s=>catOf(s)===c&&!s.excl).forEach(s=>sup.push([c,s])));
+    const cats=activeCats();
     const sheets=o.map((d,i)=>{const p=S.persp.find(q=>q.id===d.pid);
-      const rows=[['Subcategory','Supplier','Score: '+crit(d),'Comment: why this score?','','About this criterion']];
-      const info=[crit(d),p?'Dimension: '+p.name:'',d.desc||'',...LVK.map((k,n)=>d[k]?`${n+1} = ${d[k]}`:''),'Fill in a whole number from 1 to 5 in the Score column. Leave it empty if not scored yet.'].filter(Boolean);
-      const n=Math.max(sup.length,info.length);
-      for(let r=0;r<n;r++){const e=sup[r];const v=e?(+(S.scores[e[1].id]||{})[d.id]||0):0;rows.push([e?e[0]:'',e?e[1].name:'',v>0?v:'',e?noteOf(e[1].id,d.id):'','',info[r]||'']);}
-      return {name:shName(d,i),xml:sheetXml(rows,[26,32,14,50,3,70],{freezeCols:2,valid:`C2:C${Math.max(2,sup.length+1)}`})};});
+      const rows=[['Supplier',...LVK.map((k,n)=>`${n+1}`+(d[k]?`: ${d[k]}`:'')),'Notes','','Criterion: '+crit(d)]];
+      const info=[p?'Dimension: '+p.name:'',d.desc||'','Put an x in the column of the score (1 to 5) for each supplier, one x per row. Leave the row empty if not scored yet.'].filter(Boolean);let r=0;
+      const push=a=>{rows.push([...a,'',info[r]||'']);r++;};
+      cats.forEach(c=>{if(cats.length>1)push(['Subcategory: '+c,'','','','','','']);
+        sup.filter(e=>e[0]===c).forEach(e=>{const v=+(S.scores[e[1].id]||{})[d.id]||0;push([e[1].name,...[1,2,3,4,5].map(n=>v===n?'x':''),noteOf(e[1].id,d.id)]);});});
+      while(r<info.length)push(['','','','','','','']);
+      return {name:shName(d,i),xml:sheetXml(rows,[34,18,18,18,18,18,50,3,60],{freezeCols:1})};});
     const guide=[['Criterion','Dimension','What it measures','1 means','2 means','3 means','4 means','5 means']];
     o.forEach(d=>{const p=S.persp.find(q=>q.id===d.pid);guide.push([crit(d),p?p.name:'',d.desc||'',...LVK.map(k=>d[k]||'')]);});
-    guide.push([]);guide.push(['How to use: each criterion has its own sheet. Fill in a whole number from 1 to 5 per supplier in the Score column, and a comment where it helps. Leave a cell empty if it is not scored yet. Do not rename the header row, the suppliers or the sheets. Then upload the file in step 1 of the tool.']);
+    guide.push([]);guide.push(['How to use: each criterion has its own sheet. Put an x in the column of the score (1 to 5) for each supplier, one x per row, and a note where it helps. Leave the row empty if it is not scored yet. Do not rename the header row, the suppliers or the sheets. Then upload the file in step 1 of the tool.']);
     sheets.push({name:'Guide',xml:sheetXml(guide,[38,26,50,34,34,34,34,34])});
     const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',RT='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
     const wb=H+`<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${RT}"><sheets>`+sheets.map((t,i)=>`<sheet name="${x(t.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>';
@@ -2021,24 +2024,22 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
     const rows=[];if(z[path])tag(P(z[path]),'row').forEach(r=>{const row=[];let ci=0;kids(r,'c').forEach(c=>{const ref=c.getAttribute('r');if(ref){let n=0;for(const ch of ref.replace(/\d+/g,''))n=n*26+ch.charCodeAt(0)-64;ci=n-1;}
         const t=c.getAttribute('t'),v=kids(c,'v')[0];let val='';if(t==='inlineStr')val=strOf(c);else if(v){val=t==='s'?(ss[+v.textContent]||''):v.textContent;}row[ci]=val;ci++;});
       rows.push(Array.from(row,v=>v===undefined?'':v));});
-    return rows;});}
+    return {name:pick.getAttribute('name')||'',rows};});}
   function applyScores(sheets){const o=orderedDims();const key=h=>hkey(String(h).replace(/^\s*\d+\.\s*/,''));
     let nS=0,nC=0,found=0;const done=new Set(),unknown=[],bad=[];
-    sheets.forEach(rows=>{if(rows.length<2)return;
-    // one sheet per criterion: "Score: <criterion>" and "Comment" columns. Turn it into the wide layout.
-    const h0=rows[0].map(h=>String(h||''));const sj=h0.findIndex(h=>/^\s*score\s*:/i.test(h));
-    if(sj>=0){const cn=h0[sj].replace(/^\s*score\s*:/i,'').trim(),cj=h0.findIndex(h=>/^\s*comment/i.test(h)),nj=h0.findIndex(h=>hkey(h)==='supplier');if(nj<0)return;
-      rows=rows.map((r,i)=>i?[r[nj],r[sj],cj>=0?r[cj]:'']:['Supplier',cn,'Comment: '+cn]);}
-    const H=rows[0].map(h=>String(h||''));
-    const si=H.findIndex(h=>hkey(h)==='supplier');if(si<0)return;
-    const sc={},cm={};H.forEach((h,j)=>{const isC=/^\s*comment\s*:/i.test(h);const k=key(isC?h.replace(/^\s*comment\s*:/i,''):h);const d=o.find(q=>key(q.name)===k);if(d)(isC?cm:sc)[d.id]=j;});
-    if(!Object.keys(sc).length)return;found++;
-    rows.slice(1).forEach(r=>{const name=String(r[si]||'').trim();if(!name)return;const s=S.sup.find(q=>q.name.trim().toLowerCase()===name.toLowerCase());if(!s){if(!unknown.includes(name))unknown.push(name);return;}
-      S.scores[s.id]=S.scores[s.id]||{};let any=false;
-      Object.keys(sc).forEach(id=>{const raw=String(r[sc[id]]===undefined?'':r[sc[id]]).trim();if(!raw)return;const v=+raw.replace(',','.');
-        if(!(Number.isInteger(v)&&v>=1&&v<=5)){bad.push(`${name}: "${raw}"`);return;}if(S.scores[s.id][id]!==v){S.scores[s.id][id]=v;nS++;}any=true;});
-      Object.keys(cm).forEach(id=>{const t=String(r[cm[id]]===undefined?'':r[cm[id]]).trim();if(t&&t!==noteOf(s.id,id)){setNote(s.id,id,t);nC++;}if(t)any=true;});
-      if(any)done.add(s.id);});});
+    sheets.forEach(sh=>{const rows=sh.rows;if(rows.length<2)return;const H=rows[0].map(h=>String(h||''));
+      const si=H.findIndex(h=>hkey(h)==='supplier');if(si<0)return;
+      // which criterion: the "Criterion: ..." header cell, else the number the sheet name starts with
+      let d=null;const cj=H.findIndex(h=>/^\s*criterion\s*:/i.test(h));if(cj>=0){const k=key(H[cj].replace(/^\s*criterion\s*:/i,''));d=o.find(q=>key(q.name)===k)||null;}
+      if(!d){const m=/^\s*(\d+)/.exec(sh.name||'');if(m)d=o[+m[1]-1]||null;}if(!d)return;
+      const col=[1,2,3,4,5].map(n=>H.findIndex(h=>new RegExp('^\\s*'+n+'\\s*(:|$)').test(h)));if(col.some(c=>c<0))return;const nj=H.findIndex(h=>/^\s*notes?\s*$/i.test(h));found++;
+      rows.slice(1).forEach(r=>{const name=String(r[si]||'').trim();if(!name||/^subcategory\s*:/i.test(name))return;const s=S.sup.find(q=>q.name.trim().toLowerCase()===name.toLowerCase());
+        const marks=col.map((c,n)=>String(r[c]===undefined?'':r[c]).trim()?n+1:0).filter(Boolean);const note=nj>=0?String(r[nj]===undefined?'':r[nj]).trim():'';
+        if(!s){if((marks.length||note)&&!unknown.includes(name))unknown.push(name);return;}
+        S.scores[s.id]=S.scores[s.id]||{};
+        if(marks.length>1)bad.push(`${name} on ${d.short||d.name} (${marks.join(' and ')})`);
+        else if(marks.length===1){if(S.scores[s.id][d.id]!==marks[0]){S.scores[s.id][d.id]=marks[0];nS++;}done.add(s.id);}
+        if(note){if(note!==noteOf(s.id,d.id)){setNote(s.id,d.id,note);nC++;}done.add(s.id);}});});
     if(!found)throw new Error('No criterion sheets were found. Keep the sheets and header rows as downloaded.');
     return {nS,nC,sup:done.size,unknown,bad};}
   const msg=document.getElementById('xlMsg'),fi=document.getElementById('xlFile');
@@ -2048,7 +2049,7 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
   document.getElementById('btnXlUp').addEventListener('click',()=>{fi.value='';fi.click();});
   fi.addEventListener('change',async()=>{const f=fi.files&&fi.files[0];if(!f)return;
     try{const rows=await readScores(await f.arrayBuffer());const r=applyScores(rows);markScnDirty();applyCat();renderAll();save();
-      say(`Loaded ${r.nS} score${r.nS===1?'':'s'} and ${r.nC} comment${r.nC===1?'':'s'} for ${r.sup} supplier${r.sup===1?'':'s'}. Empty cells were left as they were.`+(r.unknown.length?` Not in the tool, skipped: ${r.unknown.join(', ')}.`:'')+(r.bad.length?` Not a whole number from 1 to 5, skipped: ${r.bad.slice(0,5).join('; ')}${r.bad.length>5?' and '+(r.bad.length-5)+' more':''}.`:'')+' Tick each subcategory as evaluated when the room agrees.',r.unknown.length||r.bad.length?'err':'ok');}
+      say(`Loaded ${r.nS} score${r.nS===1?'':'s'} and ${r.nC} comment${r.nC===1?'':'s'} for ${r.sup} supplier${r.sup===1?'':'s'}. Empty cells were left as they were.`+(r.unknown.length?` Not in the tool, skipped: ${r.unknown.join(', ')}.`:'')+(r.bad.length?` More than one score marked, skipped: ${r.bad.slice(0,5).join('; ')}${r.bad.length>5?' and '+(r.bad.length-5)+' more':''}.`:'')+' Tick each subcategory as evaluated when the room agrees.',r.unknown.length||r.bad.length?'err':'ok');}
     catch(e){console.error(e);say(e.message==='zip'?'That is not an Excel (.xlsx) scoring sheet.':e.message==='old'?'This browser cannot read Excel files. Use a current Edge or Chrome.':e.message,'err');}});
 })();
 /* ---------- session file: save everything and load it again ---------- */
