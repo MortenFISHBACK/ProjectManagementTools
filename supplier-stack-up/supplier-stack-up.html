@@ -438,6 +438,8 @@ table.fin input[type=checkbox]{width:18px;height:18px;accent-color:var(--hl)}
 .vz-svg text{font-family:var(--font-body);font-size:10px;fill:var(--fg-2)}
 .vz-svg .axt{font-family:var(--font-display);font-weight:600;fill:var(--fg)}
 .vz-svg .pl{font-weight:600;fill:var(--fg)}
+.confirm-w{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2)}
+.confirm-w button{font-family:var(--font-display);font-weight:600;font-size:1rem;padding:11px 22px}
 /* workshop flow */
 .setup-stack{display:grid;gap:20px;margin-top:12px}
 .wide-w #weights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
@@ -622,6 +624,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="body">
         <div class="w-why"><p><b>Why we weight.</b> The four dimensions do not matter equally in every subcategory. In one, security of supply is the main concern; in another, innovation or cost. The weights are how the room agrees up front what a good partner looks like here, before looking at any supplier. That keeps the scoring honest: suppliers are judged against what we said matters, not the other way round.</p><p>Set each dimension from 0 (does not matter here) to 10 (critical). Agree the weights first, then score.</p></div>
         <div id="weights"></div>
+        <div class="confirm-w"><button class="primary" id="btnConfirmW">Confirm weights and score the suppliers →</button><span class="small muted" id="confirmWNote"></span></div>
       </div>
     </section>
   </div>
@@ -1356,6 +1359,7 @@ function factsCSV(){const q=v=>/[",;\t\n]/.test(String(v))?'"'+String(v).replace
   S.sup.forEach(s=>{const f=factsOf(s);L.push(FCOLS.map(c=>c.k==='name'?q(s.name):c.k==='revEur'?(revEur(f)===null?'':Math.round(revEur(f))):c.k==='share'?(shareOf(f)===null?'':shareOf(f).toFixed(6)):q(f[c.k]===undefined?'':f[c.k])).join(','));});
   return L.join('\n');}
 const dlgF=document.getElementById('dlgFacts');
+document.getElementById('btnConfirmW').addEventListener('click',()=>startCat(S.curCat));
 document.getElementById('btnUpFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
 document.getElementById('btnDoFacts').addEventListener('click',()=>{const m=document.getElementById('factsMsg');
   try{const r=importFacts(document.getElementById('factsText').value,document.getElementById('factsAdd').checked);applyCat();renderAll();save();
@@ -1785,6 +1789,7 @@ function renderFlow(){
   document.getElementById('lockHint').textContent=ok?'':`Steps 3 and 4 appear when every subcategory is evaluated (${nd} of ${names.length} done)`;
   document.getElementById('catProg').textContent=`${nd} of ${names.length} evaluated`;
   document.getElementById('upStat').textContent=`${S.example?'Example data loaded: ':'Loaded: '}${S.sup.length} suppliers in ${names.length} subcategor${names.length===1?'y':'ies'}.`;
+  document.getElementById('confirmWNote').textContent=`Starts the scoring of ${S.curCat}.`;
   document.getElementById('setupFor').textContent=`Weights, suppliers and facts for: ${S.curCat}`;
   const host=document.getElementById('catList');
   host.innerHTML=names.map(c=>{const n=S.sup.filter(s=>catOf(s)===c).length;const d=catDone(c);
