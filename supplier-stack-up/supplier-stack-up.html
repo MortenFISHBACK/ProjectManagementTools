@@ -1857,7 +1857,7 @@ function summaryPdf(md){
   const G=[23,62,48];let tb=null;
   const flush=()=>{if(!tb)return;const rows=tb;tb=null;const n=rows[0].length;pdf.setFontSize(8);
     // column widths from content, within limits
-    pdf.setFont('helvetica','bold');const want=rows[0].map((h,j)=>Math.max(...String(h).split(/\s+/).map(w=>pdf.getTextWidth(w)+4),Math.min(70,Math.max(10,...rows.map(r=>pdf.getTextWidth(r[j]||'')+4)))));const tot=want.reduce((a,b)=>a+b,0);const cw=want.map(w=>w/tot*CW);
+    pdf.setFont('helvetica','bold');const want=rows[0].map((h,j)=>Math.max(...String(h).split(/\s+/).map(w=>pdf.getTextWidth(w)+4),Math.min(70,Math.max(10,...rows.map(r=>pdf.getTextWidth(r[j]||'')+4)))));const tot=want.reduce((a,b)=>a+b,0);const cw=want.map(w=>w/tot*CW);const mn=rows[0].map(h=>Math.max(...String(h).split(/\s+/).map(w=>pdf.getTextWidth(w)+3.5)));cw.forEach((w,j)=>{if(w<mn[j]){const k=cw.indexOf(Math.max(...cw));cw[k]-=mn[j]-w;cw[j]=mn[j];}});
     rows.forEach((r,ri)=>{pdf.setFont('helvetica',ri?'normal':'bold');pdf.setFontSize(8);const cells=r.map((c,j)=>pdf.splitTextToSize(c||'',cw[j]-3));const h=Math.max(...cells.map(c=>c.length))*3.6+2.4;
       need(h);if(!ri){pdf.setFillColor(232,240,236);pdf.rect(M,y,CW,h,'F');}
       pdf.setTextColor(...(ri?[30,40,36]:G));let x=M;cells.forEach((c,j)=>{pdf.text(c,x+1.5,y+3.9);x+=cw[j];});
