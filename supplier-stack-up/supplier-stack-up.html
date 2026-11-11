@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Supplier Stack-Up</title>
+<title>Supplier partnership segmentation workshop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
 <style>
@@ -70,6 +70,9 @@ header.top .sub{color:var(--brand-soft);margin-top:2px;max-width:70ch;font-size:
 header.top button{background:transparent;color:var(--brand-fg);border-color:rgba(191,230,196,.45)}
 header.top button:hover{border-color:var(--brand-soft)}
 header.top button.ghost{border-color:transparent;color:var(--brand-soft)}
+header.top button.danger{background:var(--critical);border-color:var(--critical);color:#fff}
+.toolbar label.savetog{display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.toolbar label.savetog input{accent-color:var(--brand-soft);margin:0}
 .badge{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--warn);color:#3a2f00;vertical-align:middle;margin-left:8px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .toolbar label{font-size:.85rem;color:var(--brand-soft)}
@@ -101,7 +104,12 @@ nav.pages button[aria-current=page] .n{background:var(--hl);color:#fff}
 .pgroup.collapsed .wrow{display:none}
 .phead{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;padding:6px 8px;border-radius:4px;background:var(--surface-2);border-left:4px solid var(--s1)}
 .phead .pname{font-family:var(--font-display);font-weight:600;font-size:.9rem}
-.phead .pdesc{grid-column:1/-1;font-size:.78rem;color:var(--muted);line-height:1.3}
+.phead .pdesc{grid-column:1/-1;font-size:.86rem;color:var(--fg-2);line-height:1.4}
+.phead .pdesc .when{display:block;margin-top:4px;color:var(--muted);font-style:italic}
+.wrow .cdesc{grid-column:1/-1;font-size:.84rem;color:var(--fg-2);line-height:1.35;padding-bottom:4px}
+.wrow .cdesc .lohi{display:block;margin-top:3px;color:var(--muted);font-size:.8rem}
+.wide-w .wrow .name{grid-column:1}
+.w-why{max-width:95ch;margin-bottom:12px;font-size:.92rem;color:var(--fg-2)}.w-why p{margin:0 0 6px}
 .phead .share{font-family:var(--font-display);font-weight:600;color:var(--fg-2);text-align:right}
 .phead .pw{grid-column:1/-1;display:flex;align-items:center;gap:8px}
 .phead .pw input{flex:1;accent-color:var(--hl);min-width:0}
@@ -282,7 +290,7 @@ button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-l
 .sc-dots{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto;padding:2px}
 .sc-dots button{flex:1 1 0;min-width:28px;padding:5px 4px;font-size:.78rem;font-weight:600;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-top:4px solid var(--s0)}
 .sc-dots button[aria-selected=true]{background:var(--hl);color:var(--hl-fg);border-color:var(--hl)}
-.sc-grid{display:grid;grid-template-columns:minmax(210px,25%) minmax(0,1fr);gap:16px;min-height:0}
+.sc-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-height:0}
 .sc-grid>.panel{display:flex;flex-direction:column;min-height:0}
 .sc-grid>.panel>.body{overflow:auto;min-height:0;flex:1}
 @media (max-width:900px){.sc-wrap{height:auto}.sc-grid{grid-template-columns:1fr}.sc-main{order:-1}}
@@ -292,7 +300,7 @@ button.notes-btn .ct{display:inline-block;min-width:1.4em;padding:0 4px;margin-l
 .sc-desc{margin:6px 0 12px}
 .sc-desc textarea{width:100%;font:inherit;font-size:.95rem;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);resize:none;min-height:0}
 .sc-desc textarea:focus,.rub textarea:focus,.srow input.cm:focus{outline:0;border-color:var(--hl)}
-.sc-table{display:grid;grid-template-columns:minmax(150px,1.5fr) repeat(5,minmax(0,1fr)) minmax(140px,1.4fr);gap:6px;align-items:stretch}
+.sc-table{display:grid;grid-template-columns:minmax(230px,2.4fr) repeat(5,minmax(0,1fr)) minmax(180px,2fr);gap:6px;align-items:stretch}
 .sc-table .hd{font-family:var(--font-display);font-weight:600;font-size:.78rem;color:var(--fg-2);align-self:end;padding-bottom:2px}
 .rub{border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:3px;border:1px solid var(--line-2)}
 .rub .lv{font-family:var(--font-display);font-weight:700;font-size:1.1rem;line-height:1}
@@ -414,6 +422,105 @@ table.fin input[type=checkbox]{width:18px;height:18px;accent-color:var(--hl)}
 .stk-add input:focus{outline:0;border-color:var(--hl)}
 .stk-add select{padding:5px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);font-size:.88rem}
 
+/* data at a glance */
+.viz-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}
+@media (max-width:900px){.viz-grid{grid-template-columns:1fr}}
+.vz-card h3{font-size:1rem;margin-bottom:2px}
+.vz-body{margin-top:10px}
+.vz-row{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr);gap:10px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line-2)}
+.vz-row .nm{font-weight:600;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vz-bar{display:grid;grid-template-columns:minmax(0,1fr) 7ch;gap:8px;align-items:center;margin:2px 0}
+.vz-bar .num{font-size:.82rem;text-align:right;font-weight:600}
+.vz-track{display:flex;height:12px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.vz-track i{display:block;height:100%}
+.vz-sub{font-size:.76rem;color:var(--muted)}
+.vz-svg{width:100%;max-width:520px;height:auto;display:block}
+.vz-svg text{font-family:var(--font-body);font-size:10px;fill:var(--fg-2)}
+.vz-svg .axt{font-family:var(--font-display);font-weight:600;fill:var(--fg)}
+.vz-svg .pl{font-weight:600;fill:var(--fg)}
+.confirm-w{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2)}
+.confirm-w button{font-family:var(--font-display);font-weight:600;font-size:1rem;padding:11px 22px}
+.srow .nm .nmw{min-width:0;display:grid}
+.srow .nm .evw{font-weight:400;font-size:.78rem;color:var(--fg-2);line-height:1.3}
+.srow .nm .evw span{white-space:normal;overflow:visible}
+.srow .nm .evw b{font-family:var(--font-display);color:var(--fg)}
+.sc-sec{display:flex;align-items:center;gap:8px;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--line-2)}
+.sc-sec .n{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--hl);color:#fff;font-family:var(--font-display);font-weight:700;font-size:.85rem}
+.sc-sec h3{font-size:1.05rem}
+
+.sc-viz.two{max-width:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.sc-viz .vz-card h3{font-size:.92rem}
+.sc-wrap{height:auto!important}.sc-grid>.panel>.body{overflow:visible}
+.mn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px 22px;margin-top:6px}
+.mn h4{margin:0 0 3px;font-family:var(--font-display);font-size:.8rem;font-weight:600;color:var(--fg-2)}
+.mn-note{margin-bottom:3px}.mn-note .legend{font-size:.7rem;gap:2px 8px}
+.mn-row{display:grid;grid-template-columns:minmax(70px,105px) minmax(0,1fr) 6.5ch;gap:6px;align-items:center;padding:1px 0}
+.mn-row .nm{font-size:.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mn-row .num{font-size:.76rem;font-weight:600;text-align:right}
+.mn-row .vz-track{height:9px}
+table.mn-bg td,table.mn-bg th{padding:3px 8px;font-size:.84rem}
+.mn-pair{display:grid;gap:2px}.mn-pair .vz-track{height:5px}
+.sup-row .incl{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;color:var(--fg-2);cursor:pointer;white-space:nowrap}
+.sup-row .incl input{width:16px;height:16px;accent-color:var(--hl);padding:0}
+.sup-row.off>input{color:var(--muted);font-style:italic}
+.nm.xs{font-style:italic;color:var(--muted)}
+.cat-row .incl{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:var(--fg-2);cursor:pointer;white-space:nowrap}
+.cat-row .incl input{width:16px;height:16px;accent-color:var(--hl)}
+.cat-row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:9px 8px;border-bottom:1px solid var(--line-2);border-radius:4px;cursor:pointer}
+.cat-row:hover{background:var(--surface-2)}.cat-row.cur:hover{background:var(--hl-soft)}
+.cat-row .pick{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.cat-row.cur .pick{border-color:var(--hl)}.cat-row.cur .pick::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--hl)}
+.cat-row .nm{flex:1 1 170px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.cat-row .curtag{margin-left:8px;font-family:var(--font-display);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--hl-strong)}
+.cat-row .cnt{white-space:nowrap}
+.cat-row .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-left:auto}
+.cat-row .stat{border-radius:999px;color:var(--fg-2)}
+.cat-row.done .stat{background:var(--good);border-color:var(--good);color:#fff}
+.cat-row.skip .nm,.cat-row.skip .cnt,.cat-row.skip .stat{opacity:.5}
+/* workshop flow */
+.setup-stack{display:grid;gap:20px;margin-top:12px}
+.wide-w #weights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+@media (max-width:640px){.wide-w #weights{grid-template-columns:1fr}}
+.wide-w .pgroup{margin-bottom:0}
+.sc-cat{display:grid;line-height:1.15;max-width:220px;min-width:0}
+.sc-cat b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-display)}
+.intro-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:16px}
+@media (max-width:1000px){.intro-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.intro-steps{grid-template-columns:1fr}}
+.intro-steps p{margin:8px 0 0;font-size:.92rem}
+.istep{display:flex;align-items:center;gap:10px}
+.istep .n{display:inline-grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;background:var(--hl);color:#fff;font-family:var(--font-display);font-weight:700;flex:none}
+table.intro-tbl td{text-align:left;font-size:.9rem}table.intro-tbl td:last-child,table.intro-tbl th:last-child{text-align:left;white-space:nowrap}
+.intro-list{margin:0;padding-left:18px;display:grid;gap:8px;font-size:.92rem}
+.setup-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;margin-top:16px}
+@media (max-width:900px){.setup-top{grid-template-columns:1fr}}
+.uprow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.sect-h{margin-top:24px;font-size:1.15rem}
+.cat-row.cur{background:var(--hl-soft)}
+.cat-row.done .nm{color:var(--fg-2)}
+.lockhint{align-self:center;margin-left:10px;font-size:.82rem;color:var(--brand-soft);white-space:nowrap}
+.scn-pick{display:grid;gap:4px;margin-bottom:10px}
+.scn-pick select{padding:5px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table.cmp tr.go{cursor:pointer}
+table.cmp tr.go:hover td{background:var(--surface-2)}
+table.cmp tr.curcat td.sup{color:var(--hl-strong)}
+.le-row{display:grid;gap:6px;align-items:center;padding:4px 0}
+.le-row input{width:100%;min-width:0;font:inherit;font-size:.9rem;padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.le-row input:focus{outline:0;border-color:var(--hl)}
+.le-row button{border:0;background:transparent;color:var(--muted);font-size:1.1rem;padding:0 6px}
+.le-row button:hover{color:var(--critical)}
+.le-head{font-family:var(--font-display);font-weight:600;font-size:.78rem;color:var(--fg-2)}
+@media (max-width:640px){.le-row{grid-template-columns:1fr!important}.le-head{display:none}}
+.finish{text-align:center;padding:12px 0 8px;display:grid;gap:6px;justify-items:center}
+.finish button{font-family:var(--font-display);font-size:1.15rem;font-weight:700;padding:16px 36px;border-radius:10px;background:var(--hl);border-color:var(--hl);color:var(--hl-fg)}
+#dlgSummary{max-width:min(900px,calc(100vw - 32px))}
+#dlgSummary .db{max-height:min(76vh,860px);overflow:auto;display:block}
+.md h1{font-size:1.4rem;margin:0 0 4px}.md h2{font-size:1.1rem;margin:20px 0 6px;padding-bottom:4px;border-bottom:2px solid var(--line)}.md h3{margin:14px 0 4px}
+.md p{margin:6px 0}.md ul,.md ol{margin:6px 0;padding-left:20px}
+.md table{border-collapse:collapse;width:100%;font-size:.86rem;margin:6px 0}
+.md th,.md td{padding:4px 8px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+.md th{font-family:var(--font-display);font-weight:600;font-size:.78rem;color:var(--fg-2)}
+
 /* export + print */
 .print-only{display:none}
 dialog .sect{border-top:1px solid var(--line-2);padding-top:10px}
@@ -456,76 +563,124 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <header class="top">
   <div class="bar">
     <div>
-      <h1>Supplier Stack-Up <span class="badge" id="badge">Example data</span></h1>
-      <div class="sub">Supplier partnership segmentation across four perspectives. Everything stays in this browser; nothing is sent anywhere.</div>
+      <h1>Supplier partnership segmentation workshop <span class="badge" id="badge">Example data</span></h1>
+      <div class="sub">Choose the suppliers to partner with, across four perspectives. Nothing is sent anywhere. <span id="saveNote"></span></div>
     </div>
     <div class="toolbar">
-      <label for="catSel">Subcategory</label>
-      <select id="catSel" aria-label="Subcategory" style="max-width:260px"></select>
-      <label for="scnSel">Scenario</label>
-      <select id="scnSel" aria-label="Scenario"></select>
-      <button id="btnImport">Import data</button>
       <button id="btnExport">Export</button>
+      <button id="btnSesSave" title="Save the whole workshop (data, weights, scores, comments, decisions) as a file you can load again later">Save session</button>
+      <button id="btnSesLoad" title="Continue from a session file saved earlier">Load session</button><input type="file" id="sesFile" accept=".json,application/json" hidden aria-label="Choose a session file">
+      <span class="small" id="sesMsg" style="color:#fff"></span>
       <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
+      <button id="btnFull" aria-pressed="false" title="Show the tool on the whole screen. Press Esc to leave.">⛶ Full screen</button>
+      <label class="savetog" title="When off, nothing is kept after you close or reload the tab"><input type="checkbox" id="chkSave"> Save in this browser</label>
+      <button id="btnClear" class="ghost" title="Delete everything this tool has stored in this browser">Clear my data</button>
     </div>
   </div>
   <nav class="pages" aria-label="Pages">
-    <button data-page="input" aria-current="page"><span class="n">1</span>Setup &amp; weighting</button>
+    <button data-page="intro" aria-current="page">Introduction</button>
+    <button data-page="input"><span class="n">1</span>Setup &amp; weighting</button>
     <button data-page="scoring"><span class="n">2</span>Supplier criteria scoring</button>
-    <button data-page="results"><span class="n">3</span>Supplier evaluations</button>
-    <button data-page="final"><span class="n">4</span>Final selection</button>
+    <button data-page="results" data-lock><span class="n">3</span>Supplier evaluations</button>
+    <button data-page="final" data-lock><span class="n">4</span>Final selection</button>
+    <span class="lockhint" id="lockHint"></span>
   </nav>
 </header>
 
-<div data-pagebody="input">
-  <div class="page-intro"><p>Pick the subcategory in the bar above. Set how much each of the four dimensions matters for it, check the suppliers in scope, and keep the supplier facts up to date. Scoring happens on the next page.</p><button class="primary" data-goto="scoring">Supplier criteria scoring →</button></div>
-  <div class="layout">
-    <aside class="panel" aria-label="Weights">
-      <div class="head"><h2 id="wTitle">Weights</h2><button class="small" id="btnAddDim">+ Criterion</button></div>
+<div data-pagebody="intro">
+  <div class="page-intro"><p>This tool takes a group through choosing the <b>1–3 suppliers</b> to build a partnership with. It runs in four steps, one subcategory at a time, and ends with a summary of what was agreed.</p><button class="primary" data-goto="input">Start with step 1 →</button></div>
+  <div class="intro-steps">
+    <section class="panel"><div class="body"><div class="istep"><span class="n">1</span><h2>Setup &amp; weighting</h2></div><p>Upload the supplier list. The tool lists the subcategories in it. Tick <b>Include in workshop</b> for the subcategories you want to cover. Then click a subcategory, tick <b>Include in scoring</b> for the suppliers to score, and set how much each of the four dimensions matters.</p><p class="small muted">Outcome: agreed scope (subcategories and suppliers) and weights per subcategory.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">2</span><h2>Supplier criteria scoring</h2></div><p>Score every included supplier in the selected subcategory from 1 to 5, one criterion per screen, with a comment on why. When the last criterion is done, the subcategory is ticked off and you return to step 1 for the next one.</p><p class="small muted">Outcome: a ranking and segment per subcategory.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">3</span><h2>Supplier evaluations</h2></div><p>Appears when every included subcategory is evaluated. Look at the overall picture across the included subcategories, check close calls, and adjust scores or weights where the room disagrees.</p><p class="small muted">Outcome: a result the room stands behind.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">4</span><h2>Final selection</h2></div><p>Compare the finalists from the included subcategories and decide: a) which suppliers to work with, b) who to involve internally, c) the next steps. One button then gives the workshop summary.</p><p class="small muted">Outcome: decisions, owners and a summary to share.</p></div></section>
+  </div>
+  <div class="layout" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+    <section class="panel" aria-label="Data needed">
+      <div class="head"><h2>Data you need before you start</h2></div>
       <div class="body">
-        <div class="small muted" style="margin-bottom:10px">Weights are set per subcategory, on the four dimensions (0 = ignore, 10 = critical). The criteria inside a dimension share its weight equally; the % shows each one's share of the score. A knock-out hides any supplier scoring below it. The X / Y buttons decide which perspectives feed each axis of the map.</div>
-        <div id="weights"></div>
+        <p style="margin-top:0">One Excel sheet with a header row and one row per supplier. Copy the rows and paste them in step 1. Columns are matched by name. Only <b>Supplier</b> is required; the rest is used where it is filled in.</p>
+        <div class="scroll"><table class="cmp intro-tbl"><thead><tr><th class="sup">Columns</th><th class="sup">Used for</th><th>Theme</th></tr></thead><tbody>
+          <tr><td class="sup">Supplier</td><td class="sup">The supplier's name</td><td><b>Required</b></td></tr>
+          <tr><td class="sup">Subcategory</td><td class="sup">Splits the suppliers into the groups evaluated one at a time</td><td>Flow</td></tr>
+          <tr><td class="sup">Global Spend (EUR), Spend Rank, Spend Score, Europe, NA, APAC, LATAM, MEIA</td><td class="sup">Shown when scoring Spend and future volume; spend by region chart</td><td>Business importance</td></tr>
+          <tr><td class="sup"># materials delivered 12m and 24m</td><td class="sup">A prompt for Future growth dependency</td><td>Business importance</td></tr>
+          <tr><td class="sup"># single-source materials 12m, Single-source % by # materials and by spend, Avg # suppliers per material 12m and 24m</td><td class="sup">Shown when scoring Supply risk and criticality; single-source chart</td><td>Resilience &amp; dependency</td></tr>
+          <tr><td class="sup">Spend-to-supplier revenue ratio, Supplier total Revenue (EUR m), Trading Revenue (EUR), Trading Rank, Trading Score</td><td class="sup">Shown when scoring Reciprocity and mutual dependence; what we buy vs what they buy chart</td><td>Partnership feasibility</td></tr>
+          <tr><td class="sup">Rank, Composite Score, Tier, Comments Latest FY</td><td class="sup">Background for the discussion</td><td>All</td></tr>
+          <tr><td class="sup">Data Status, Revenue basis / confidence</td><td class="sup">Flags figures that are not final</td><td>Data quality</td></tr>
+        </tbody></table></div>
+        <p class="small muted">The data is shown as evidence beside the scores. Innovation, sustainability, willingness to invest and relationship quality have no data and are judged by the room.</p>
       </div>
-    </aside>
-    <main class="stack">
+    </section>
+    <section class="panel" aria-label="Good to know">
+      <div class="head"><h2>Good to know</h2></div>
+      <div class="body"><ul class="intro-list">
+        <li><b>In the room:</b> a facilitator, and the people who know the suppliers (category, quality, R&amp;D, supply chain).</li>
+        <li><b>Scores</b> start empty for every supplier and are set by the room in step 2. An empty score counts as 0 until it is set.</li>
+        <li><b>Your data stays in this browser.</b> Nothing is sent anywhere. Use "Clear my data" in the top bar when you are done.</li>
+        <li><b>Stopping halfway?</b> Use "Save session" in the top bar to get a file with everything in it. "Load session" brings it all back later, on this or another computer.</li>
+        <li><b>Example data</b> is loaded so you can try the flow first. Uploading your own supplier list replaces it.</li>
+      </ul></div>
+    </section>
+  </div>
+</div>
+
+<div data-pagebody="input" hidden>
+  <div class="page-intro"><p><b>A.</b> Upload the supplier data. <b>B.</b> Choose the subcategories to include in the workshop. Then take them one at a time: click a subcategory, choose which of its suppliers to include in scoring, set the weights, score in step 2, and come back here for the next one. Steps 3 and 4 appear when every included subcategory is evaluated.</p></div>
+  <div class="setup-top">
+    <section class="panel" aria-label="Upload data">
+      <div class="head"><h2>A. Upload the supplier data</h2></div>
+      <div class="body">
+        <div class="small muted">Paste the supplier sheet from Excel, including the header row. Columns are matched by name: Supplier, Global Spend (EUR), the region split, materials and single-source figures, Supplier total Revenue and the rest. A <b>Subcategory</b> column splits the suppliers into subcategories; without it you can type the subcategory in the Supplier facts table.</div>
+        <div class="uprow"><button class="primary" id="btnUpFacts">Paste supplier data from Excel</button><button id="btnImport">Import scores from CSV</button><button id="btnSesLoad2" title="Load a session file saved earlier and carry on where you stopped">Continue an earlier session</button></div>
+        <div class="small muted" style="margin-top:10px"><b>Score offline:</b> download an Excel file with one sheet per criterion: suppliers down the side, scores 1 to 5 across, and a notes column. Mark each supplier's score with an x, then upload it again.</div>
+        <div class="uprow"><button id="btnXlDown">Download scoring sheet (Excel)</button><button id="btnXlUp">Upload filled-in scoring sheet</button><input type="file" id="xlFile" accept=".xlsx" hidden aria-label="Choose a filled-in scoring sheet"></div>
+        <div class="small" id="xlMsg"></div>
+        <div class="small" id="upStat"></div>
+      </div>
+    </section>
+    <section class="panel" aria-label="Subcategories">
+      <div class="head"><h2>B. Subcategories to evaluate</h2><span class="small muted" id="catProg"></span></div>
+      <div class="body"><div class="small muted" style="margin-bottom:8px">Tick <b>Include in workshop</b> for each subcategory you want to cover; the others are left out of steps 3 and 4. Click a row to select the subcategory you work on now.</div><div id="catList"></div></div>
+    </section>
+  </div>
+  <h2 class="sect-h" id="setupFor"></h2>
+  <div class="setup-stack">
       <section class="panel" aria-label="Suppliers">
         <div class="head"><h2 id="supTitle">Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
-        <div class="body"><div class="sup-list" id="supList"></div></div>
+        <div class="body"><div class="small muted" style="margin-bottom:8px">Tick <b>Include in scoring</b> for the suppliers the room should score in this subcategory. Suppliers left out still show in the charts, in grey, but are not scored or ranked. At least one must be included.</div><div class="sup-list" id="supList"></div></div>
       </section>
-      <section class="panel" aria-label="Scenarios">
-        <div class="head"><h2>Saved weight scenarios</h2></div>
-        <div class="body">
-          <div class="small muted">Save the current dimension weights under a name. Scenarios can be applied to any subcategory and compared on Supplier evaluations.</div>
-          <div class="saveas">
-            <input id="scnName" placeholder="Name for the current weights, e.g. Resilience first" aria-label="Scenario name">
-            <button class="primary" id="btnSaveScn">Save current weights</button>
-          </div>
-          <div class="scn-list" id="scnList"></div>
-        </div>
-      </section>
-    </main>
-  </div>
-  <section class="panel" aria-label="Supplier facts" style="margin-top:20px">
-    <div class="head"><div><h2>Supplier facts</h2><div class="small muted">Spend, revenue and research status per supplier. Shown as evidence when scoring and in the Dependency view; they never change a score.</div></div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="small primary" id="btnPasteFacts">Paste from Excel</button><button class="small" id="btnFactsCsv">Download facts .csv</button></div></div>
-    <div class="body"><div class="scroll"><table class="facts" id="factsTbl"></table></div>
-      <div class="small muted" style="margin-top:8px">Revenue (EUR) = Supplier revenue (million) × FX to EUR. Share = Novonesis spend ÷ Supplier revenue (EUR). <span class="flag">!</span> marks a row whose research status isn't final or that has a caveat.</div></div>
+  <section class="panel" aria-label="Data at a glance">
+    <div class="head"><h2 id="vizTitle">Data at a glance</h2><span class="small muted">From the uploaded data. It starts the discussion; it does not settle it.</span></div>
+    <div class="body"><div class="viz-grid" id="viz"></div></div>
   </section>
+  <section class="panel" aria-label="Supplier facts">
+    <div class="head"><div><h2 id="factsTitle">Supplier facts</h2><div class="small muted">The uploaded figures per supplier, editable. Shown as evidence when scoring and in the charts above; they never change a score.</div></div></div>
+    <div class="body"><div class="scroll"><table class="facts" id="factsTbl"></table></div>
+      <div class="small muted" style="margin-top:8px">Ratio = Global Spend ÷ Supplier total Revenue. <span class="flag">!</span> marks a row whose data status isn't final or that has a note on the revenue basis.</div></div>
+  </section>
+    <section class="panel wide-w" aria-label="Weights">
+      <div class="head"><h2 id="wTitle">Weights</h2></div>
+      <div class="body">
+        <div class="w-why"><p><b>Why we weight.</b> The four dimensions do not matter equally in every subcategory. In one, security of supply is the main concern; in another, innovation or cost. The weights are how the room agrees up front what a good partner looks like here, before looking at any supplier. That keeps the scoring honest: suppliers are judged against what we said matters, not the other way round.</p><p>Set each dimension from 0 (does not matter here) to 10 (critical). Agree the weights first, then score.</p></div>
+        <div id="weights"></div>
+        <div class="confirm-w"><button class="primary" id="btnConfirmW">Confirm weights and score the suppliers →</button><span class="small muted" id="confirmWNote"></span></div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <div data-pagebody="scoring" hidden>
   <div class="sc-wrap" id="scWrap">
     <div class="sc-step">
+      <span class="sc-cat" title="Subcategory being scored. Pick another subcategory, or change which suppliers are scored, in step 1."><span class="eyebrow">Subcategory</span><b id="scCat"></b></span>
       <button id="scPrev" aria-label="Previous criterion">‹ Prev</button>
       <div class="sc-dots" id="scDots" role="tablist" aria-label="Criteria"></div>
       <button id="scNext" class="primary" aria-label="Next criterion">Next ›</button>
       <button id="scAll" aria-pressed="false" title="All suppliers and criteria in one table">All scores</button>
     </div>
     <div class="sc-grid">
-      <aside class="panel sc-cmp" aria-label="Comparison">
-        <div class="head"><h2>Compared with the others</h2></div>
-        <div class="body" id="scCmp"></div>
-      </aside>
       <section class="panel sc-main" aria-label="Criterion">
         <div class="body" id="scMain"></div>
       </section>
@@ -541,7 +696,11 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </div>
 
 <div data-pagebody="results" hidden>
-  <div class="page-intro"><p>The outcome of the current weights and scores. Change weights on Setup &amp; weighting, scores on Supplier criteria scoring, or pick another scenario in the bar above.</p><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button data-goto="scoring">← Back to scoring</button><button class="primary" id="btnFacil" aria-pressed="false">Facilitate the session</button></div></div>
+  <div class="page-intro"><p>Start with the overall picture across the subcategories included in the workshop and check whether anything needs adjusting. Only suppliers included in scoring are ranked. Open a subcategory to see its ranking, map and comparisons below.</p><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button data-goto="scoring">← Back to scoring</button><button class="primary" id="btnFacil" aria-pressed="false">Facilitate the session</button></div></div>
+  <section class="panel" aria-label="Overall picture" style="margin-top:16px">
+    <div class="head"><h2>Overall picture across subcategories</h2><span class="small muted">Click a row to review that subcategory</span></div>
+    <div class="body"><div class="scroll"><table class="cmp" id="overall"></table></div></div>
+  </section>
   <div class="res-wrap" id="resWrap">
   <aside class="panel facil" id="facil" aria-label="Facilitation guide" hidden>
     <div class="head"><h2>Facilitation guide</h2><button class="small ghost" id="facilClose">Close</button></div>
@@ -621,7 +780,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </div>
 
 <div data-pagebody="final" hidden>
-  <div class="page-intro"><p>The finalists from every subcategory, compared on the four dimensions with one shared set of weights. Agree on the <b>1–3 suppliers</b> to work with, and write down why.</p><button id="btnFinalMd" class="primary">Download decision summary .md</button></div>
+  <div class="page-intro"><p>The finalists from every included subcategory, compared on the four dimensions with one shared set of weights. Decide <b>a)</b> which 1–3 suppliers to work with, <b>b)</b> who to involve internally, and <b>c)</b> the next steps. Then finish the workshop to get the summary.</p></div>
   <div class="layout">
     <aside class="panel" aria-label="Final weights">
       <div class="head"><h2>Final round weights</h2></div>
@@ -638,16 +797,25 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
         <div class="body"><div class="scroll"><table class="fin" id="finTbl"></table></div></div>
       </section>
       <section class="panel" aria-label="Decision">
-        <div class="head"><h2>Decision: suppliers to work with</h2><span class="small muted" id="selCount"></span></div>
+        <div class="head"><h2>a) Suppliers to work with</h2><span class="small muted" id="selCount"></span></div>
         <div class="body">
           <ul class="small" style="margin:0 0 10px;padding-left:18px;color:var(--fg-2)"><li>Which finalists give the most joint value for the effort?</li><li>Can we realistically run 1–3 partnerships at once? Who owns each?</li><li>Do the facts (spend, share of their revenue) support the choice?</li></ul>
           <div id="selList"></div>
         </div>
       </section>
+      <section class="panel" aria-label="Who to involve">
+        <div class="head"><h2>b) Who to involve internally</h2><button class="small" id="btnAddPpl">+ Person</button></div>
+        <div class="body"><div class="small muted" style="margin-bottom:8px">Who do we need on board to make these partnerships happen, and what do we ask of them?</div><div id="pplList"></div></div>
+      </section>
+      <section class="panel" aria-label="Next steps">
+        <div class="head"><h2>c) Agreed next steps</h2><button class="small" id="btnAddStep">+ Next step</button></div>
+        <div class="body"><div class="small muted" style="margin-bottom:8px">How the suppliers are approached, and how the internal stakeholders are onboarded and asked for help.</div><div id="stepList"></div></div>
+      </section>
       <section class="panel" aria-label="How finalists were picked">
         <div class="head"><h2>How finalists were picked</h2></div>
         <div class="body" id="finPick"></div>
       </section>
+      <div class="finish"><button id="btnFinish" class="primary">Finish workshop: show the summary</button><div class="small muted">Sums up all four steps. You can download or copy it afterwards.</div></div>
     </main>
   </div>
 </div>
@@ -662,18 +830,23 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   </div>
 </dialog>
 
+<dialog id="dlgSummary">
+  <div class="dh"><h3>Workshop summary</h3><div class="row" style="display:flex;gap:6px"><button class="small primary" id="btnSumPdf">Download .pdf</button><button class="small" id="btnSumMd">Download .md</button><button class="small" id="btnSumSes" title="A file you can load into the tool later to continue this workshop">Save session file</button><button class="small" id="btnSumCopy">Copy</button><span class="small ok" id="sumMsg"></span><button class="small ghost" data-close>Close</button></div></div>
+  <div class="db md" id="sumBody"></div>
+</dialog>
+
 <dialog id="dlgNotes">
   <div class="dh"><h3 id="notesTitle">Notes</h3><div class="row" style="display:flex;gap:6px"><button class="small" id="notesPrev">← Prev</button><button class="small" id="notesNext">Next →</button><button class="small ghost" data-close>Close</button></div></div>
   <div class="db" id="notesBody"></div>
 </dialog>
 
 <dialog id="dlgFacts">
-  <div class="dh"><h3>Paste supplier facts</h3><button class="small ghost" data-close>Close</button></div>
+  <div class="dh"><h3>Paste the supplier data</h3><button class="small ghost" data-close>Close</button></div>
   <div class="db">
-    <div class="small">Copy the rows from your Excel sheet <b>including the header row</b> and paste them here. Columns are matched by name (Supplier (consolidated), Supplier country, Category L3, Novonesis spend (EUR), Parent / revenue basis, Supplier revenue Milion, Currency, FX to EUR, Supplier revenue (EUR), Novonesis share of supplier revenue, Revenue period, Revenue basis / caveat, Research status, Source URL). Rows are matched to suppliers by name.</div>
+    <div class="small">Copy the rows from your Excel sheet <b>including the header row</b> and paste them here. Columns are matched by name, so the order does not matter and extra columns are ignored. Only <b>Supplier</b> is required. Rows are matched to suppliers by name.</div>
     <textarea id="factsText" placeholder="Paste here (Ctrl+V)"></textarea>
-    <label class="chk"><input type="checkbox" id="factsAdd" checked> Add suppliers that aren't in scope yet (scores start at 3)</label>
-    <div class="row"><button class="primary" id="btnDoFacts">Load facts</button><span id="factsMsg" class="small"></span></div>
+    <label class="chk"><input type="checkbox" id="factsAdd" checked> Add suppliers that aren't in the tool yet (scores start empty)</label>
+    <div class="row"><button class="primary" id="btnDoFacts">Load data</button><span id="factsMsg" class="small"></span></div>
   </div>
 </dialog>
 
@@ -775,23 +948,39 @@ function exampleState(){
     ['Pinegrove Packaging','Denmark',PKL,2800000,'Pinegrove A/S',220,'DKK',0.134,'FY2025','','Verified'],
     ['Tessel Freight','Netherlands',PKL,3900000,'Tessel Group',1450,'EUR',1,'FY2024','Group revenue','Draft']];
   more.forEach(m=>fx(m[0],{country:m[1],cat:m[2],spend:m[3],parent:m[4],rev:m[5],cur:m[6],fx:m[7],period:m[8],caveat:m[9],status:m[10],url:'https://example.com/'+m[0].toLowerCase().replace(/[^a-z]+/g,'-')}));
-  const evs={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'};
+  // tier, trading revenue, region split of spend (%), materials 24m, materials 12m, avg suppliers per material 12m, single-source materials 12m, single-source % by spend
+  const extra={'Atlas Fermentation Systems':['A',420000,[70,15,10,3,2],46,41,1.2,29,.74],'Corvex Bioprocess':['B',0,[20,60,15,5,0],22,25,1.6,9,.31],'Vessel Dynamics':['B',150000,[80,10,10,0,0],34,30,1.9,7,.18],
+    'Kestrel Process Systems':['A',90000,[65,20,10,5,0],38,39,1.5,14,.42],'BioSteel Engineering':['C',0,[90,0,10,0,0],15,11,2.4,1,.05],'Northwind Chemicals':['A',2600000,[45,25,20,5,5],120,124,2.1,22,.21],
+    'Larkspur Chemicals':['B',310000,[60,25,10,5,0],64,58,2.3,9,.12],'Ostara Specialty':['B',0,[75,5,15,5,0],41,33,1.8,8,.27],'Fenwick Additives':['C',45000,[100,0,0,0,0],18,16,2.8,1,.04],
+    'Brightwater Reagents':['B',820000,[25,55,15,5,0],52,57,1.7,16,.36],'Meridian Packaging':['B',1200000,[50,30,10,5,5],88,85,3.1,4,.03],'Halden Logistics':['C',0,[85,5,5,0,5],0,0,0,0,0],
+    'Cobalt Containers':['B',260000,[70,10,15,5,0],47,52,2.2,9,.15],'Pinegrove Packaging':['C',0,[95,5,0,0,0],29,24,2.9,2,.06],'Tessel Freight':['C',0,[40,30,20,5,5],0,0,0,0,0]};
+  suppliers.forEach(s=>{const e=extra[s.name];if(!e||!s.facts)return;const f=s.facts;f.tier=e[0];if(e[1])f.trade=e[1];REG.forEach((r,i)=>f[r[0]]=Math.round(f.spend*e[2][i]/100));
+    if(e[4]){f.mat24=e[3];f.mat12=e[4];f.sup12=e[5];f.ss12=e[6];f.ssMat=Math.round(e[6]/e[4]*1000)/1000;f.ssSpend=e[7];}f.comment=f.caveat?'':'Example comment';if(e[5])f.sup24=Math.round((e[5]+0.2)*10)/10;});
+  const rankBy=(k,out)=>suppliers.filter(s=>s.facts&&fnum(s.facts[k])!==null).sort((x,y)=>y.facts[k]-x.facts[k]).forEach((s,i)=>s.facts[out]=i+1);rankBy('spend','spendRank');rankBy('trade','tradeRank');suppliers.forEach(s=>{if(s.facts)s.facts.rank=s.facts.spendRank;});
+  const evs=EVDEF;
   dims.forEach(d=>{if(evs[d.name])d.ev=evs[d.name];});
   const notes={},supNotes={};const byName=n=>suppliers.find(x=>x.name===n).id;const dimBy=n=>dims.find(x=>x.name===n).id;
   supNotes[byName('Atlas Fermentation Systems')]='Example note: sole qualified source for our fermentation vessels; 40-week lead time.';
   notes[byName('Atlas Fermentation Systems')]={[dimBy('Preferred-customer position, reciprocity and mutual dependence')]:'Example: we are under 3% of their revenue.'};
   notes[byName('Corvex Bioprocess')]={[dimBy('Willingness to invest alongside us')]:'Example: offered to co-fund a pilot line in 2027.'};
-  return normalize({example:true,persp,dims,sup:suppliers,scores,scenarios,activeScn:null,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null,notes,supNotes,cats,curCat:FBE,closeGap:0.25,final:{pw:pw([7,7,8,7]),sel:{}}});
+  return normalize({example:true,persp,dims,sup:suppliers,scores,scenarios,activeScn:null,baseScn:scenarios[0].id,picks:null,thr:3,h2h:null,notes,supNotes,cats,curCat:FBE,closeGap:0.25,final:{pw:pw([7,7,8,7]),sel:{},people:[{who:'Example: Head of Quality',forr:'Supplier audits and qualification',ask:'Join the first supplier meeting; name a quality contact'},{who:'Example: R&D lead, fermentation',forr:'Joint development roadmap',ask:'Share the 3-year technology needs before the kick-off'}],steps:[{what:'Example: category lead calls each selected supplier to propose a partnership kick-off',owner:'Category lead',due:'Within 2 weeks'},{what:'Example: brief the internal stakeholders and confirm their time',owner:'Workshop facilitator',due:'Within 1 week'}]}});
 }
 function shorten(n){n=String(n).trim();if(n.length<=26)return n;const cut=n.slice(0,24);const sp=cut.lastIndexOf(' ');return (sp>10?cut.slice(0,sp):cut)+'…';}
 
 let S;
-function load(){
-  try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp){
+function hydrate(o){if(o&&o.dims&&(o.sup||o.suppliers)&&o.persp&&o.scores){
     if(!o.sup)o.sup=o.suppliers||[];o.notes=o.notes||{};o.supNotes=o.supNotes||{};
     o.dims.forEach(d=>{const df=DEFS[d.name];if(!df)return;if(d.desc===undefined&&d.low===undefined&&d.high===undefined)Object.assign(d,df);else ['lv2','lv3','lv4'].forEach(k=>{if(d[k]===undefined)d[k]=df[k];});
-      if(d.ev===undefined)d.ev={'Spend and future volume':'spend','Preferred-customer position, reciprocity and mutual dependence':'share','Future growth dependency':'both'}[d.name]||'';});
-    return normalize(o);}}}catch(e){}
+      if(d.ev===undefined)d.ev=EVDEF[d.name]||'';});
+    // example data saved by an older version lacks the newer columns: fill them in from the current example
+    if(o.example&&!o.sup.some(x=>x.facts&&x.facts.tier)){const ex=exampleState();o.sup.forEach(x=>{const e=ex.sup.find(y=>y.name===x.name);if(e&&e.facts)x.facts=Object.assign({},e.facts,x.facts||{});});}
+    // uploaded suppliers used to start at 3 on every criterion: clear rows that were never touched
+    if(!o.example&&!o.z0){o.sup.forEach(x=>{const sc=o.scores[x.id];if(!sc)return;const nt=o.notes[x.id]||{};if(o.dims.every(d=>sc[d.id]===3)&&!Object.values(nt).some(v=>v))o.dims.forEach(d=>sc[d.id]=0);});}
+    o.z0=1;
+    return normalize(o);}
+  return null;}
+function load(){
+  if(persist)try{const raw=localStorage.getItem(STORE);if(raw){const o=hydrate(JSON.parse(raw));if(o)return o;}}catch(e){}
   return exampleState();
 }
 const noteOf=(sid,did)=>((S.notes||{})[sid]||{})[did]||'';
@@ -801,7 +990,10 @@ function setNote(sid,did,v){S.notes=S.notes||{};S.notes[sid]=S.notes[sid]||{};if
 const LVK=['low','lv2','lv3','lv4','high'];
 function defText(d){const parts=[];if(d.desc)parts.push(d.desc);LVK.forEach((k,i)=>{if(d[k])parts.push((i+1)+' = '+d[k]);});return parts.join('\n');}
 function defHTML(d){return (d.desc?esc(d.desc)+'<br>':'')+(d.low?'<b>1</b> '+esc(d.low)+'<br>':'')+(d.high?'<b>5</b> '+esc(d.high):'');}
-function save(){try{const o=Object.assign({},S);delete o.suppliers;localStorage.setItem(STORE,JSON.stringify(o));}catch(e){}}
+// Saving can be switched off; the on/off flag itself is the only thing kept then.
+let persist=true;try{persist=localStorage.getItem(STORE+'-nosave')!=='1';}catch(_){}
+function save(){if(!persist)return;try{const o=Object.assign({},S);delete o.suppliers;localStorage.setItem(STORE,JSON.stringify(o));}catch(e){}}
+function wipeStored(){try{localStorage.removeItem(STORE);localStorage.removeItem(STORE+'-wopen');}catch(_){}}
 /* ---------- subcategories (Category L3) ---------- */
 const catOf=s=>((s.facts&&s.facts.cat)||'').trim()||'Unassigned';
 function catNames(){const n=[...new Set(S.sup.map(catOf))];return n.sort((a,b)=>(a==='Unassigned')-(b==='Unassigned')||a.localeCompare(b));}
@@ -815,17 +1007,22 @@ const curPW=()=>ensureCat(S.curCat).pw;
 function stakeOf(d,c){const C=ensureCat(c||S.curCat);if(!C.stake)C.stake=JSON.parse(JSON.stringify(S.stakeSeed||{}));return C.stake[d.id]||(C.stake[d.id]=[]);}
 function syncW(){const pw=curPW();S.dims.forEach(d=>d.weight=(+pw[d.pid]||0)/nIn(d.pid));}
 function applyCat(){const names=catNames();if(!names.includes(S.curCat))S.curCat=names[0]||'Unassigned';ensureCat(S.curCat);
-  S.suppliers=S.sup.filter(s=>catOf(s)===S.curCat);syncW();}
+  S.suppliers=S.sup.filter(s=>catOf(s)===S.curCat&&!s.excl);syncW();}
+// every supplier in the current subcategory, including the ones left out of the scoring
+const catAll=()=>S.sup.filter(s=>catOf(s)===S.curCat);
+// which uploaded data sits beside each criterion when scoring
+const EVDEF={'Spend and future volume':'spend','Future growth dependency':'growth','Supply risk and criticality':'single','Technical differentiation and unique capabilities':'single','Relationship quality and executive engagement':'trade','Preferred-customer position, reciprocity and mutual dependence':'share'};
 function normalize(o){
+  o.dims.forEach(d=>{if(EVDEF[d.name])d.ev=EVDEF[d.name];});
   if(!o.sup)o.sup=o.suppliers||[];o.cats=o.cats||{};o.closeGap=o.closeGap===undefined?0.25:o.closeGap;
   o.scenarios=(o.scenarios||[]).map(sc=>{if(sc.pw)return sc;const pw={};o.persp.forEach(p=>{pw[p.id]=o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+((sc.weights||{})[d.id])||0),0);});return {id:sc.id,name:sc.name,pw};});
   if(!Object.keys(o.cats).length){const pw={};o.persp.forEach(p=>{pw[p.id]=Math.min(10,Math.round(o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+d.weight||0),0)*10)/10);});
     [...new Set(o.sup.map(s=>((s.facts&&s.facts.cat)||'').trim()||'Unassigned'))].forEach(c=>o.cats[c]={pw:Object.assign({},pw),ovr:{}});}
   if(o.dims.some(d=>d.stake)){const seed={};o.dims.forEach(d=>{if(d.stake){seed[d.id]=d.stake;delete d.stake;}});o.stakeSeed=seed;
     Object.values(o.cats).forEach(C=>{C.stake=C.stake||{};Object.keys(seed).forEach(k=>{if(!C.stake[k])C.stake[k]=JSON.parse(JSON.stringify(seed[k]));});});}
-  if(!o.final){const pw={};o.persp.forEach(p=>pw[p.id]=5);o.final={pw,sel:{}};}o.final.sel=o.final.sel||{};
+  if(!o.final){const pw={};o.persp.forEach(p=>pw[p.id]=5);o.final={pw,sel:{}};}o.final.sel=o.final.sel||{};o.final.people=o.final.people||[];o.final.steps=o.final.steps||[];
   return o;}
-function catEval(c){return evaluate(dimWFor(ensureCat(c).pw),S.sup.filter(s=>catOf(s)===c));}
+function catEval(c){return evaluate(dimWFor(ensureCat(c).pw),S.sup.filter(s=>catOf(s)===c&&!s.excl));}
 // who goes to the final round from a subcategory: the winner, plus #2 and #3 when within closeGap of the winner; the room can override
 function finalistsOf(c){const ev=catEval(c);const inRun=ev.sorted.filter(r=>!r.out);const top=inRun[0];if(!top)return [];const ovr=ensureCat(c).ovr;
   return inRun.slice(0,3).map((r,i)=>{const gap=top.total-r.total;const auto=i===0||gap<=S.closeGap+1e-9;const inc=ovr[r.s.id]!==undefined?!!ovr[r.s.id]:auto;return {r,i,gap,auto,inc,cat:c};});}
@@ -844,7 +1041,7 @@ function evaluate(weights,list){
   const sumW=S.dims.reduce((a,d)=>a+(+weights[d.id]||0),0);
   const rows=(list||S.suppliers).map(s=>{
     const parts={};let total=0;const failed=[];
-    S.dims.forEach(d=>{const sc=+(S.scores[s.id]||{})[d.id]||0;const nw=sumW>0?(+weights[d.id]||0)/sumW:0;parts[d.id]=nw*sc;total+=nw*sc;if(d.min>0&&sc<d.min)failed.push(d.name);});
+    S.dims.forEach(d=>{const sc=+(S.scores[s.id]||{})[d.id]||0;const nw=sumW>0?(+weights[d.id]||0)/sumW:0;parts[d.id]=nw*sc;total+=nw*sc;if(d.min>0&&sc>0&&sc<d.min)failed.push(d.name);});
     const x=axisScore(s.id,'x',weights),y=axisScore(s.id,'y',weights);
     return {s,total,parts,failed,out:failed.length>0,x,y,seg:segmentOf(x,y)};
   });
@@ -859,29 +1056,32 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 /* ---------- weights rail ---------- */
 // which dimensions show their sub-criteria on the setup page (collapsed by default, remembered per browser)
-let wOpen={};try{wOpen=JSON.parse(localStorage.getItem(STORE+'-wopen'))||{};}catch(_){}
+let wOpen={};if(persist){try{wOpen=JSON.parse(localStorage.getItem(STORE+'-wopen'))||{};}catch(_){}}
+// longer explanation of the four standard dimensions: what it asks, and when to weight it high
+const PDESC={
+  'business importance':['How much this supplier matters to our business today and in the coming years: what we spend with them, and how much of our growth depends on them.','Weight it high when the subcategory is a large part of our cost base or is central to our growth plans.'],
+  'resilience & dependency':['How exposed we are if this supplier fails or leaves: the risk to supply, how critical the item is, and how hard their capabilities are to replace.','Weight it high when there are few alternatives, long qualification times, or a disruption would stop production.'],
+  'joint value potential':['What we could gain by working closer together beyond price: innovation, new technology, and sustainability gains such as Scope 3 reductions.','Weight it high when the subcategory is a source of differentiation or needed to reach our sustainability targets.'],
+  'partnership feasibility':['Whether a partnership can work in practice: their willingness to invest with us, the quality of the relationship, and whether we matter enough to them.','Weight it high when success depends on the supplier committing people, capacity or capital to us.']
+};
+function pdescHTML(p){const d=PDESC[String(p.name||'').trim().toLowerCase()];return d?`${esc(d[0])}<span class="when">${esc(d[1])}</span>`:esc(p.desc||'');}
 function buildWeights(){
   const host=document.getElementById('weights');host.innerHTML='';
   S.persp.forEach((p,pi)=>{
     const g=document.createElement('div');g.className='pgroup'+(wOpen[p.id]?'':' collapsed');g.dataset.pid=p.id;const nd=dimsOf(p.id).length;
     const head=document.createElement('div');head.className='phead';head.style.borderLeftColor=col(pi);
-    head.innerHTML=`<span class="pname">${pi+1}. ${esc(p.name)}</span><span class="share num" data-share></span><span class="pdesc">${esc(p.desc||'')}</span>
+    head.innerHTML=`<span class="pname">${pi+1}. ${esc(p.name)}</span><span class="share num" data-share></span><span class="pdesc">${pdescHTML(p)}</span>
       <span class="pw"><input type="range" min="0" max="10" step="1" value="${curPW()[p.id]||0}" aria-label="Weight for ${esc(p.name)}"><span class="num" data-pwv>${curPW()[p.id]||0}</span></span>
-      <span class="axis">Map axis <button data-ax="x" aria-pressed="${p.axis==='x'}">X</button><button data-ax="y" aria-pressed="${p.axis==='y'}">Y</button><button data-ax="" aria-pressed="${!p.axis}">none</button></span>
       <button class="subtog" aria-expanded="${!!wOpen[p.id]}"><span class="chev" aria-hidden="true"></span>${nd} sub-criteri${nd===1?'on':'a'}</button>`;
-    head.querySelector('.subtog').addEventListener('click',e=>{wOpen[p.id]=!wOpen[p.id];g.classList.toggle('collapsed',!wOpen[p.id]);e.currentTarget.setAttribute('aria-expanded',String(!!wOpen[p.id]));try{localStorage.setItem(STORE+'-wopen',JSON.stringify(wOpen));}catch(_){}});
+    head.querySelector('.subtog').addEventListener('click',e=>{wOpen[p.id]=!wOpen[p.id];g.classList.toggle('collapsed',!wOpen[p.id]);e.currentTarget.setAttribute('aria-expanded',String(!!wOpen[p.id]));if(persist){try{localStorage.setItem(STORE+'-wopen',JSON.stringify(wOpen));}catch(_){}}});
     head.querySelector('.pw input').addEventListener('input',e=>{curPW()[p.id]=+e.target.value;head.querySelector('[data-pwv]').textContent=e.target.value;syncW();markScnDirty();renderResults();save();});
-    head.querySelectorAll('[data-ax]').forEach(b=>b.addEventListener('click',()=>{p.axis=b.dataset.ax;head.querySelectorAll('[data-ax]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderResults();save();}));
     g.appendChild(head);
     dimsOf(p.id).forEach(d=>{
       const row=document.createElement('div');row.className='wrow';row.dataset.id=d.id;
       row.innerHTML=`<div class="name"><input value="${esc(d.name)}" title="${esc(d.name)}" aria-label="Criterion name"></div>
         <div class="pct num" data-pct title="Share of the total score; criteria in a dimension share its weight equally"></div>
-        <div class="min"><span>Knock-out below</span><select aria-label="Knock-out threshold for ${esc(d.name)}"><option value="0">none</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select><button class="small ghost" title="Remove this criterion" aria-label="Remove ${esc(d.name)}">remove</button></div>`;
-      row.querySelector('select').value=String(d.min||0);
+        <div class="cdesc">${d.desc?esc(d.desc):'<span class="muted">No description yet. Add one on the scoring page.</span>'}${d.low||d.high?`<span class="lohi">${d.low?'<b>1</b> '+esc(d.low):''}${d.low&&d.high?' &nbsp;·&nbsp; ':''}${d.high?'<b>5</b> '+esc(d.high):''}</span>`:''}</div>`;
       row.querySelector('.name input').addEventListener('change',e=>{d.name=e.target.value.trim()||d.name;d.short=shorten(d.name);e.target.value=d.name;renderAll();save();});
-      row.querySelector('select').addEventListener('change',e=>{d.min=+e.target.value;renderResults();buildMatrix();save();});
-      row.querySelector('button').addEventListener('click',()=>{if(S.dims.length<=2)return;S.dims=S.dims.filter(x=>x!==d);syncW();renderAll();save();});
       g.appendChild(row);
     });
     host.appendChild(g);
@@ -996,11 +1196,12 @@ document.getElementById('thr').addEventListener('input',e=>{S.thr=+e.target.valu
 function buildSuppliers(){
   document.getElementById('supTitle').textContent='Suppliers in '+S.curCat;
   const host=document.getElementById('supList');
-  host.innerHTML=S.suppliers.map((s,i)=>`<div class="sup-row" data-sid="${s.id}"><i style="background:${col(i)}"></i><input value="${esc(s.name)}" aria-label="Supplier name"><button class="small notes-btn" data-notes>Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button><button class="small ghost" data-remove aria-label="Remove ${esc(s.name)}">remove</button></div>`).join('');
-  host.querySelectorAll('.sup-row').forEach(r=>{const s=S.suppliers.find(x=>x.id===r.dataset.sid);
-    r.querySelector('input').addEventListener('change',e=>{s.name=e.target.value.trim()||s.name;e.target.value=s.name;renderAll();save();});
+  host.innerHTML=catAll().map(s=>{const i=S.suppliers.indexOf(s);return `<div class="sup-row${s.excl?' off':''}" data-sid="${s.id}"><i style="background:${i<0?'var(--s0)':col(i)}"></i><input value="${esc(s.name)}" aria-label="Supplier name"><button class="small notes-btn" data-notes>Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button><label class="incl"><input type="checkbox" data-incl${s.excl?'':' checked'}> Include in scoring</label></div>`;}).join('');
+  host.querySelectorAll('.sup-row').forEach(r=>{const s=S.sup.find(x=>x.id===r.dataset.sid);
+    r.querySelector('input:not([data-incl])').addEventListener('change',e=>{s.name=e.target.value.trim()||s.name;e.target.value=s.name;renderAll();save();});
     r.querySelector('[data-notes]').addEventListener('click',()=>openNotes(s.id));
-    r.querySelector('[data-remove]').addEventListener('click',()=>removeSupplier(s));});
+    r.querySelector('[data-incl]').addEventListener('change',e=>{if(!e.target.checked&&S.suppliers.length<=1){e.target.checked=true;return;}
+      s.excl=!e.target.checked;applyCat();S.h2h=null;S.picks=null;renderAll();save();});});
 }
 function removeSupplier(s){if(S.suppliers.length<=2)return;S.sup=S.sup.filter(x=>x!==s);S.suppliers=S.suppliers.filter(x=>x!==s);delete S.scores[s.id];if(S.notes)delete S.notes[s.id];if(S.supNotes)delete S.supNotes[s.id];if(S.picks)S.picks=S.picks.filter(id=>id!==s.id);renderAll();save();}
 
@@ -1015,7 +1216,7 @@ function buildMatrix(){
   const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
   const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name+(defText(d)?'\n\n'+defText(d):''))}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${fmtW(d.weight)}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
   const body=`<tbody>${S.suppliers.map(s=>{const r=c.rows.find(x=>x.s===s);return `<tr data-sup="${s.id}"><td class="sup"><input value="${esc(s.name)}" aria-label="Supplier name"></td>`+
-    ordered.map(d=>{const v=S.scores[s.id][d.id];const fail=d.min>0&&v<d.min;const nt=noteOf(s.id,d.id);return `<td class="cell${fail?' fail':''}${nt?' noted':''}" data-dim="${d.id}"${nt?` title="${esc(nt)}"`:''} style="background:rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})"><input type="number" min="1" max="5" step="1" value="${v}" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
+    ordered.map(d=>{const v=+S.scores[s.id][d.id]||0;const fail=d.min>0&&v>0&&v<d.min;const nt=noteOf(s.id,d.id);return `<td class="cell${fail?' fail':''}${nt?' noted':''}" data-dim="${d.id}"${nt?` title="${esc(nt)}"`:''} style="background:rgba(var(--seq),${v?(0.05+(v-1)/4*0.4).toFixed(2):0})"><input type="number" min="1" max="5" step="1" value="${v||''}" placeholder="–" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
     `<td class="total num" data-total>${r.out?'–':f2(r.total)}</td><td class="num" data-rank>${r.rank||'out'}</td><td class="small" data-seg>${r.seg?SEGMENTS[r.seg]:'–'}</td><td style="white-space:nowrap"><button class="small notes-btn" data-notes title="Comments for ${esc(s.name)}">Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button> <button class="small ghost" data-remove title="Remove supplier" aria-label="Remove ${esc(s.name)}">remove</button></td></tr>`;}).join('')}</tbody>`;
   t.innerHTML=`<thead>${h1}${h2}</thead>${body}`;
   t.querySelectorAll('tbody tr').forEach(tr=>{
@@ -1023,7 +1224,7 @@ function buildMatrix(){
     tr.querySelector('td.sup input').addEventListener('change',e=>{s.name=e.target.value.trim()||s.name;e.target.value=s.name;renderAll();save();});
     tr.querySelectorAll('td.cell').forEach(td=>{
       const inp=td.querySelector('input');const d=S.dims.find(x=>x.id===td.dataset.dim);
-      const apply=()=>{let v=Math.round(+inp.value);if(!(v>=1))v=1;if(v>5)v=5;inp.value=v;S.scores[s.id][d.id]=v;
+      const apply=()=>{let v=inp.value.trim()===''?0:Math.round(+inp.value);if(inp.value.trim()!==''&&!(v>=1))v=1;if(v>5)v=5;inp.value=v||'';S.scores[s.id][d.id]=v;
         td.style.background=`rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})`;td.classList.toggle('fail',d.min>0&&v<d.min);renderResults();save();};
       inp.addEventListener('input',apply);inp.addEventListener('change',apply);
     });
@@ -1047,7 +1248,7 @@ function renderNotes(){
   let h=`<label class="eyebrow" for="supNote">Overall note</label><textarea id="supNote" rows="3" placeholder="Overall view of this supplier: context, concerns, opportunities">${esc(supNoteOf(s.id))}</textarea>`;
   S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);if(!ds.length)return;
     h+=`<div class="note-pg" style="border-left-color:${col(pi)}">${esc(p.name)}</div>`;
-    ds.forEach(d=>{h+=`<div class="note" data-dim="${d.id}"><span class="nm">${esc(d.name)}</span><label class="small">Score <select aria-label="Score for ${esc(d.name)}">${[1,2,3,4,5].map(v=>`<option${S.scores[s.id][d.id]===v?' selected':''}>${v}</option>`).join('')}</select></label>`+
+    ds.forEach(d=>{h+=`<div class="note" data-dim="${d.id}"><span class="nm">${esc(d.name)}</span><label class="small">Score <select aria-label="Score for ${esc(d.name)}">${S.scores[s.id][d.id]?'':'<option value="0" selected>–</option>'}${[1,2,3,4,5].map(v=>`<option${S.scores[s.id][d.id]===v?' selected':''}>${v}</option>`).join('')}</select></label>`+
       (LVK.some(k=>d[k])?`<span class="scale">${LVK.map((k,i)=>d[k]?'<b>'+(i+1)+'</b> '+esc(d[k]):'').filter(Boolean).join(' · ')}</span>`:'')+
       `<textarea rows="2" placeholder="Why this score? Evidence, examples, open questions">${esc(noteOf(s.id,d.id))}</textarea></div>`;});
   });
@@ -1084,7 +1285,7 @@ function renderRadar(){
   picks.forEach(id=>{const si=S.suppliers.findIndex(s=>s.id===id);if(si<0)return;const s=S.suppliers[si];
     const pts=ordered.map((d,i)=>pt(i,S.scores[s.id][d.id]||0));
     out+=`<polygon points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${col(si)}" fill-opacity="0.12" stroke="${col(si)}" stroke-width="2" stroke-linejoin="round"/>`;
-    pts.forEach((p,i)=>{out+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col(si)}" stroke="var(--surface)" stroke-width="2"><title>${esc(s.name)} · ${esc(ordered[i].name)}: ${S.scores[s.id][ordered[i].id]}</title></circle>`;});
+    pts.forEach((p,i)=>{out+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col(si)}" stroke="var(--surface)" stroke-width="2"><title>${esc(s.name)} · ${esc(ordered[i].name)}: ${S.scores[s.id][ordered[i].id]||'not scored'}</title></circle>`;});
   });
   svg.innerHTML=out;
 }
@@ -1093,9 +1294,6 @@ function renderRadar(){
 function scnMatches(sc){const pw=curPW();return S.persp.every(p=>(+sc.pw[p.id]||0)===(+pw[p.id]||0));}
 function markScnDirty(){const sc=S.scenarios.find(x=>x.id===S.activeScn);if(sc&&!scnMatches(sc))S.activeScn=null;}
 function renderScnSelect(){
-  const sel=document.getElementById('scnSel');
-  sel.innerHTML=`<option value="">Custom weights</option>`+S.scenarios.map(sc=>`<option value="${sc.id}">${esc(sc.name)}</option>`).join('');
-  sel.value=S.activeScn||'';
   const sc=S.scenarios.find(x=>x.id===S.activeScn);const b=baseScn();document.getElementById('scnTag').textContent=sc?`Weights: ${sc.name}`:`Weights: custom${b?', arrows vs '+b.name:' (not saved)'}`;
 }
 function applyScn(id){const sc=S.scenarios.find(x=>x.id===id);if(!sc)return;const pw=curPW();S.persp.forEach(p=>{if(sc.pw[p.id]!==undefined)pw[p.id]=+sc.pw[p.id];});syncW();S.activeScn=id;S.baseScn=id;renderResults();save();}
@@ -1105,20 +1303,7 @@ function renderScenarios(){
   if(!S.activeScn)cols.unshift({name:'Current',ev:evaluate(weightsNow()),id:''});
   t.innerHTML=`<thead><tr><th class="sup">Supplier</th>${cols.map(c=>`<th>${esc(c.name)}${c.id===S.activeScn?' ●':''}</th>`).join('')}</tr></thead><tbody>`+
     S.suppliers.map(s=>`<tr><td class="sup">${esc(s.name)}</td>${cols.map(c=>{const r=c.ev.rows.find(x=>x.s===s);return `<td><span class="r num${r.rank===1?' top':''}">${r.rank?'#'+r.rank:'out'}</span><span class="sc num">${f2(r.total)}${r.seg?' · '+SEGMENTS[r.seg]:''}</span></td>`;}).join('')}</tr>`).join('')+`</tbody>`;
-  const list=document.getElementById('scnList');list.innerHTML='';
-  S.scenarios.forEach(sc=>{const row=document.createElement('div');row.className='scn-row';
-    row.innerHTML=`<span class="nm">${esc(sc.name)}</span><button class="small">Apply</button><button class="small ghost">Delete</button><span class="w">${S.persp.map(p=>`${esc(p.name)} ${+sc.pw[p.id]||0}`).join(' · ')}</span>`;
-    const b=row.querySelectorAll('button');b[0].addEventListener('click',()=>applyScn(sc.id));b[1].addEventListener('click',()=>{S.scenarios=S.scenarios.filter(x=>x!==sc);if(S.activeScn===sc.id)S.activeScn=null;renderResults();save();});
-    list.appendChild(row);});
 }
-document.getElementById('btnSaveScn').addEventListener('click',()=>{
-  const inp=document.getElementById('scnName');const name=inp.value.trim()||('Scenario '+(S.scenarios.length+1));
-  const existing=S.scenarios.find(x=>x.name.toLowerCase()===name.toLowerCase());
-  if(existing){existing.pw=Object.assign({},curPW());S.activeScn=existing.id;}else{const sc={id:nid(),name,pw:Object.assign({},curPW())};S.scenarios.push(sc);S.activeScn=sc.id;}
-  S.baseScn=S.activeScn;
-  inp.value='';renderResults();save();
-});
-document.getElementById('scnSel').addEventListener('change',e=>{if(e.target.value)applyScn(e.target.value);else{S.activeScn=null;renderResults();save();}});
 
 /* ---------- tabs ---------- */
 document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('click',()=>{
@@ -1128,21 +1313,25 @@ document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.addEventListener('cli
 
 /* ---------- supplier facts (evidence only) ---------- */
 const FCOLS=[
-  {k:'name',h:'Supplier (consolidated)'},{k:'country',h:'Supplier country'},{k:'cat',h:'Category L3'},{k:'spend',h:'Novonesis spend (EUR)',num:1},
-  {k:'parent',h:'Parent / revenue basis'},{k:'rev',h:'Supplier revenue Milion',num:1},{k:'cur',h:'Currency'},{k:'fx',h:'FX to EUR',num:1},
-  {k:'revEur',h:'Supplier revenue (EUR)',calc:1},{k:'share',h:'Novonesis share of supplier revenue',calc:1},
-  {k:'period',h:'Revenue period'},{k:'caveat',h:'Revenue basis / caveat'},{k:'status',h:'Research status'},{k:'url',h:'Source URL'}];
+  {k:'name',h:'Supplier'},{k:'cat',h:'Subcategory',w:'150px'},{k:'tier',h:'Tier',w:'60px'},{k:'spend',h:'Global Spend (EUR)',num:1,w:'100px'},
+  {k:'rev',h:'Supplier total Revenue (EUR m)',num:1,w:'80px'},{k:'share',h:'Spend-to-supplier revenue ratio',calc:1},
+  {k:'trade',h:'Trading Revenue (EUR)',num:1,w:'100px'},{k:'ssSpend',h:'Single-source % by spend (12m)',num:1,pct:1,w:'70px'},{k:'ssMat',h:'Single-source % by # materials (12m)',num:1,pct:1,w:'70px'},
+  {k:'ss12',h:'# single-source materials 12m',num:1,w:'60px'},{k:'mat12',h:'# materials delivered 12m',num:1,w:'60px'},{k:'sup12',h:'Avg # suppliers per material 12m',num:1,w:'60px'},
+  {k:'status',h:'Data Status',w:'100px'},{k:'caveat',h:'Revenue basis / confidence',w:'180px'},{k:'comment',h:'Comments Latest FY',w:'220px'}];
+const REG=[['rEU','Europe'],['rNA','NA'],['rAPAC','APAC'],['rLATAM','LATAM'],['rMEIA','MEIA']];
+const fnum=v=>v!==''&&v!==undefined&&v!==null&&isFinite(+v)?+v:null;
+const pctIn=v=>{const n=fnum(v);return n===null?'':(Math.abs(n)>1?n/100:n);};
 const factsOf=s=>s.facts||{};
-function revEur(f){const fxv=f.fx!==undefined&&f.fx!==''&&isFinite(+f.fx)?+f.fx:(/^eur$/i.test(f.cur||'')?1:NaN);
+function revEur(f){const fxv=f.fx!==undefined&&f.fx!==''&&isFinite(+f.fx)?+f.fx:(!(f.cur||'').trim()||/^eur$/i.test(f.cur||'')?1:NaN);
   if(isFinite(+f.rev)&&f.rev!==''&&f.rev!==undefined&&isFinite(fxv))return +f.rev*1e6*fxv;
   if(isFinite(+f.revEurIn)&&f.revEurIn)return +f.revEurIn<1e5?+f.revEurIn*1e6:+f.revEurIn;return null;}
 function shareOf(f){const r=revEur(f);if(r&&isFinite(+f.spend)&&f.spend!==''&&f.spend!==undefined)return +f.spend/r;if(isFinite(+f.shareIn)&&f.shareIn!=='')return +f.shareIn;return null;}
-const isFinal=f=>/^(final|verified|done|complete|completed|confirmed|validated)\b/i.test((f.status||'').trim());
+const isFinal=f=>/^(final|verified|done|complete|completed|confirmed|validated|ok|high)\b/i.test((f.status||'').trim());
 const factWarn=f=>(f.status||f.caveat||f.spend!==undefined)&&(!isFinal(f)||!!(f.caveat||'').trim());
 const hasFacts=f=>Object.keys(f).some(k=>f[k]!==''&&f[k]!==undefined&&f[k]!==null);
 const eurM=v=>v===null||!isFinite(v)?'–':(v>=1e9?'€'+(v/1e9).toFixed(1)+'bn':'€'+(v/1e6).toFixed(v<1e7?2:1)+'m');
 const pctS=v=>v===null||!isFinite(v)?'–':(v*100<1?(v*100).toFixed(2):(v*100).toFixed(1))+'%';
-function warnText(f){const w=[];if(!isFinal(f))w.push('Research status: '+(f.status||'not set'));if((f.caveat||'').trim())w.push('Caveat: '+f.caveat);return w.join('\n');}
+function warnText(f){const w=[];if(!isFinal(f))w.push('Data status: '+(f.status||'not set'));if((f.caveat||'').trim())w.push('Revenue basis: '+f.caveat);return w.join('\n');}
 function safeUrl(u){u=String(u||'').trim();return /^https?:\/\//i.test(u)?u:'';}
 // parse numbers as Excel shows them: 18,400,000 · 18.400.000 · 18400000,5 · 3.1% · € 9.1
 // dec: '.' or ',' when known for the whole paste; otherwise guess from the value itself
@@ -1159,24 +1348,31 @@ function guessDecimal(cells){let c=0,d=0;cells.forEach(v=>{const t=String(v||'')
   if(/^-?0\.\d/.test(t)||/\d\.\d{1,2}$/.test(t)||/\d\.\d{4,}$/.test(t)||/\d,\d{3},\d{3}/.test(t)||/,\d{3}\.\d/.test(t))d++;});
   return c>d?',':'.';}
 function buildFacts(){
-  const t=document.getElementById('factsTbl');if(!t)return;
+  const t=document.getElementById('factsTbl');if(!t)return;document.getElementById('factsTitle').textContent='Supplier facts: '+S.curCat;
+  const show=(c,f)=>{const v=f[c.k];if(v===undefined||v==='')return '';return c.pct&&fnum(v)!==null?(Math.round(+v*1000)/10)+'%':v;};
   t.innerHTML=`<thead><tr>${FCOLS.map(c=>`<th class="${c.num||c.calc?'n':''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>`+
-    S.sup.map(s=>{const f=factsOf(s);const w=hasFacts(f)&&factWarn(f);return `<tr data-sid="${s.id}"${w?' class="warn"':''}>`+FCOLS.map(c=>{
+    catAll().map(s=>{const f=factsOf(s);const w=hasFacts(f)&&factWarn(f);return `<tr data-sid="${s.id}"${w?' class="warn"':''}>`+FCOLS.map(c=>{
       if(c.k==='name')return `<td class="sup">${esc(s.name)}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`;
-      if(c.k==='revEur')return `<td class="calc" data-calc="revEur">${eurM(revEur(f))}</td>`;
       if(c.k==='share')return `<td class="calc" data-calc="share">${pctS(shareOf(f))}</td>`;
-      return `<td><input data-k="${c.k}" class="${c.num?'n':''}" value="${esc(f[c.k]===undefined?'':f[c.k])}" aria-label="${esc(s.name)}: ${esc(c.h)}" style="min-width:${({country:'96px',cat:'130px',spend:'96px',parent:'150px',rev:'64px',cur:'48px',fx:'56px',period:'80px',caveat:'170px',status:'90px',url:'170px'})[c.k]||'60px'}"></td>`;}).join('')+`</tr>`;}).join('')+`</tbody>`;
+      return `<td><input data-k="${c.k}" class="${c.num?'n':''}" value="${esc(show(c,f))}" aria-label="${esc(s.name)}: ${esc(c.h)}" style="min-width:${c.w||'60px'}"></td>`;}).join('')+`</tr>`;}).join('')+`</tbody>`;
   t.querySelectorAll('tbody tr').forEach(tr=>{const s=S.sup.find(x=>x.id===tr.dataset.sid);
     tr.querySelectorAll('input[data-k]').forEach(inp=>inp.addEventListener('change',()=>{const c=FCOLS.find(x=>x.k===inp.dataset.k);s.facts=s.facts||{};
-      s.facts[c.k]=c.num?parseNum(inp.value):inp.value.trim();if(c.num)inp.value=s.facts[c.k];
-      tr.querySelector('[data-calc=revEur]').textContent=eurM(revEur(s.facts));tr.querySelector('[data-calc=share]').textContent=pctS(shareOf(s.facts));
+      s.facts[c.k]=c.num?(c.pct?pctIn(parseNum(inp.value)):parseNum(inp.value)):inp.value.trim();inp.value=show(c,s.facts);
+      tr.querySelector('[data-calc=share]').textContent=pctS(shareOf(s.facts));
       save();if(c.k==='cat'){applyCat();renderAll();}else{renderDep();renderScoring();}}));});
 }
-const HMAP={'supplier (consolidated)':'name','supplier':'name','supplier name':'name','supplier country':'country','country':'country','category l3':'cat','category':'cat',
-  'novonesis spend (eur)':'spend','spend (eur)':'spend','spend':'spend','parent / revenue basis':'parent','parent':'parent',
-  'supplier revenue milion':'rev','supplier revenue million':'rev','supplier revenue (million)':'rev','currency':'cur','fx to eur':'fx','fx':'fx',
-  'supplier revenue (eur)':'revEurIn','novonesis share of supplier revenue':'shareIn','revenue period':'period','revenue basis / caveat':'caveat','caveat':'caveat',
-  'research status':'status','status':'status','source url':'url','source':'url','url':'url'};
+const HMAP={'supplier (consolidated)':'name','supplier':'name','supplier name':'name','supplier country':'country','country':'country','category l3':'cat','category':'cat','subcategory':'cat','sub-category':'cat',
+  'novonesis spend (eur)':'spend','spend (eur)':'spend','spend':'spend','global spend (eur)':'spend','parent / revenue basis':'parent','parent':'parent',
+  'supplier revenue milion':'rev','supplier revenue million':'rev','supplier revenue (million)':'rev','supplier total revenue (eur m)':'revM','currency':'cur','fx to eur':'fx','fx':'fx',
+  'supplier revenue (eur)':'revEurIn','novonesis share of supplier revenue':'shareIn','spend-to-novonesis supplier revenue ratio':'shareIn','revenue period':'period','revenue basis / caveat':'caveat','revenue basis / confidence':'caveat','caveat':'caveat',
+  'research status':'status','data status':'status','status':'status','source url':'url','source':'url','url':'url',
+  'rank':'rank','spend rank':'spendRank','spend score':'spendScore','trading revenue (eur)':'trade','trading rank':'tradeRank','trading score':'tradeScore','composite score':'comp','tier':'tier',
+  'europe':'rEU','na':'rNA','apac':'rAPAC','latam':'rLATAM','meia':'rMEIA',
+  '# materials delivered 24m':'mat24','avg # suppliers per material 24m':'sup24','# materials delivered 12m':'mat12','avg # suppliers per material 12m':'sup12','# single-source materials 12m':'ss12',
+  'single-source % - by # materials (12m)':'ssMat','single-source % - by spend (12m)':'ssSpend','comments latest fy':'comment','comments':'comment'};
+// headers are matched ignoring case, spaces and punctuation
+const hkey=h=>String(h).toLowerCase().replace(/[^a-z0-9%#]/g,'');
+const HMAP2={};Object.keys(HMAP).forEach(k=>HMAP2[hkey(k)]=HMAP[k]);
 function parseTable(text){
   if(!/\t/.test(text))return parseCSV(text);
   const rows=[];let row=[],cell='',inQ=false;const t=text.replace(/\r\n?/g,'\n');
@@ -1188,15 +1384,20 @@ function parseTable(text){
 }
 function importFacts(text,addNew){
   const rows=parseTable(text);if(rows.length<2)throw new Error('Paste the header row and at least one supplier row.');
-  const norm=h=>h.toLowerCase().replace(/\s+/g,' ').trim();const map=rows[0].map(h=>HMAP[norm(h)]||null);
-  if(!map.includes('name'))throw new Error('No "Supplier (consolidated)" column found in the header row.');
-  let upd=0,added=0;const skipped=[];const NUMK=['spend','rev','fx','revEurIn','shareIn'];
+  const map=rows[0].map(h=>HMAP2[hkey(h)]||null);
+  if(!map.includes('name'))throw new Error('No "Supplier" column found in the header row.');
+  // the first real upload replaces the example suppliers and everything captured about them
+  if(S.example&&addNew){S.sup=[];S.suppliers=[];S.scores={};S.notes={};S.supNotes={};S.cats={};S.facil={};S.final.sel={};S.final.people=[];S.final.steps=[];}
+  let upd=0,added=0;const skipped=[];const NUMK=['spend','rev','revM','fx','revEurIn','shareIn','rank','spendRank','spendScore','trade','tradeRank','tradeScore','comp','rEU','rNA','rAPAC','rLATAM','rMEIA','mat24','sup24','mat12','sup12','ss12','ssMat','ssSpend'];
   const dec=guessDecimal(rows.slice(1).flatMap(r=>map.map((k,j)=>NUMK.includes(k)?r[j]:null).filter(Boolean)));
   rows.slice(1).forEach(r=>{const f={};map.forEach((k,j)=>{if(!k)return;const v=r[j]===undefined?'':r[j];
       f[k]=NUMK.includes(k)?parseNum(v,dec):v;});
     const name=(f.name||'').trim();if(!name)return;delete f.name;
+    ['shareIn','ssMat','ssSpend'].forEach(k=>{if(f[k]!==undefined)f[k]=pctIn(f[k]);});
+    if(f.revM!==undefined){if(f.revM!==''){f.rev=f.revM;f.cur='EUR';f.fx=1;}delete f.revM;}
     let s=S.sup.find(x=>x.name.trim().toLowerCase()===name.toLowerCase());
-    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.sup.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);added++;}else upd++;
+    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.sup.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=0);added++;}else upd++;
+    if(!f.cat&&s.facts&&s.facts.cat)f.cat=s.facts.cat;
     s.facts=f;});
   S.example=false;
   return {upd,added,skipped};
@@ -1206,15 +1407,90 @@ function factsCSV(){const q=v=>/[",;\t\n]/.test(String(v))?'"'+String(v).replace
   S.sup.forEach(s=>{const f=factsOf(s);L.push(FCOLS.map(c=>c.k==='name'?q(s.name):c.k==='revEur'?(revEur(f)===null?'':Math.round(revEur(f))):c.k==='share'?(shareOf(f)===null?'':shareOf(f).toFixed(6)):q(f[c.k]===undefined?'':f[c.k])).join(','));});
   return L.join('\n');}
 const dlgF=document.getElementById('dlgFacts');
-document.getElementById('btnPasteFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
+document.getElementById('btnConfirmW').addEventListener('click',()=>startCat(S.curCat));
+document.getElementById('btnUpFacts').addEventListener('click',()=>{document.getElementById('factsMsg').textContent='';dlgF.showModal();});
 document.getElementById('btnDoFacts').addEventListener('click',()=>{const m=document.getElementById('factsMsg');
   try{const r=importFacts(document.getElementById('factsText').value,document.getElementById('factsAdd').checked);applyCat();renderAll();save();
     m.className='small ok';m.textContent=`Updated ${r.upd} supplier${r.upd===1?'':'s'}${r.added?`, added ${r.added}`:''}${r.skipped.length?`. Not in scope, skipped: ${r.skipped.join(', ')}`:''}.`;}
   catch(e){m.className='small err';m.textContent=e.message;}});
-document.getElementById('btnFactsCsv').addEventListener('click',()=>{saveFile('supplier-facts.csv',factsCSV()).catch(()=>{});});
 
 /* dependency view: spend vs share of supplier revenue */
+/* ---------- data at a glance (setup page) ---------- */
+function vizCards(){
+  const rows=catAll().map(s=>{const si=S.suppliers.indexOf(s);return {s,si,f:factsOf(s),x:si<0};});const cc=r=>r.x?'var(--s0)':col(r.si);const n=fnum;const RC=['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+  const none='<div class="small muted">No data for this chart in the upload.</div>';
+  const bar=(segs,label)=>`<div class="vz-bar"><div class="vz-track">${segs.map(g=>`<i style="width:${Math.max(0,Math.min(100,g.w*100)).toFixed(1)}%;background:${g.c}" title="${esc(g.t||'')}"></i>`).join('')}</div><span class="num">${label}</span></div>`;
+  const row=(r,bars,sub)=>`<div class="vz-row"><span class="nm${r.x?' xs':''}" title="${esc(r.s.name)}${r.x?' (not included in scoring)':''}">${esc(r.s.name)}</span><div>${bars.join('')}${sub?`<div class="vz-sub">${sub}</div>`:''}</div></div>`;
+  const leg=items=>`<div class="legend" style="margin-bottom:8px">${items.map(x=>`<span class="i"><i style="background:${x[1]}"></i>${esc(x[0])}</span>`).join('')}</div>`;
+  const card=(t,why,body)=>`<div class="vz-card"><h3>${t}</h3><div class="small muted">${why}</div><div class="vz-body">${body}</div></div>`;
+  // 1 spend by region
+  const sp=rows.filter(r=>n(r.f.spend)!==null).sort((a,b)=>b.f.spend-a.f.spend);const maxS=Math.max(1,...sp.map(r=>+r.f.spend));
+  const anyReg=sp.some(r=>REG.some(g=>n(r.f[g[0]])));
+  const c1=sp.length?(anyReg?leg(REG.map((g,i)=>[g[1],RC[i]])):'')+sp.map(r=>{const rv=REG.map(g=>Math.max(0,n(r.f[g[0]])||0));const tot=rv.reduce((a,b)=>a+b,0);const w=+r.f.spend/maxS;
+    return row(r,[bar(tot>0?rv.map((v,i)=>({w:w*v/tot,c:RC[i],t:`${REG[i][1]}: ${Math.round(v/tot*100)}%`})):[{w,c:'var(--s0)',t:'No regional split'}],eurM(+r.f.spend))]);}).join(''):none;
+  // 2 who needs whom
+  const pts=rows.map(r=>({...r,sp:n(r.f.spend),sh:n(r.f.trade)})).filter(p=>p.sp!==null&&p.sh!==null);let c2=none;
+  if(pts.length){const L=58,R=410,T=14,B=210;const mx=Math.max(1,...pts.map(p=>p.sp))*1.12,my=Math.max(1,...pts.map(p=>p.sh))*1.18;const sx=v=>L+v/mx*(R-L),sy=v=>B-v/my*(B-T);
+    let o=`<rect x="${L}" y="${T}" width="${R-L}" height="${B-T}" fill="var(--surface)" stroke="var(--line)"/>`;
+    for(let k=0;k<=2;k++){o+=`<text x="${sx(mx*k/2)}" y="${B+15}" text-anchor="${k===2?'end':'middle'}">${eurM(mx*k/2)}</text><text x="${L-6}" y="${sy(my*k/2)+4}" text-anchor="end">${eurM(my*k/2)}</text>`;}
+    o+=`<text class="axt" x="${(L+R)/2}" y="${B+32}" text-anchor="middle">What we buy from them →</text><text class="axt" transform="translate(12 ${(T+B)/2}) rotate(-90)" text-anchor="middle">What they buy from us →</text>`;
+    pts.forEach(p=>{const cx=sx(p.sp),cy=sy(p.sh),right=cx<R-120;o+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${cc(p)}"><title>${esc(p.s.name)}: we buy ${eurM(p.sp)} from them, they buy ${eurM(p.sh)} from us</title></circle><text class="pl" x="${(cx+(right?10:-10)).toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="${right?'start':'end'}">${esc(shorten(p.s.name))}</text>`;});
+    c2=`<svg class="vz-svg" viewBox="0 0 420 246" role="img" aria-label="What we buy from each supplier against what they buy from us">${o}</svg>`;}
+  // 3 single-source exposure
+  const ss=rows.filter(r=>n(r.f.ssSpend)!==null||n(r.f.ssMat)!==null).sort((a,b)=>(n(b.f.ssSpend)||0)-(n(a.f.ssSpend)||0));
+  const c3=ss.length?leg([['By spend','var(--s5)'],['By number of materials','var(--s4)']])+ss.map(r=>row(r,[bar([{w:n(r.f.ssSpend)||0,c:'var(--s5)'}],n(r.f.ssSpend)===null?'–':pctS(+r.f.ssSpend)),bar([{w:n(r.f.ssMat)||0,c:'var(--s4)'}],n(r.f.ssMat)===null?'–':pctS(+r.f.ssMat))],
+    [n(r.f.ss12)!==null?`${r.f.ss12} single-source materials`:'',n(r.f.sup12)!==null?`${r.f.sup12} suppliers per material on average`:''].filter(Boolean).join(' · '))).join(''):none;
+  // 4 materials delivered
+  const mt=rows.filter(r=>n(r.f.mat12)!==null||n(r.f.mat24)!==null).sort((a,b)=>(n(b.f.mat12)||0)-(n(a.f.mat12)||0));const maxM=Math.max(1,...mt.map(r=>Math.max(n(r.f.mat12)||0,n(r.f.mat24)||0)));
+  const c4=mt.length?leg([['Last 12 months','var(--s2)'],['Last 24 months','var(--s3)']])+mt.map(r=>row(r,[bar([{w:(n(r.f.mat12)||0)/maxM,c:'var(--s2)'}],n(r.f.mat12)===null?'–':r.f.mat12),bar([{w:(n(r.f.mat24)||0)/maxM,c:'var(--s3)'}],n(r.f.mat24)===null?'–':r.f.mat24)])).join(''):none;
+  return {spend:card('Where the spend is','Global spend per supplier, split by region. Feeds <b>Spend and future volume</b>.',c1),
+    share:card('What we buy vs what they buy','Right = we buy a lot from them (Global Spend). Up = they buy a lot from us (Trading Revenue). Feeds <b>Reciprocity and mutual dependence</b>.',c2),
+    single:card('Single-source exposure','How much of what we buy from each supplier has no second source. Feeds <b>Supply risk and criticality</b>.',c3),
+    growth:card('Materials delivered','Number of materials in the last 12 and 24 months. A prompt for <b>Future growth dependency</b>.',c4)};
+}
+function renderViz(){
+  const host=document.getElementById('viz');if(!host)return;
+  document.getElementById('vizTitle').textContent='Data at a glance: '+S.curCat;
+  const v=vizCards();host.innerHTML=v.spend+v.share+v.single+v.growth;
+}
+// every uploaded figure that belongs to a criterion, as small charts above its scoring grid
+function critViz(d){
+  const rows=catAll().map(s=>{const si=S.suppliers.indexOf(s);return {s,si,f:factsOf(s),x:si<0};});const cc=r=>r.x?'var(--s0)':col(r.si);const n=fnum;const RC=['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+  const line=(r,segs,label)=>`<div class="mn-row"><span class="nm${r.x?' xs':''}" title="${esc(r.s.name)}${r.x?' (not included in scoring)':''}">${esc(r.s.name)}</span><div class="vz-track">${segs.map(g=>`<i style="width:${Math.max(0,Math.min(100,g.w*100)).toFixed(1)}%;background:${g.c}" title="${esc(g.t||'')}"></i>`).join('')}</div><span class="num">${label}</span></div>`;
+  const box=(t,body,note)=>`<div class="mn"><h4>${t}</h4>${note?`<div class="mn-note">${note}</div>`:''}${body}</div>`;
+  // one bar per supplier for a single column; rank columns grow as the rank improves
+  const bars=(t,k,fmt,o)=>{o=o||{};const val=r=>k==='share'?shareOf(r.f):n(r.f[k]);if(!rows.some(r=>val(r)!==null))return '';
+    const mx=o.max||Math.max(1e-9,...rows.map(r=>val(r)||0));
+    return box(t,rows.map(r=>{const v=val(r);return line(r,[{w:v===null?0:(o.rank?(mx-v+1)/mx:v/mx),c:cc(r)}],v===null?'–':fmt(v));}).join(''),o.note);};
+  const num=v=>String(Math.round(v*100)/100),eur=v=>eurM(v),pc=v=>pctS(v),rk=v=>'#'+v;
+  let out=[];
+  if(d.ev==='spend'||d.ev==='both'){out.push(bars('Global Spend (EUR)','spend',eur));
+    out.push(regBox());
+  }
+  function regBox(){if(!rows.some(r=>REG.some(g=>n(r.f[g[0]]))))return '';return (box('Where they supply us: spend by region',rows.map(r=>{const rv=REG.map(g=>Math.max(0,n(r.f[g[0]])||0));const tot=rv.reduce((a,b)=>a+b,0);
+      return line(r,tot>0?rv.map((v,i)=>({w:v/tot,c:RC[i],t:`${REG[i][1]}: ${Math.round(v/tot*100)}%`})):[],tot>0?REG[rv.indexOf(Math.max(...rv))][1]:'–');}).join(''),
+      `<span class="legend">${REG.map((g,i)=>`<span class="i"><i style="background:${RC[i]}"></i>${g[1]}</span>`).join('')}</span>`));}
+  if(d.ev==='spend'||d.ev==='both')out.push(bars('Spend Rank','spendRank',rk,{rank:1}),bars('Spend Score','spendScore',num));
+  if(d.ev==='growth')out.push(bars('# materials delivered 12m','mat12',num),bars('# materials delivered 24m','mat24',num),bars('Global Spend (EUR)','spend',eur),regBox());
+  if(d.ev==='single')out.push(bars('Single-source % by spend (12m)','ssSpend',pc,{max:1}),bars('Single-source % by # materials (12m)','ssMat',pc,{max:1}),bars('# single-source materials 12m','ss12',num),
+    bars('Avg # suppliers per material 12m','sup12',num),bars('Avg # suppliers per material 24m','sup24',num),regBox());
+  // what we buy from them against what they buy from us, on one scale
+  const pair=()=>{const pr=rows.filter(r=>n(r.f.spend)!==null||n(r.f.trade)!==null);if(!pr.some(r=>n(r.f.trade)!==null))return '';const mx=Math.max(1,...pr.map(r=>Math.max(n(r.f.spend)||0,n(r.f.trade)||0)));
+    return box('We buy from them vs they buy from us',rows.map(r=>{const a=n(r.f.spend),b=n(r.f.trade);
+      return `<div class="mn-row"><span class="nm${r.x?' xs':''}" title="${esc(r.s.name)}${r.x?' (not included in scoring)':''}">${esc(r.s.name)}</span><div class="mn-pair"><div class="vz-track"><i style="width:${((a||0)/mx*100).toFixed(1)}%;background:var(--s5)" title="We buy: ${a===null?'–':eurM(a)}"></i></div><div class="vz-track"><i style="width:${((b||0)/mx*100).toFixed(1)}%;background:var(--s2)" title="They buy: ${b===null?'–':eurM(b)}"></i></div></div><span class="num">${a&&b?(a/b>=10?Math.round(a/b):(a/b).toFixed(1))+' : 1':'–'}</span></div>`;}).join(''),
+      `<span class="legend"><span class="i"><i style="background:var(--s5)"></i>Our spend with them</span><span class="i"><i style="background:var(--s2)"></i>Their spend with us</span></span>`);};
+  const revBox=()=>{const rv=rows.map(r=>({r,v:revEur(r.f)}));if(!rv.some(x=>x.v!==null))return '';const mx=Math.max(1,...rv.map(x=>x.v||0));
+    return box('Their total revenue',rv.map(x=>line(x.r,[{w:x.v===null?0:x.v/mx,c:cc(x.r)}],x.v===null?'–':eurM(x.v))).join(''));};
+  if(d.ev==='trade'||d.ev==='share'||d.ev==='both')out.push(bars('What they buy from us (Trading Revenue)','trade',eur),revBox(),bars('What we buy from them (Global Spend)','spend',eur),pair(),
+    d.ev==='trade'?'':bars('Our spend as a share of their revenue','share',pc),bars('Trading Rank','tradeRank',rk,{rank:1}),bars('Trading Score','tradeScore',num));
+  if(!d.ev){const bg=rows.filter(r=>n(r.f.comp)!==null||(r.f.tier||'')!==''||n(r.f.rank)!==null||(r.f.comment||'').trim());
+    if(bg.length)return `<div class="small muted" style="margin-bottom:6px">No uploaded figures measure this criterion directly. The background below is for the discussion; the room judges the score.</div><div class="scroll"><table class="cmp mn-bg"><thead><tr><th class="sup">Supplier</th><th>Rank</th><th>Composite Score</th><th>Tier</th><th class="sup">Comments Latest FY</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="sup">${esc(r.s.name)}</td><td>${n(r.f.rank)===null?'–':r.f.rank}</td><td>${n(r.f.comp)===null?'–':r.f.comp}</td><td>${esc(r.f.tier||'–')}</td><td class="sup small">${esc(r.f.comment||'')}</td></tr>`).join('')}</tbody></table></div>`;
+    return '<div class="small muted">No uploaded data for this criterion. The room judges it from experience; note the reasons in the comments.</div>';}
+  out=out.filter(Boolean);
+  return out.length?`<div class="mn-grid">${out.join('')}</div>`:'<div class="small muted">The upload has no figures for this criterion yet.</div>';
+}
 function renderDep(){
+  renderViz();
   const svg=document.getElementById('dep');if(!svg)return;
   const all=S.suppliers.map((s,si)=>({s,si,f:factsOf(s)}));
   const cats=[...new Set(all.map(x=>x.f.cat).filter(Boolean))].sort(),ctys=[...new Set(all.map(x=>x.f.country).filter(Boolean))].sort();
@@ -1233,18 +1509,19 @@ function renderDep(){
     o+=`<line class="mid" x1="${sx(mx)}" y1="${T}" x2="${sx(mx)}" y2="${B}"/><line class="mid" x1="${L}" y1="${sy(my)}" x2="${R}" y2="${sy(my)}"/>`;
     o+=`<text class="qlab" x="${R-8}" y="${T+16}" text-anchor="end">Mutual dependence</text><text class="qlab" x="${L+8}" y="${T+16}">They depend on us</text><text class="qlab" x="${R-8}" y="${B-8}" text-anchor="end">We depend on them</text><text class="qlab" x="${L+8}" y="${B-8}">Low dependence</text>`;}
   for(let k=0;k<=4;k++){const vx=maxX*k/4,vy=maxY*k/4;o+=`<text x="${sx(vx)}" y="${B+18}" text-anchor="middle">${eurM(vx)}</text><text x="${L-8}" y="${sy(vy)+4}" text-anchor="end">${pctS(vy)}</text>`;}
-  o+=`<text class="axt" x="${(L+R)/2}" y="${B+44}" text-anchor="middle">Novonesis spend (EUR) →</text><text class="axt" transform="translate(18 ${(T+B)/2}) rotate(-90)" text-anchor="middle">Novonesis share of supplier revenue →</text>`;
+  o+=`<text class="axt" x="${(L+R)/2}" y="${B+44}" text-anchor="middle">Global spend (EUR) →</text><text class="axt" transform="translate(18 ${(T+B)/2}) rotate(-90)" text-anchor="middle">Novonesis share of supplier revenue →</text>`;
   pts.forEach(p=>{const w=hasFacts(p.f)&&factWarn(p.f);const cx=sx(p.sp),cy=sy(p.sh);const right=cx<R-150;
     o+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="${w?'var(--surface)':col(p.si)}" stroke="${col(p.si)}" stroke-width="2.5"><title>${esc(p.s.name)}: ${eurM(p.sp)} spend, ${pctS(p.sh)} of their revenue${w?'\n'+warnText(p.f):''}</title></circle>`;
     o+=`<text class="pl" x="${(cx+(right?13:-13)).toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="${right?'start':'end'}">${esc(p.s.name)}</text>`;});
-  if(!pts.length)o+=`<text x="${(L+R)/2}" y="${(T+B)/2}" text-anchor="middle">No suppliers with both spend and revenue yet. Add facts on Setup &amp; weighting.</text>`;
+  if(!pts.length)o+=`<text x="${(L+R)/2}" y="${(T+B)/2}" text-anchor="middle">No suppliers with both spend and revenue yet. Upload the data on Setup &amp; weighting.</text>`;
   svg.innerHTML=o;
-  const cols=FCOLS.filter(c=>c.k!=='fx'&&c.k!=='cur'&&c.k!=='rev');
+  const cols=FCOLS.filter(c=>c.k!=='cat');
   document.getElementById('depTbl').innerHTML=`<thead><tr>${cols.map(c=>`<th class="${c.num||c.calc?'n':''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>`+
     rows.slice().sort((a,b)=>(shareOf(b.f)||0)-(shareOf(a.f)||0)).map(x=>{const f=x.f;const w=hasFacts(f)&&factWarn(f);return `<tr>`+cols.map(c=>{
       if(c.k==='name')return `<td class="sup">${esc(x.s.name)}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`;
       if(c.k==='spend')return `<td class="calc">${f.spend===''||f.spend===undefined?'–':eurM(+f.spend)}</td>`;
-      if(c.k==='revEur')return `<td class="calc">${eurM(revEur(f))}</td>`;if(c.k==='share')return `<td class="calc">${pctS(shareOf(f))}</td>`;
+      if(c.k==='rev')return `<td class="calc">${eurM(revEur(f))}</td>`;if(c.k==='share')return `<td class="calc">${pctS(shareOf(f))}</td>`;
+      if(c.k==='trade')return `<td class="calc">${fnum(f.trade)===null?'–':eurM(+f.trade)}</td>`;if(c.pct)return `<td class="calc">${fnum(f[c.k])===null?'–':pctS(+f[c.k])}</td>`;if(c.num)return `<td class="n">${esc(f[c.k]===undefined?'':f[c.k])}</td>`;
       if(c.k==='url'){const u=safeUrl(f.url);return `<td>${u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">source</a>`:esc(f.url||'')}</td>`;}
       return `<td>${esc(f[c.k]||'')}</td>`;}).join('')+`</tr>`;}).join('')+`</tbody>`;
 }
@@ -1290,23 +1567,24 @@ function renderScoring(){
   const sumW=S.dims.reduce((a,x)=>a+(+x.weight||0),0);
   document.getElementById('scDots').innerHTML=o.map((x,i)=>`<button role="tab" aria-selected="${x===d}" data-id="${x.id}" style="border-top-color:${col(pIndex(x.pid))}" title="${esc(x.name)}">${i+1}. ${esc(x.short||shorten(x.name))}</button>`).join('');
   document.querySelectorAll('#scDots button').forEach(b=>b.addEventListener('click',()=>{S.curDim=b.dataset.id;renderScoring();save();}));
-  document.getElementById('scPrev').disabled=idx<=0;const nx=document.getElementById('scNext');nx.disabled=idx>=o.length-1;nx.textContent=idx>=o.length-1?'Last criterion':'Next ›';
+  document.getElementById('scPrev').disabled=idx<=0;const nx=document.getElementById('scNext');nx.disabled=false;nx.textContent=idx>=o.length-1?'Finish subcategory ✓':'Next ›';
   // main: title, definition, rubric, supplier rows
   let h=`<div class="sc-title"><h2>${idx+1}. ${esc(d.name)}</h2><span class="meta"><span style="color:${col(pi)}">■</span> ${esc(p?p.name:'')} · weight ${fmtW(d.weight)} (${sumW>0?pct((+d.weight||0)/sumW):'0%'})${d.min?' · knock-out below '+d.min:''}</span></div>`;
+  h+=`<p class="small muted" style="margin:4px 0 8px">Scoring ${S.suppliers.length} supplier${S.suppliers.length===1?'':'s'} in <b>${esc(S.curCat||'')}</b>. To pick another subcategory or change which suppliers are scored, go back to step 1.</p>`;
   h+=`<div class="sc-desc"><textarea rows="1" data-k="desc" placeholder="What does this criterion measure?" aria-label="What ${esc(d.name)} measures">${esc(d.desc||'')}</textarea></div>`;
-  h+=`<div class="sc-ev"><label for="scEv">Evidence beside the comparison:</label><select id="scEv">${[['','none'],['spend','Novonesis spend'],['share','Share of supplier revenue'],['both','Spend and share']].map(([v,l])=>`<option value="${v}"${(d.ev||'')===v?' selected':''}>${l}</option>`).join('')}</select></div>`;
+  h+=`<div class="sc-sec"><span class="n">A</span><h3>What the data says</h3></div>`;
+  h+=`<div id="scViz">${critViz(d)}</div><div class="sc-sec"><span class="n">B</span><h3>Score the suppliers</h3></div>`;
   h+=`<div class="sc-table"><div class="hd">Score</div>`;
   LVK.forEach((k,i)=>{const a=(0.06+i/4*0.34).toFixed(2);h+=`<div class="rub" style="background:rgba(var(--seq),${a})"><span class="lv">${i+1}</span><textarea data-k="${k}" placeholder="${i===0?'Lowest: what does a 1 look like?':i===4?'Highest: what does a 5 look like?':'What does a '+(i+1)+' look like?'}" aria-label="Score ${i+1} means">${esc(d[k]||'')}</textarea></div>`;});
   h+=`<div class="hd">Comment: why this score?</div>`;
   S.suppliers.forEach((s,si)=>{const v=S.scores[s.id][d.id];
-    h+=`<div class="srow${scFocusSid===s.id?' hl':''}" data-sid="${s.id}"><div class="nm"><i style="background:${col(si)}"></i><span title="${esc(s.name)}">${esc(s.name)}</span></div>`+
+    h+=`<div class="srow${scFocusSid===s.id?' hl':''}" data-sid="${s.id}"><div class="nm"><i style="background:${col(si)}"></i><div class="nmw"><span title="${esc(s.name)}">${esc(s.name)}</span><div class="evw"></div></div></div>`+
       [1,2,3,4,5].map(n=>`<button class="lvb${d.min&&n<d.min?' ko':''}" data-v="${n}" aria-pressed="${v===n}" aria-label="${esc(s.name)}: score ${n}" title="${esc(d[LVK[n-1]]||'Score '+n)}">${n}</button>`).join('')+
       `<input class="cm" value="${esc(noteOf(s.id,d.id))}" placeholder="Evidence, examples…" aria-label="Comment on ${esc(s.name)}"></div>`;});
   h+=`</div>`+stakeHTML(d);
   host.innerHTML=h;
   wireStake(host,d);
-  host.querySelector('#scEv').addEventListener('change',e=>{d.ev=e.target.value;renderScoreCmp(d);save();});
-  host.querySelectorAll('textarea[data-k]').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();});});
+  host.querySelectorAll('textarea[data-k]').forEach(ta=>{fit(ta);ta.addEventListener('input',()=>{fit(ta);d[ta.dataset.k]=ta.value;save();});ta.addEventListener('change',()=>{buildMatrix();buildWeights();updateWeightLabels(S.dims.reduce((t,x)=>t+(+x.weight||0),0));});});
   host.querySelectorAll('.srow').forEach(r=>{const sid=r.dataset.sid;
     r.querySelectorAll('.lvb').forEach(b=>b.addEventListener('click',()=>{S.scores[sid][d.id]=+b.dataset.v;scFocusSid=sid;
       r.querySelectorAll('.lvb').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));markScnDirty();buildMatrix();renderResults();renderScoreCmp(d);save();}));
@@ -1315,21 +1593,14 @@ function renderScoring(){
   });
   renderScoreCmp(d);
 }
-function evLine(d,s){if(!d.ev)return '';const f=factsOf(s);if(!hasFacts(f))return '<span class="ev muted">No facts yet</span>';const bits=[];
-  if(d.ev==='spend'||d.ev==='both')bits.push(`<b>${f.spend===''||f.spend===undefined?'–':eurM(+f.spend)}</b> spend`);
-  if(d.ev==='share'||d.ev==='both')bits.push(`<b>${pctS(shareOf(f))}</b> of their revenue`);
+function evLine(d,s){if(!d.ev)return '';const f=factsOf(s);if(!hasFacts(f))return '<span class="ev muted">No data yet</span>';const bits=[];const n=fnum;
+  if(d.ev==='spend'||d.ev==='both'){bits.push(`<b>${n(f.spend)===null?'–':eurM(+f.spend)}</b> spend`);if(n(f.spendRank)!==null)bits.push(`spend rank <b>${f.spendRank}</b>`);if(n(f.spendScore)!==null)bits.push(`spend score <b>${f.spendScore}</b>`);}
+  if(d.ev==='share'||d.ev==='both'){bits.push(`<b>${pctS(shareOf(f))}</b> of their revenue`);if(n(f.trade)!==null)bits.push(`trading revenue <b>${eurM(+f.trade)}</b>`);if(n(f.tradeScore)!==null)bits.push(`trading score <b>${f.tradeScore}</b>`);}
+  if(d.ev==='single'){bits.push(`<b>${n(f.ssSpend)===null?'–':pctS(+f.ssSpend)}</b> of spend single-sourced`);if(n(f.ss12)!==null)bits.push(`<b>${f.ss12}</b> single-source materials`);if(n(f.sup12)!==null)bits.push(`<b>${f.sup12}</b> suppliers per material`);}
+  if(d.ev==='growth'){bits.push(`<b>${n(f.mat12)===null?'–':f.mat12}</b> materials in 12m`);if(n(f.mat24)!==null)bits.push(`<b>${f.mat24}</b> in 24m`);}
   const w=factWarn(f);return `<span class="ev">${bits.join(' · ')}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</span>`;}
-function renderScoreCmp(d){
-  const host=document.getElementById('scCmp');
-  const rows=S.suppliers.map((s,si)=>({s,si,v:S.scores[s.id][d.id],c:noteOf(s.id,d.id)})).sort((a,b)=>b.v-a.v||a.s.name.localeCompare(b.s.name));
-  const avg=rows.reduce((t,r)=>t+r.v,0)/(rows.length||1);
-  let h=`<div class="cmp-stats">Average ${f1(avg)} · range ${rows.length?rows[rows.length-1].v:'–'} to ${rows.length?rows[0].v:'–'}</div>`;
-  let lastV=null;
-  rows.forEach(r=>{if(r.v!==lastV){h+=`<div class="cmp-lv"><b>${r.v}</b> ${esc(d[LVK[r.v-1]]||'')}</div>`;lastV=r.v;}
-    h+=`<div class="cmp-row" data-sid="${r.s.id}" title="Jump to ${esc(r.s.name)}"><span class="n">${esc(r.s.name)}</span><span class="v num">${r.v}</span><span class="bar"><i style="width:${r.v/5*100}%;background:${col(r.si)}"></i></span>${evLine(d,r.s)}${r.c?`<span class="c">${esc(r.c)}</span>`:''}</div>`;});
-  host.innerHTML=h;
-  host.querySelectorAll('.cmp-row').forEach(el=>el.addEventListener('click',()=>{const inp=document.querySelector(`#scMain .srow[data-sid="${el.dataset.sid}"] input.cm`);if(inp)inp.focus();}));
-}
+// refresh the data line under each supplier on the scoring page
+function renderScoreCmp(d){document.querySelectorAll('#scMain .srow').forEach(r=>{const s=S.suppliers.find(x=>x.id===r.dataset.sid);const e=r.querySelector('.evw');if(!s||!e)return;const f=factsOf(s);e.innerHTML=d.ev&&hasFacts(f)&&factWarn(f)?`<span class="flag" title="${esc(warnText(f))}">!</span> check the data status`:'';});}
 function stepDim(k){const o=orderedDims();const i=o.findIndex(d=>d.id===S.curDim);const j=Math.max(0,Math.min(o.length-1,i+k));if(j!==i){S.curDim=o[j].id;scFocusSid=null;renderScoring();save();}}
 function setScView(v){S.scView=v;const w=document.getElementById('scWrap');w.classList.toggle('table',v==='table');
   document.querySelector('.sc-table-view').hidden=v!=='table';document.getElementById('scAll').setAttribute('aria-pressed',String(v==='table'));
@@ -1337,7 +1608,7 @@ function setScView(v){S.scView=v;const w=document.getElementById('scWrap');w.cla
 document.getElementById('scAll').addEventListener('click',()=>{setScView(S.scView==='table'?'crit':'table');save();});
 document.getElementById('scDots').addEventListener('click',()=>{if(S.scView==='table')setScView('crit');});
 document.getElementById('scPrev').addEventListener('click',()=>stepDim(-1));
-document.getElementById('scNext').addEventListener('click',()=>stepDim(1));
+document.getElementById('scNext').addEventListener('click',()=>{const o=orderedDims();if(S.scView!=='table'&&o.length&&S.curDim===o[o.length-1].id)finishCat();else stepDim(1);});
 document.addEventListener('keydown',e=>{if(S.page!=='scoring'||e.altKey||e.ctrlKey||e.metaKey)return;const t=e.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return;
   if(e.key==='ArrowRight'||e.key==='PageDown'){stepDim(1);e.preventDefault();}else if(e.key==='ArrowLeft'||e.key==='PageUp'){stepDim(-1);e.preventDefault();}});
 // make the scoring page fill the window below the header, so a criterion fits without page scrolling
@@ -1473,7 +1744,7 @@ function workshopSummary(){
 function dimScore(sid,pid){const ds=S.dims.filter(d=>d.pid===pid);if(!ds.length)return null;return ds.reduce((t,d)=>t+(+(S.scores[sid]||{})[d.id]||0),0)/ds.length;}
 function finalRows(){
   const pw=S.final.pw;const sumW=S.persp.reduce((t,p)=>t+(+pw[p.id]||0),0);
-  const rows=[];catNames().forEach(c=>finalistsOf(c).filter(x=>x.inc).forEach(x=>{const ds={};let tot=0;
+  const rows=[];activeCats().forEach(c=>finalistsOf(c).filter(x=>x.inc).forEach(x=>{const ds={};let tot=0;
     S.persp.forEach(p=>{const v=dimScore(x.r.s.id,p.id);ds[p.id]=v;tot+=sumW>0?(+pw[p.id]||0)/sumW*(v||0):0;});rows.push({...x,s:x.r.s,ds,tot});}));
   rows.sort((a,b)=>b.tot-a.tot||a.s.name.localeCompare(b.s.name));rows.forEach((r,i)=>r.rank=i+1);return rows;}
 function renderFinal(){
@@ -1498,14 +1769,14 @@ function renderFinal(){
         `<td class="num">${f.spend===''||f.spend===undefined?'–':eurM(+f.spend)}</td><td class="num">${pctS(shareOf(f))}${w?`<span class="flag" title="${esc(warnText(f))}">!</span>`:''}</td>`+
         `<td><input type="checkbox"${on?' checked':''}${!on&&nSel>=3?' disabled title="Already 3 selected"':''} aria-label="Select ${esc(r.s.name)}"></td></tr>`;}).join('')+`</tbody>`;
   host.querySelectorAll('tbody input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{const id=cb.closest('tr').dataset.sid;if(cb.checked)sel[id]=sel[id]||'';else delete sel[id];renderFinal();save();}));
-  document.getElementById('finCount').textContent=`${rows.length} finalist${rows.length===1?'':'s'} from ${catNames().length} subcategor${catNames().length===1?'y':'ies'}`;
+  document.getElementById('finCount').textContent=`${rows.length} finalist${rows.length===1?'':'s'} from ${activeCats().length} subcategor${activeCats().length===1?'y':'ies'}`;
   document.getElementById('selCount').textContent=`${nSel} of max 3 selected`;
   // decision list
   const sl=document.getElementById('selList');const chosen=rows.filter(r=>sel[r.s.id]!==undefined);
   sl.innerHTML=chosen.length?chosen.map((r,i)=>`<div class="sel-item" data-sid="${r.s.id}"><span class="no">${i+1}</span><div><b>${esc(r.s.name)}</b> <span class="small muted">· ${esc(r.cat)} · final score ${f2(r.tot)}</span></div><textarea placeholder="Why this supplier? Next step, owner, timing">${esc(sel[r.s.id]||'')}</textarea></div>`).join(''):'<div class="small muted">Tick up to three finalists in the table above.</div>';
   sl.querySelectorAll('.sel-item textarea').forEach(ta=>ta.addEventListener('input',()=>{sel[ta.closest('.sel-item').dataset.sid]=ta.value;save();}));
   // how finalists were picked
-  document.getElementById('finPick').innerHTML=catNames().map(c=>{const fl=finalistsOf(c);
+  document.getElementById('finPick').innerHTML=activeCats().map(c=>{const fl=finalistsOf(c);
     return `<div class="pick-cat"><h3>${esc(c)}</h3>`+(fl.length?fl.map(x=>`<label class="pick-row"><input type="checkbox" data-cat="${esc(c)}" data-sid="${x.r.s.id}"${x.inc?' checked':''}><span>#${x.i+1} ${esc(x.r.s.name)} <span class="m">${f2(x.r.total)}${x.i?` · ${f2(x.gap)} behind`:''}</span></span><span class="m">${x.auto?(x.i===0?'winner':'close call'):(x.i===0?'':'not close')}</span><span class="m">${x.inc===x.auto?'':'changed by room'}</span></label>`).join(''):'<div class="small muted">No supplier clears the knock-outs.</div>')+`</div>`;}).join('');
   document.querySelectorAll('#finPick input[type=checkbox]').forEach(cb=>cb.addEventListener('change',()=>{const C=ensureCat(cb.dataset.cat);const x=finalistsOf(cb.dataset.cat).find(y=>y.r.s.id===cb.dataset.sid);
     if(x&&cb.checked===x.auto)delete C.ovr[cb.dataset.sid];else C.ovr[cb.dataset.sid]=cb.checked;renderFinal();renderResults();save();}));
@@ -1519,38 +1790,304 @@ function finalSummary(){const rows=finalRows();const sel=S.final.sel;const L=[`#
   rows.forEach(r=>L.push(`| ${r.rank} | ${r.s.name} | ${r.cat} | ${r.i===0?'Winner':'#'+(r.i+1)+', '+r.gap.toFixed(2)+' behind'}${r.auto?'':' (room)'} | ${S.persp.map(p=>r.ds[p.id]===null?'–':r.ds[p.id].toFixed(1)).join(' | ')} | ${r.tot.toFixed(2)} |`));
   L.push(``,`Runner-ups joined when within ${(+S.closeGap).toFixed(2)} points of their subcategory winner.`);
   return L.join('\n')+'\n';}
-document.getElementById('btnFinalMd').addEventListener('click',()=>{saveFile(`supplier-decision-${new Date().toISOString().slice(0,10)}.md`,finalSummary()).catch(()=>{});});
+// small editable lists on the final page (people to involve, next steps)
+function listEditor(hostId,key,fields,cols){
+  const host=document.getElementById(hostId);const arr=S.final[key];
+  host.innerHTML=(arr.length?`<div class="le-row le-head" style="grid-template-columns:${cols} auto">${fields.map(f=>`<span>${f.l}</span>`).join('')}<span></span></div>`:'<div class="small muted">Nothing added yet.</div>')+
+    arr.map((x,i)=>`<div class="le-row" data-i="${i}" style="grid-template-columns:${cols} auto">${fields.map(f=>`<input data-k="${f.k}" value="${esc(x[f.k]||'')}" placeholder="${esc(f.p)}" aria-label="${esc(f.l)}">`).join('')}<button title="Remove" aria-label="Remove">×</button></div>`).join('');
+  host.querySelectorAll('.le-row[data-i]').forEach(r=>{const i=+r.dataset.i;
+    r.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{arr[i][inp.dataset.k]=inp.value;save();}));
+    r.querySelector('button').addEventListener('click',()=>{arr.splice(i,1);renderDecide();save();});});
+}
+const PPL=[{k:'who',l:'Who (name or role)',p:'e.g. Head of Quality'},{k:'forr',l:'Needed for',p:'Which supplier or topic'},{k:'ask',l:'What we ask of them',p:'e.g. join the kick-off, share data'}];
+const STP=[{k:'what',l:'Next step',p:'e.g. approach the supplier with a proposal'},{k:'owner',l:'Owner',p:'Who'},{k:'due',l:'By when',p:'Date'}];
+function renderDecide(){listEditor('pplList','people',PPL,'1fr 1fr 1.4fr');listEditor('stepList','steps',STP,'2.2fr 1fr .8fr');}
+function addRow(key,hostId){S.final[key].push({});renderDecide();save();const i=document.querySelector(`#${hostId} .le-row:last-child input`);if(i)i.focus();}
+document.getElementById('btnAddPpl').addEventListener('click',()=>addRow('people','pplList'));
+document.getElementById('btnAddStep').addEventListener('click',()=>addRow('steps','stepList'));
+
+/* ---------- full workshop summary ---------- */
+function fullSummary(){
+  const cell=v=>String(v===undefined||v===null?'':v).replace(/\|/g,'/').replace(/\s*\n\s*/g,' ').trim()||'–';
+  const tbl=(head,rows)=>[`| ${head.join(' | ')} |`,`|${'---|'.repeat(head.length)}`,...rows.map(r=>`| ${r.map(cell).join(' | ')} |`)];
+  const names=activeCats();const parked=catNames().filter(c=>!names.includes(c));const nSup=S.sup.filter(x=>names.includes(catOf(x))&&!x.excl).length;const rows=finalRows();const sel=S.final.sel;const ch=rows.filter(r=>sel[r.s.id]!==undefined);
+  const ppl=S.final.people.filter(x=>(x.who||x.forr||x.ask||'').trim()),stp=S.final.steps.filter(x=>(x.what||x.owner||x.due||'').trim());
+  const L=[`# Supplier partnership workshop: summary`,``,new Date().toLocaleDateString()+(S.example?' · example data':''),``,`## At a glance`,``];
+  L.push(`- ${names.length} subcategor${names.length===1?'y':'ies'} and ${nSup} suppliers evaluated on ${S.dims.length} criteria`+(parked.length?` (not included in this workshop: ${parked.join(', ')})`:''),
+    `- Suppliers to work with: ${ch.length?ch.map(r=>`**${r.s.name}**`).join(', '):'not decided yet'}`,
+    `- ${ppl.length} internal stakeholder${ppl.length===1?'':'s'} to involve, ${stp.length} next step${stp.length===1?'':'s'} agreed`);
+  L.push(``,`## Step 1 · Scope and weighting`,``,...tbl(['Subcategory','Suppliers',...S.persp.map(p=>p.name+' (weight)'),'Evaluated'],
+    names.map(c=>{const pw=ensureCat(c).pw;return [c,S.sup.filter(s=>catOf(s)===c&&!s.excl).length,...S.persp.map(p=>fmtW(+pw[p.id]||0)),catDone(c)?'Yes':'No'];})));
+  L.push(``,`## Step 2 · Scoring per subcategory`);
+  names.forEach(c=>{const ev=catEval(c);L.push(``,`### ${c}`,``,...tbl(['#','Supplier','Score','Segment','Note'],
+      ev.sorted.map(r=>[r.out?'–':r.rank,r.s.name,r.out?'Knocked out: '+r.failed.join(', '):f2(r.total),r.seg?SEGMENTS[r.seg]:'',supNoteOf(r.s.id)])));
+    const fl=finalistsOf(c).filter(x=>x.inc);L.push(``,`Going to the final: ${fl.length?fl.map(x=>x.r.s.name+(x.auto?'':' (chosen by the room)')).join(', '):'none'}`);
+    const fn=FSTEPS.map(x=>({t:x.t,v:((((S.facil||{})[c])||{})[x.k]||'').trim()})).filter(x=>x.v);
+    if(fn.length){L.push(``,`Agreed in the room:`,``);fn.forEach(x=>L.push(`- **${x.t}**: ${x.v.replace(/\s*\n\s*/g,'; ')}`));}});
+  const sw=S.persp.reduce((t,p)=>t+(+S.final.pw[p.id]||0),0);
+  L.push(``,`## Step 3 · Overall picture`,``,`Finalists from all subcategories, compared with one set of weights (${S.persp.map(p=>`${p.name} ${sw>0?pct((+S.final.pw[p.id]||0)/sw):'0%'}`).join(', ')}). Runner-ups joined when within ${f2(+S.closeGap)} points of their subcategory winner.`,``,
+    ...tbl(['#','Supplier','Subcategory',...S.persp.map(p=>p.name),'Final score','Selected'],rows.map(r=>[r.rank,r.s.name,r.cat,...S.persp.map(p=>r.ds[p.id]===null?'–':f1(r.ds[p.id])),f2(r.tot),sel[r.s.id]!==undefined?'Yes':''])));
+  L.push(``,`## Step 4 · Decisions`,``,`### a) Suppliers to work with`,``);
+  if(!ch.length)L.push(`_None selected yet._`);ch.forEach((r,i)=>L.push(`${i+1}. **${r.s.name}** (${r.cat}, final score ${f2(r.tot)})${(sel[r.s.id]||'').trim()?': '+sel[r.s.id].trim().replace(/\s*\n\s*/g,'; '):''}`));
+  L.push(``,`### b) Who to involve internally`,``);if(ppl.length)L.push(...tbl(['Who','Needed for','What we ask of them'],ppl.map(x=>[x.who,x.forr,x.ask])));else L.push(`_Nobody named yet._`);
+  L.push(``,`### c) Agreed next steps`,``);if(stp.length)L.push(...tbl(['Next step','Owner','By when'],stp.map(x=>[x.what,x.owner,x.due])));else L.push(`_No next steps agreed yet._`);
+  const open=[];names.forEach(c=>S.dims.forEach(d=>{const o=stakeOf(d,c).filter(x=>!x.done);if(o.length)open.push(`- ${c}, ${d.name}: ${o.map(x=>`${x.name} (${x.role})`).join('; ')}`);}));
+  const warn=S.sup.filter(s=>hasFacts(factsOf(s))&&factWarn(factsOf(s)));
+  L.push(``,`## Open points`,``,`**Stakeholder input still open**`,``,...(open.length?open:[`- None`]),``,`**Figures to verify**`,``,...(warn.length?warn.map(s=>`- ${s.name}: ${warnText(factsOf(s)).replace(/\s*\n\s*/g,'; ')}`):[`- None`]));
+  return L.join('\n')+'\n';
+}
+function mdToHtml(md){
+  const inl=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|\s)_(.+?)_(?=\s|$)/g,'$1<i>$2</i>');
+  const out=[];let list=null,tb=null;const close=()=>{if(list){out.push(`</${list}>`);list=null;}if(tb){out.push('</tbody></table>');tb=null;}};
+  md.split('\n').forEach(l=>{let m;
+    if(/^\|/.test(l)){if(/^\|[-| ]+\|$/.test(l))return;const cs=l.replace(/^\||\|$/g,'').split('|').map(x=>x.trim());
+      if(!tb){close();tb=true;out.push('<table><thead><tr>'+cs.map(x=>`<th>${inl(x)}</th>`).join('')+'</tr></thead><tbody>');}else out.push('<tr>'+cs.map(x=>`<td>${inl(x)}</td>`).join('')+'</tr>');return;}
+    if((m=/^(- |\d+\. )(.*)$/.exec(l))){const k=m[1]==='- '?'ul':'ol';if(list!==k){close();list=k;out.push(`<${k}>`);}out.push(`<li>${inl(m[2])}</li>`);return;}
+    close();if(!l.trim())return;
+    if((m=/^(#{1,3}) (.*)$/.exec(l)))out.push(`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`);else out.push(`<p>${inl(l)}</p>`);});
+  close();return out.join('');
+}
+let sumMd='';
+document.getElementById('btnFinish').addEventListener('click',()=>{sumMd=fullSummary();document.getElementById('sumBody').innerHTML=mdToHtml(sumMd);document.getElementById('sumMsg').textContent='';const dl=document.getElementById('dlgSummary');dl.showModal();document.getElementById('sumBody').scrollTop=0;});
+/* summary as PDF: a small Markdown layout (headings, paragraphs, lists, tables) drawn with jsPDF */
+function summaryPdf(md){
+  const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});const W=210,H=297,M=16,CW=W-2*M;let y=M;
+  const clean=t=>String(t).replace(/✓/g,'Yes').replace(/→/g,'->').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/≥/g,'>=').replace(/≤/g,'<=').replace(/…/g,'...').replace(/[^\x00-\xff–—·•]/g,'').replace(/—/g,'–');
+  const plain=t=>clean(t).replace(/\*\*(.+?)\*\*/g,'$1').replace(/(^|\s)_(.+?)_(?=\s|$)/g,'$1$2');
+  const need=h=>{if(y+h>H-M){pdf.addPage();y=M;}};
+  const text=(t,size,style,color,indent,gap)=>{pdf.setFont('helvetica',style||'normal');pdf.setFontSize(size);pdf.setTextColor(...(color||[30,40,36]));const lh=size*0.44;
+    pdf.splitTextToSize(t,CW-(indent||0)).forEach(l=>{need(lh);pdf.text(l,M+(indent||0),y+lh*0.78);y+=lh;});y+=gap||0;};
+  const G=[23,62,48];let tb=null;
+  const flush=()=>{if(!tb)return;const rows=tb;tb=null;const n=rows[0].length;pdf.setFontSize(8);
+    // column widths from content, within limits
+    pdf.setFont('helvetica','bold');const want=rows[0].map((h,j)=>Math.max(...String(h).split(/\s+/).map(w=>pdf.getTextWidth(w)+4),Math.min(70,Math.max(10,...rows.map(r=>pdf.getTextWidth(r[j]||'')+4)))));const tot=want.reduce((a,b)=>a+b,0);const cw=want.map(w=>w/tot*CW);const mn=rows[0].map(h=>Math.max(...String(h).split(/\s+/).map(w=>pdf.getTextWidth(w)+3.5)));cw.forEach((w,j)=>{if(w<mn[j]){const k=cw.indexOf(Math.max(...cw));cw[k]-=mn[j]-w;cw[j]=mn[j];}});
+    rows.forEach((r,ri)=>{pdf.setFont('helvetica',ri?'normal':'bold');pdf.setFontSize(8);const cells=r.map((c,j)=>pdf.splitTextToSize(c||'',cw[j]-3));const h=Math.max(...cells.map(c=>c.length))*3.6+2.4;
+      need(h);if(!ri){pdf.setFillColor(232,240,236);pdf.rect(M,y,CW,h,'F');}
+      pdf.setTextColor(...(ri?[30,40,36]:G));let x=M;cells.forEach((c,j)=>{pdf.text(c,x+1.5,y+3.9);x+=cw[j];});
+      pdf.setDrawColor(205,214,209);pdf.setLineWidth(0.15);pdf.line(M,y+h,M+CW,y+h);y+=h;});y+=4;};
+  md.split('\n').forEach(l=>{let m;
+    if(/^\|/.test(l)){if(/^\|[-| ]+\|$/.test(l))return;(tb=tb||[]).push(l.replace(/^\||\|$/g,'').split('|').map(x=>plain(x.trim())));return;}
+    flush();
+    if((m=/^# (.*)$/.exec(l))){text(plain(m[1]),18,'bold',G,0,3);}
+    else if((m=/^## (.*)$/.exec(l))){y+=3;need(14);text(plain(m[1]),13,'bold',G,0,1);pdf.setDrawColor(...G);pdf.setLineWidth(0.3);pdf.line(M,y,M+CW,y);y+=3;}
+    else if((m=/^### (.*)$/.exec(l))){y+=1.5;need(12);text(plain(m[1]),10.5,'bold',[30,40,36],0,1.5);}
+    else if((m=/^(- |\d+\. )(.*)$/.exec(l))){const b=m[1]==='- '?'•':m[1].trim();pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);need(4.2);pdf.setTextColor(30,40,36);pdf.text(b,M+1,y+4.2*0.78);text(plain(m[2]),9.5,'normal',null,6,0.8);}
+    else if(l.trim()){text(plain(l),9.5,'normal',null,0,2);}
+    else y+=1;});
+  flush();
+  const np=pdf.getNumberOfPages();for(let i=1;i<=np;i++){pdf.setPage(i);pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);pdf.setTextColor(120,130,125);pdf.text(`Page ${i} of ${np}`,W-M,H-8,{align:'right'});}
+  return pdf.output('blob');
+}
+document.getElementById('btnSumPdf').addEventListener('click',async()=>{const m=document.getElementById('sumMsg');
+  if(!window.jspdf){m.textContent='PDF needs an internet connection the first time. Use Download .md instead.';return;}
+  try{const r=await saveFile(`workshop-summary-${new Date().toISOString().slice(0,10)}.pdf`,summaryPdf(sumMd));m.textContent=r==='saved'?'Saved.':'';}catch(e){console.error(e);m.textContent='Could not create the PDF. Use Download .md instead.';}});
+document.getElementById('btnSumMd').addEventListener('click',async()=>{const m=document.getElementById('sumMsg');try{const r=await saveFile(`workshop-summary-${new Date().toISOString().slice(0,10)}.md`,sumMd);m.textContent=r==='saved'?'Saved.':'';}catch(e){m.textContent='Could not save here.';}});
+document.getElementById('btnSumCopy').addEventListener('click',()=>{const m=document.getElementById('sumMsg');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(sumMd).then(()=>{m.textContent='Copied.';}).catch(()=>{m.textContent='Copy is blocked here; use Download.';});else m.textContent='Copy is blocked here; use Download.';});
 
 /* ---------- subcategory picker ---------- */
-function renderCatSel(){const sel=document.getElementById('catSel');
-  sel.innerHTML=catNames().map(c=>{const n=S.sup.filter(s=>catOf(s)===c).length;return `<option value="${esc(c)}"${c===S.curCat?' selected':''}>${esc(c)} (${n})</option>`;}).join('');}
-document.getElementById('catSel').addEventListener('change',e=>{S.curCat=e.target.value;applyCat();S.h2h=null;S.picks=null;S.activeScn=null;
-  const m=S.scenarios.find(sc=>scnMatches(sc));if(m)S.activeScn=m.id;renderAll();if(S.page==='scoring')setScView(S.scView||'crit');if(S.facilOn)goFacil(0);save();});
+function renderCatSel(){document.getElementById('scCat').textContent=S.curCat;}
+function setCat(c){S.curCat=c;applyCat();S.h2h=null;S.picks=null;S.activeScn=null;
+  const m=S.scenarios.find(sc=>scnMatches(sc));if(m)S.activeScn=m.id;renderAll();if(S.page==='scoring')setScView(S.scView||'crit');if(S.facilOn)goFacil(0);save();}
+
+/* ---------- workshop flow: subcategory checklist, locked steps ---------- */
+const catDone=c=>!!ensureCat(c).done;
+// subcategories taken through the workshop; the rest are parked and do not hold back steps 3 and 4
+const activeCats=()=>catNames().filter(c=>!ensureCat(c).skip);
+const allDone=()=>{const n=activeCats();return n.length>0&&n.every(catDone);};
+function startCat(c){setCat(c);const o=orderedDims();if(o[0])S.curDim=o[0].id;S.scView='crit';showPage('scoring');renderScoring();window.scrollTo(0,0);}
+function missingScores(){let n=0;S.suppliers.forEach(s=>S.dims.forEach(d=>{if(!(+(S.scores[s.id]||{})[d.id]>0))n++;}));return n;}
+function finishCat(){const m=missingScores();if(m&&!confirm(`${m} score${m===1?' is':'s are'} still empty in ${S.curCat}. Empty scores count as 0 in the ranking. Finish this subcategory anyway?`))return;ensureCat(S.curCat).done=true;renderFlow();showPage('input');window.scrollTo(0,0);}
+function renderFlow(){
+  const names=catNames(),act=activeCats(),nd=act.filter(catDone).length,ok=allDone();
+  document.querySelectorAll('nav.pages [data-lock]').forEach(b=>b.hidden=!ok);
+  document.getElementById('lockHint').textContent=ok?'':act.length?`Steps 3 and 4 appear when every included subcategory is evaluated (${nd} of ${act.length} done)`:'Include at least one subcategory in the workshop';
+  document.getElementById('catProg').textContent=`${nd} of ${act.length} evaluated`+(act.length<names.length?` · ${names.length-act.length} not included`:'');
+  document.getElementById('upStat').textContent=`${S.example?'Example data loaded: ':'Loaded: '}${S.sup.length} suppliers in ${names.length} subcategor${names.length===1?'y':'ies'}.`;
+  document.getElementById('confirmWNote').textContent=`Starts the scoring of ${S.curCat}.`;
+  document.getElementById('setupFor').textContent=`Weights, suppliers and facts for: ${S.curCat}`;
+  const host=document.getElementById('catList');
+  host.innerHTML=names.map(c=>{const n=S.sup.filter(s=>catOf(s)===c).length;const ns=S.sup.filter(s=>catOf(s)===c&&!s.excl).length;const d=catDone(c);
+    const sk=!!ensureCat(c).skip;
+    const cur=c===S.curCat;
+    return `<div class="cat-row${d?' done':''}${cur?' cur':''}${sk?' skip':''}" data-cat="${esc(c)}" title="Click to work on ${esc(c)}"><span class="pick" role="radio" aria-checked="${cur}" tabindex="0" aria-label="Work on ${esc(c)}"></span><span class="nm">${esc(c)}${cur?'<span class="curtag">Selected</span>':''}</span><span class="small muted cnt">${ns<n?`${ns} of ${n} scored`:`${n} supplier${n===1?'':'s'}`}</span><span class="ctl"><button class="small stat" title="${d?'Click to reopen':'Click to mark as evaluated without scoring'}" aria-pressed="${d}">${d?'✓ Evaluated':'Not evaluated'}</button><label class="incl"><input type="checkbox" data-inc${sk?'':' checked'}> Include in workshop</label><button class="small${d?'':' primary'}" data-act="go">${d?'Rescore':'Score suppliers →'}</button></span></div>`;}).join('');
+  host.querySelectorAll('.cat-row').forEach(r=>{const c=r.dataset.cat;
+    // the whole row selects the subcategory; its buttons and tick box keep their own job
+    r.addEventListener('click',e=>{if(e.target.closest('button,label,input'))return;if(c!==S.curCat)setCat(c);});
+    r.querySelector('.pick').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(c!==S.curCat)setCat(c);}});
+    r.querySelector('.stat').addEventListener('click',()=>{const C=ensureCat(c);C.done=!C.done;renderFlow();if(!allDone()&&(S.page==='results'||S.page==='final'))showPage('input');save();});
+    r.querySelector('[data-inc]').addEventListener('change',e=>{ensureCat(c).skip=!e.target.checked;renderFlow();if(!allDone()&&(S.page==='results'||S.page==='final'))showPage('input');safe(renderOverall);save();});
+    r.querySelector('[data-act=go]').addEventListener('click',()=>startCat(c));});
+}
+function renderOverall(){
+  const t=document.getElementById('overall');if(!t)return;
+  t.innerHTML=`<thead><tr><th class="sup">Subcategory</th><th>#1</th><th>#2</th><th>#3</th><th>Knocked out</th><th>Going to the final</th></tr></thead><tbody>`+activeCats().map(c=>{const ev=catEval(c);const run=ev.sorted.filter(r=>!r.out);const out=ev.sorted.filter(r=>r.out);const fl=finalistsOf(c).filter(x=>x.inc);
+    const cell=r=>r?`<span class="r${r===run[0]?' top':''}">${esc(shorten(r.s.name))}</span><span class="sc">${f2(r.total)}${r.seg?' · '+SEGMENTS[r.seg]:''}</span>`:'–';
+    return `<tr class="go${c===S.curCat?' curcat':''}" data-cat="${esc(c)}"><td class="sup">${esc(c)}</td><td>${cell(run[0])}</td><td>${cell(run[1])}</td><td>${cell(run[2])}</td><td class="small">${out.length?out.map(r=>esc(shorten(r.s.name))).join(', '):'–'}</td><td class="small">${fl.length?fl.map(x=>esc(shorten(x.r.s.name))).join(', '):'–'}</td></tr>`;}).join('')+`</tbody>`;
+  t.querySelectorAll('tr.go').forEach(r=>r.addEventListener('click',()=>{if(r.dataset.cat!==S.curCat)setCat(r.dataset.cat);document.getElementById('resWrap').scrollIntoView({behavior:'smooth',block:'start'});}));
+}
+
 
 /* ---------- pages ---------- */
 function showPage(pg){
-  if(!['results','scoring','final'].includes(pg))pg='input';S.page=pg;
+  if(!['input','results','scoring','final'].includes(pg))pg='intro';if((pg==='results'||pg==='final')&&!allDone())pg='input';S.page=pg;
   document.querySelectorAll('[data-pagebody]').forEach(el=>el.hidden=el.dataset.pagebody!==pg);
   document.querySelectorAll('nav.pages [data-page]').forEach(b=>{if(b.dataset.page===pg)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   document.body.dataset.page=pg;
   if(pg==='scoring'){setScView(S.scView||'crit');}
   if(pg==='results'&&S.facilOn)renderFacil();
-  if(pg==='final')renderFinal();
+  if(pg==='final'){renderFinal();renderDecide();}
   save();
 }
 document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListener('click',()=>{showPage(b.dataset.page||b.dataset.goto);window.scrollTo(0,0);}));
 
 /* ---------- add / reset ---------- */
-document.getElementById('btnAddDim').addEventListener('click',()=>{
-  if(S.dims.length>=12)return;const p=S.persp[S.persp.length-1];const d={id:nid(),pid:p.id,name:'New criterion',short:'New criterion',weight:5,min:0,desc:'',low:'',lv2:'',lv3:'',lv4:'',high:''};S.dims.push(d);
-  S.sup.forEach(s=>S.scores[s.id][d.id]=3);syncW();renderAll();save();
-  const last=document.querySelector('#weights .pgroup:last-child .wrow:last-child .name input');if(last){last.focus();last.select();}
-});
 document.getElementById('btnAddSup').addEventListener('click',()=>{
-  const s={id:nid(),name:'New supplier',facts:S.curCat==='Unassigned'?{}:{cat:S.curCat}};S.sup.push(s);S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
+  const s={id:nid(),name:'New supplier',facts:S.curCat==='Unassigned'?{}:{cat:S.curCat}};S.sup.push(s);S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=0);renderAll();save();
   const last=document.querySelector('#supList .sup-row:last-child input');if(last){last.focus();last.select();}
 });
 document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();save();});
+
+/* ---------- saving on/off, clear my data ---------- */
+/* ---------- full screen ---------- */
+(function(){const bf=document.getElementById('btnFull'),de=document.documentElement;
+  const req=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen;
+  const cur=()=>document.fullscreenElement||document.webkitFullscreenElement;
+  const sync=()=>{const on=!!cur();bf.setAttribute('aria-pressed',String(on));bf.textContent=on?'Exit full screen':'⛶ Full screen';};
+  const blocked=()=>{bf.textContent='Press F11 for full screen';bf.title='This page cannot switch to full screen by itself here. Press F11 (Windows) or Ctrl+Cmd+F (Mac), or download the tool and open the file.';};
+  bf.addEventListener('click',()=>{if(cur()){ex.call(document);return;}
+    if(!req||document.fullscreenEnabled===false){blocked();return;}
+    try{const r=req.call(de);if(r&&r.catch)r.catch(blocked);}catch(e){blocked();}});
+  document.addEventListener('fullscreenchange',sync);document.addEventListener('webkitfullscreenchange',sync);})();
+/* ---------- offline scoring sheet (.xlsx written and read here, no library) ---------- */
+(function(){
+  const te=new TextEncoder(),td=new TextDecoder();
+  const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return b=>{let c=-1;for(let i=0;i<b.length;i++)c=t[(c^b[i])&255]^(c>>>8);return (c^-1)>>>0;};})();
+  function zip(files){const parts=[],cen=[];let off=0;
+    files.forEach(([name,txt])=>{const nm=te.encode(name),d=te.encode(txt),crc=CRC(d);
+      const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint32(10,0x00210000,true);h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);
+      const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint32(12,0x00210000,true);c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+      parts.push(new Uint8Array(h.buffer),nm,d);cen.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+d.length;});
+    const cs=cen.reduce((t,x)=>t+x.length,0);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+    return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});}
+  const x=v=>String(v===undefined||v===null?'':v).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const colL=i=>{let t='';i++;while(i>0){const m=(i-1)%26;t=String.fromCharCode(65+m)+t;i=(i-m-1)/26;}return t;};
+  function sheetXml(rows,widths,opt){opt=opt||{};
+    let o='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane '+(opt.freezeCols?`xSplit="${opt.freezeCols}" `:'')+`ySplit="1" topLeftCell="${colL(opt.freezeCols||0)}2" activePane="${opt.freezeCols?'bottomRight':'bottomLeft'}" state="frozen"/></sheetView></sheetViews><cols>`+widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')+'</cols><sheetData>';
+    rows.forEach((r,ri)=>{o+=`<row r="${ri+1}">`;r.forEach((v,ci)=>{const ref=colL(ci)+(ri+1),st=ri===0?1:2;if(v===''||v===null||v===undefined){o+=`<c r="${ref}" s="${st}"/>`;return;}
+      o+=typeof v==='number'?`<c r="${ref}" s="${st}"><v>${v}</v></c>`:`<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${x(v)}</t></is></c>`;});o+='</row>';});
+    o+='</sheetData>';
+    if(opt.valid)o+=`<dataValidations count="1"><dataValidation type="whole" operator="between" allowBlank="1" showErrorMessage="1" errorTitle="Score" error="Use a whole number from 1 to 5, or leave the cell empty." sqref="${opt.valid}"><formula1>1</formula1><formula2>5</formula2></dataValidation></dataValidations>`;
+    return o+'</worksheet>';}
+  const crit=d=>{const o=orderedDims();return `${o.indexOf(d)+1}. ${d.name}`;};
+  const shName=(d,i)=>`${i+1} ${(d.short||d.name)}`.replace(/[\[\]:*?\/\\]/g,' ').slice(0,31).trim();
+  function build(){const o=orderedDims();const sup=[];activeCats().forEach(c=>S.sup.filter(s=>catOf(s)===c&&!s.excl).forEach(s=>sup.push([c,s])));
+    const cats=activeCats();
+    const sheets=o.map((d,i)=>{const p=S.persp.find(q=>q.id===d.pid);
+      const rows=[['Supplier',...LVK.map((k,n)=>`${n+1}`+(d[k]?`: ${d[k]}`:'')),'Notes','','Criterion: '+crit(d)]];
+      const info=[p?'Dimension: '+p.name:'',d.desc||'','Put an x in the column of the score (1 to 5) for each supplier, one x per row. Leave the row empty if not scored yet.'].filter(Boolean);let r=0;
+      const push=a=>{rows.push([...a,'',info[r]||'']);r++;};
+      cats.forEach(c=>{if(cats.length>1)push(['Subcategory: '+c,'','','','','','']);
+        sup.filter(e=>e[0]===c).forEach(e=>{const v=+(S.scores[e[1].id]||{})[d.id]||0;push([e[1].name,...[1,2,3,4,5].map(n=>v===n?'x':''),noteOf(e[1].id,d.id)]);});});
+      while(r<info.length)push(['','','','','','','']);
+      return {name:shName(d,i),xml:sheetXml(rows,[34,18,18,18,18,18,50,3,60],{freezeCols:1})};});
+    const guide=[['Criterion','Dimension','What it measures','1 means','2 means','3 means','4 means','5 means']];
+    o.forEach(d=>{const p=S.persp.find(q=>q.id===d.pid);guide.push([crit(d),p?p.name:'',d.desc||'',...LVK.map(k=>d[k]||'')]);});
+    guide.push([]);guide.push(['How to use: each criterion has its own sheet. Put an x in the column of the score (1 to 5) for each supplier, one x per row, and a note where it helps. Leave the row empty if it is not scored yet. Do not rename the header row, the suppliers or the sheets. Then upload the file in step 1 of the tool.']);
+    sheets.push({name:'Guide',xml:sheetXml(guide,[38,26,50,34,34,34,34,34])});
+    const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',RT='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    const wb=H+`<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${RT}"><sheets>`+sheets.map((t,i)=>`<sheet name="${x(t.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>';
+    const styles=H+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF173E30"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    return zip([
+      ['[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+sheets.map((t,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ['_rels/.rels',H+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${RT}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+      ['xl/workbook.xml',wb],
+      ['xl/_rels/workbook.xml.rels',H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((t,i)=>`<Relationship Id="rId${i+1}" Type="${RT}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+`<Relationship Id="rId${sheets.length+1}" Type="${RT}/styles" Target="styles.xml"/></Relationships>`],
+      ['xl/styles.xml',styles],
+      ...sheets.map((t,i)=>[`xl/worksheets/sheet${i+1}.xml`,t.xml])]);}
+  /* --- read --- */
+  async function unzip(buf){const dv=new DataView(buf),u8=new Uint8Array(buf);let e=buf.byteLength-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('zip');
+    const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const out={};
+    for(let i=0;i<n;i++){const meth=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+      const name=td.decode(u8.subarray(p+46,p+46+nl));const ds=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true);const raw=u8.subarray(ds,ds+cs);
+      if(/\.(xml|rels)$/.test(name)){if(meth===0)out[name]=td.decode(raw);else if(meth===8){if(typeof DecompressionStream==='undefined')throw new Error('old');out[name]=await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();}}
+      p+=46+nl+xl+cl;}
+    return out;}
+  const tag=(el,n)=>[...el.getElementsByTagName('*')].filter(k=>k.localName===n);
+  const kids=(el,n)=>[...el.children].filter(k=>k.localName===n);
+  const strOf=el=>tag(el,'t').filter(t=>!t.parentNode||t.parentNode.localName!=='rPh').map(t=>t.textContent).join('');
+  async function readScores(buf){const z=await unzip(buf);const P=t=>new DOMParser().parseFromString(t,'application/xml');
+    if(!z['xl/workbook.xml'])throw new Error('zip');
+    const wb=P(z['xl/workbook.xml']),rel=z['xl/_rels/workbook.xml.rels']?P(z['xl/_rels/workbook.xml.rels']):null;const sh=tag(wb,'sheet');
+    const ss=z['xl/sharedStrings.xml']?kids(P(z['xl/sharedStrings.xml']).documentElement,'si').map(strOf):[];
+    return sh.map((pick,idx)=>{let path=`xl/worksheets/sheet${idx+1}.xml`;
+    if(rel){const rid=pick.getAttribute('r:id')||[...pick.attributes].filter(a=>a.localName==='id').map(a=>a.value)[0];const r=tag(rel,'Relationship').find(k=>k.getAttribute('Id')===rid);if(r){const t=r.getAttribute('Target');path=t.startsWith('/')?t.slice(1):'xl/'+t;}}
+    const rows=[];if(z[path])tag(P(z[path]),'row').forEach(r=>{const row=[];let ci=0;kids(r,'c').forEach(c=>{const ref=c.getAttribute('r');if(ref){let n=0;for(const ch of ref.replace(/\d+/g,''))n=n*26+ch.charCodeAt(0)-64;ci=n-1;}
+        const t=c.getAttribute('t'),v=kids(c,'v')[0];let val='';if(t==='inlineStr')val=strOf(c);else if(v){val=t==='s'?(ss[+v.textContent]||''):v.textContent;}row[ci]=val;ci++;});
+      rows.push(Array.from(row,v=>v===undefined?'':v));});
+    return {name:pick.getAttribute('name')||'',rows};});}
+  function applyScores(sheets){const o=orderedDims();const key=h=>hkey(String(h).replace(/^\s*\d+\.\s*/,''));
+    let nS=0,nC=0,found=0;const done=new Set(),unknown=[],bad=[];
+    sheets.forEach(sh=>{const rows=sh.rows;if(rows.length<2)return;const H=rows[0].map(h=>String(h||''));
+      const si=H.findIndex(h=>hkey(h)==='supplier');if(si<0)return;
+      // which criterion: the "Criterion: ..." header cell, else the number the sheet name starts with
+      let d=null;const cj=H.findIndex(h=>/^\s*criterion\s*:/i.test(h));if(cj>=0){const k=key(H[cj].replace(/^\s*criterion\s*:/i,''));d=o.find(q=>key(q.name)===k)||null;}
+      if(!d){const m=/^\s*(\d+)/.exec(sh.name||'');if(m)d=o[+m[1]-1]||null;}if(!d)return;
+      const col=[1,2,3,4,5].map(n=>H.findIndex(h=>new RegExp('^\\s*'+n+'\\s*(:|$)').test(h)));if(col.some(c=>c<0))return;const nj=H.findIndex(h=>/^\s*notes?\s*$/i.test(h));found++;
+      rows.slice(1).forEach(r=>{const name=String(r[si]||'').trim();if(!name||/^subcategory\s*:/i.test(name))return;const s=S.sup.find(q=>q.name.trim().toLowerCase()===name.toLowerCase());
+        const marks=col.map((c,n)=>String(r[c]===undefined?'':r[c]).trim()?n+1:0).filter(Boolean);const note=nj>=0?String(r[nj]===undefined?'':r[nj]).trim():'';
+        if(!s){if((marks.length||note)&&!unknown.includes(name))unknown.push(name);return;}
+        S.scores[s.id]=S.scores[s.id]||{};
+        if(marks.length>1)bad.push(`${name} on ${d.short||d.name} (${marks.join(' and ')})`);
+        else if(marks.length===1){if(S.scores[s.id][d.id]!==marks[0]){S.scores[s.id][d.id]=marks[0];nS++;}done.add(s.id);}
+        if(note){if(note!==noteOf(s.id,d.id)){setNote(s.id,d.id,note);nC++;}done.add(s.id);}});});
+    if(!found)throw new Error('No criterion sheets were found. Keep the sheets and header rows as downloaded.');
+    return {nS,nC,sup:done.size,unknown,bad};}
+  const msg=document.getElementById('xlMsg'),fi=document.getElementById('xlFile');
+  const say=(t,cls)=>{msg.className='small '+(cls||'');msg.textContent=t;};
+  document.getElementById('btnXlDown').addEventListener('click',async()=>{try{if(!activeCats().length){say('Include at least one subcategory first.','err');return;}
+      const r=await saveFile(`scoring-sheet-${new Date().toISOString().slice(0,10)}.xlsx`,build());say(r==='saved'?'Scoring sheet downloaded. Fill it in and upload it here again.':'','ok');}catch(e){console.error(e);say('Could not create the file here.','err');}});
+  document.getElementById('btnXlUp').addEventListener('click',()=>{fi.value='';fi.click();});
+  fi.addEventListener('change',async()=>{const f=fi.files&&fi.files[0];if(!f)return;
+    try{const rows=await readScores(await f.arrayBuffer());const r=applyScores(rows);markScnDirty();applyCat();renderAll();save();
+      say(`Loaded ${r.nS} score${r.nS===1?'':'s'} and ${r.nC} comment${r.nC===1?'':'s'} for ${r.sup} supplier${r.sup===1?'':'s'}. Empty cells were left as they were.`+(r.unknown.length?` Not in the tool, skipped: ${r.unknown.join(', ')}.`:'')+(r.bad.length?` More than one score marked, skipped: ${r.bad.slice(0,5).join('; ')}${r.bad.length>5?' and '+(r.bad.length-5)+' more':''}.`:'')+' Tick each subcategory as evaluated when the room agrees.',r.unknown.length||r.bad.length?'err':'ok');}
+    catch(e){console.error(e);say(e.message==='zip'?'That is not an Excel (.xlsx) scoring sheet.':e.message==='old'?'This browser cannot read Excel files. Use a current Edge or Chrome.':e.message,'err');}});
+})();
+/* ---------- session file: save everything and load it again ---------- */
+(function(){const msg=document.getElementById('sesMsg'),fi=document.getElementById('sesFile');
+  const say=(t,el)=>{(el||msg).textContent=t;if(!el)setTimeout(()=>{if(msg.textContent===t)msg.textContent='';},6000);};
+  async function saveSes(el){try{const o=Object.assign({},S);delete o.suppliers;
+      const r=await saveFile(`workshop-session-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({app:'supplier-workshop-session',v:1,saved:new Date().toISOString(),state:o},null,1));
+      say(r==='saved'?'Session saved.':'',el);}catch(e){say('Could not save here.',el);}}
+  document.getElementById('btnSesSave').addEventListener('click',()=>saveSes());
+  document.getElementById('btnSumSes').addEventListener('click',()=>saveSes(document.getElementById('sumMsg')));
+  const pick=()=>{fi.value='';fi.click();};
+  document.getElementById('btnSesLoad').addEventListener('click',pick);document.getElementById('btnSesLoad2').addEventListener('click',pick);
+  fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];if(!f)return;const rd=new FileReader();
+    rd.onerror=()=>say('Could not read the file.');
+    rd.onload=()=>{let o=null;try{const j=JSON.parse(rd.result);if(j&&j.app==='supplier-workshop-session'&&j.state)o=hydrate(j.state);}catch(e){}
+      if(!o){say('That is not a workshop session file.');return;}
+      if(!confirm('Load this session? It replaces what is in the tool now.'))return;
+      S=o;applyCat();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page==='intro'?'input':S.page);save();window.scrollTo(0,0);
+      say('Session loaded'+(j_saved(rd.result)?' (saved '+j_saved(rd.result)+')':'')+'.');};
+    rd.readAsText(f);});
+  function j_saved(t){try{return new Date(JSON.parse(t).saved).toLocaleDateString();}catch(e){return '';}}
+})();
+const chkSave=document.getElementById('chkSave'),btnClear=document.getElementById('btnClear');
+function showSaveNote(){chkSave.checked=persist;document.getElementById('saveNote').textContent=persist
+  ?'Your data is saved only in this browser, so it is still here next time.'
+  :'Saving is off: your data is gone when you close or reload this tab.';}
+chkSave.addEventListener('change',()=>{persist=chkSave.checked;
+  try{if(persist)localStorage.removeItem(STORE+'-nosave');else localStorage.setItem(STORE+'-nosave','1');}catch(_){}
+  if(persist)save();else wipeStored();showSaveNote();});
+let clearArm=null;
+btnClear.addEventListener('click',()=>{
+  if(!clearArm){btnClear.textContent='Click again to clear';btnClear.classList.add('danger');
+    clearArm=setTimeout(()=>{clearArm=null;btnClear.textContent='Clear my data';btnClear.classList.remove('danger');},4000);return;}
+  clearTimeout(clearArm);clearArm=null;btnClear.classList.remove('danger');
+  wipeStored();wOpen={};const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();
+  btnClear.textContent='Cleared';setTimeout(()=>{btnClear.textContent='Clear my data';},2000);
+});
+showSaveNote();
 
 /* ---------- import / export ---------- */
 function toCSV(){
@@ -1560,7 +2097,7 @@ function toCSV(){
   lines[0]+=','+[...ordered.map(d=>'Comment: '+d.name),'Overall note'].map(q).join(',');
   const pad=','.repeat(ordered.length+1);for(let i=1;i<4;i++)lines[i]+=pad;
   [['Definition','desc'],['Score 1 means','low'],['Score 2 means','lv2'],['Score 3 means','lv3'],['Score 4 means','lv4'],['Score 5 means','high'],['Stakeholders','__stake']].forEach(([lab,k])=>lines.push([lab,...ordered.map(d=>k==='__stake'?stakeToText(d):(d[k]||''))].map(q).join(',')+pad));
-  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id]),...ordered.map(d=>q(noteOf(s.id,d.id))),q(supNoteOf(s.id))].join(',')));
+  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id]||''),...ordered.map(d=>q(noteOf(s.id,d.id))),q(supNoteOf(s.id))].join(',')));
   return lines.join('\n');
 }
 function parseCSV(text){
@@ -1595,7 +2132,7 @@ function importCSV(text){
     const id=nid();suppliers.push({id,name:r[0]});scores[id]={};
     cmtCols.forEach(c=>{if(c.dim&&r[c.j]){notes[id]=notes[id]||{};notes[id][c.dim.id]=r[c.j];}});
     if(noteCol>0&&r[noteCol])supNotes[id]=r[noteCol];
-    dims.forEach(d=>{let v=Math.round(+r[d.col]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
+    dims.forEach(d=>{let v=Math.round(+r[d.col]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=v<=0?0:Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
   });
   if(suppliers.length<2)throw new Error('Need at least two suppliers.');
   if(!persp.length){const p={id:nid(),name:'All criteria',desc:'',axis:'x'};persp.push(p);}
@@ -1631,6 +2168,8 @@ function h2hPair(c){
   return S.h2h;
 }
 function renderH2H(c){
+  if(S.suppliers.length<2){document.getElementById('h2hA').innerHTML='';document.getElementById('h2hB').innerHTML='';document.getElementById('h2hCards').innerHTML='<div class="small muted">Head to head needs at least two suppliers in the subcategory.</div>';
+    ['h2hTbl','h2hNotes','h2hIns'].forEach(id=>document.getElementById(id).innerHTML='');return;}
   const [ia,ib]=h2hPair(c);
   const opts=sel=>S.suppliers.map(s=>`<option value="${s.id}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
   const sa=document.getElementById('h2hA'),sb=document.getElementById('h2hB');
@@ -1765,10 +2304,12 @@ document.getElementById('btnPrint').addEventListener('click',printRanking);
 
 /* ---------- render ---------- */
 function renderResults(){
-  const c=compute();setTimeout(()=>{if(S.facilOn&&S.page==='results'&&!document.activeElement.closest('#facil'))renderFacil();},0);updateWeightLabels(c.sumW);renderRanking(c);renderMap(c);updateMatrixTotals(c);renderRadar();renderH2H(c);renderDep();renderScnSelect();renderScenarios();
+  const c=compute();setTimeout(()=>{if(S.facilOn&&S.page==='results'&&!document.activeElement.closest('#facil'))renderFacil();},0);[()=>updateWeightLabels(c.sumW),()=>renderRanking(c),()=>renderMap(c),()=>updateMatrixTotals(c),renderRadar,()=>renderH2H(c),renderDep,renderScnSelect,renderScenarios,renderOverall].forEach(safe);
   document.getElementById('badge').hidden=!S.example;
 }
-function renderAll(){renderCatSel();buildWeights();buildSuppliers();buildFacts();buildMatrix();renderResults();renderScoring();if(S.page==='final')renderFinal();}
+// one failing view must not stop the others from updating
+const safe=f=>{try{f();}catch(e){console.error(e);}};
+function renderAll(){[renderCatSel,renderFlow,buildWeights,buildSuppliers,renderViz,buildFacts,buildMatrix,renderResults,renderScoring,()=>{if(S.page==='final')renderFinal();}].forEach(safe);}
 S=load();applyCat();S.facilOn=false;if(!S.baseScn)S.baseScn=S.activeScn||(S.scenarios[0]&&S.scenarios[0].id)||null;renderAll();showPage(S.page);
 })();
 </script>
