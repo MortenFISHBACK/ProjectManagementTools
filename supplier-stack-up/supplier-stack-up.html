@@ -586,10 +586,10 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <div data-pagebody="intro">
   <div class="page-intro"><p>This tool takes a group through choosing the <b>1–3 suppliers</b> to build a partnership with. It runs in four steps, one subcategory at a time, and ends with a summary of what was agreed.</p><button class="primary" data-goto="input">Start with step 1 →</button></div>
   <div class="intro-steps">
-    <section class="panel"><div class="body"><div class="istep"><span class="n">1</span><h2>Setup &amp; weighting</h2></div><p>Upload the supplier list. The tool lists the subcategories in it. For each subcategory, set how much each of the four dimensions matters.</p><p class="small muted">Outcome: agreed weights per subcategory.</p></div></section>
-    <section class="panel"><div class="body"><div class="istep"><span class="n">2</span><h2>Supplier criteria scoring</h2></div><p>Score every supplier in the subcategory from 1 to 5, one criterion per screen, with a comment on why. When the last criterion is done, the subcategory is ticked off and you return to step 1 for the next one.</p><p class="small muted">Outcome: a ranking and segment per subcategory.</p></div></section>
-    <section class="panel"><div class="body"><div class="istep"><span class="n">3</span><h2>Supplier evaluations</h2></div><p>Appears when every subcategory is ticked off. Look at the overall picture across subcategories, check close calls, and adjust scores or weights where the room disagrees.</p><p class="small muted">Outcome: a result the room stands behind.</p></div></section>
-    <section class="panel"><div class="body"><div class="istep"><span class="n">4</span><h2>Final selection</h2></div><p>Compare the finalists from all subcategories and decide: a) which suppliers to work with, b) who to involve internally, c) the next steps. One button then gives the workshop summary.</p><p class="small muted">Outcome: decisions, owners and a summary to share.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">1</span><h2>Setup &amp; weighting</h2></div><p>Upload the supplier list. The tool lists the subcategories in it. Tick <b>Include in workshop</b> for the subcategories you want to cover. Then click a subcategory, tick <b>Include in scoring</b> for the suppliers to score, and set how much each of the four dimensions matters.</p><p class="small muted">Outcome: agreed scope (subcategories and suppliers) and weights per subcategory.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">2</span><h2>Supplier criteria scoring</h2></div><p>Score every included supplier in the selected subcategory from 1 to 5, one criterion per screen, with a comment on why. When the last criterion is done, the subcategory is ticked off and you return to step 1 for the next one.</p><p class="small muted">Outcome: a ranking and segment per subcategory.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">3</span><h2>Supplier evaluations</h2></div><p>Appears when every included subcategory is evaluated. Look at the overall picture across the included subcategories, check close calls, and adjust scores or weights where the room disagrees.</p><p class="small muted">Outcome: a result the room stands behind.</p></div></section>
+    <section class="panel"><div class="body"><div class="istep"><span class="n">4</span><h2>Final selection</h2></div><p>Compare the finalists from the included subcategories and decide: a) which suppliers to work with, b) who to involve internally, c) the next steps. One button then gives the workshop summary.</p><p class="small muted">Outcome: decisions, owners and a summary to share.</p></div></section>
   </div>
   <div class="layout" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
     <section class="panel" aria-label="Data needed">
@@ -622,7 +622,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </div>
 
 <div data-pagebody="input" hidden>
-  <div class="page-intro"><p>Upload the supplier data, then take the subcategories one at a time: set the weights, score its suppliers in step 2, and come back here for the next one. Steps 3 and 4 appear when every subcategory is ticked off.</p></div>
+  <div class="page-intro"><p><b>A.</b> Upload the supplier data. <b>B.</b> Choose the subcategories to include in the workshop. Then take them one at a time: click a subcategory, choose which of its suppliers to include in scoring, set the weights, score in step 2, and come back here for the next one. Steps 3 and 4 appear when every included subcategory is evaluated.</p></div>
   <div class="setup-top">
     <section class="panel" aria-label="Upload data">
       <div class="head"><h2>A. Upload the supplier data</h2></div>
@@ -634,14 +634,14 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
     </section>
     <section class="panel" aria-label="Subcategories">
       <div class="head"><h2>B. Subcategories to evaluate</h2><span class="small muted" id="catProg"></span></div>
-      <div class="body"><div id="catList"></div></div>
+      <div class="body"><div class="small muted" style="margin-bottom:8px">Tick <b>Include in workshop</b> for each subcategory you want to cover; the others are left out of steps 3 and 4. Click a row to select the subcategory you work on now.</div><div id="catList"></div></div>
     </section>
   </div>
   <h2 class="sect-h" id="setupFor"></h2>
   <div class="setup-stack">
       <section class="panel" aria-label="Suppliers">
         <div class="head"><h2 id="supTitle">Suppliers in scope</h2><button class="small" id="btnAddSup">+ Supplier</button></div>
-        <div class="body"><div class="sup-list" id="supList"></div></div>
+        <div class="body"><div class="small muted" style="margin-bottom:8px">Tick <b>Include in scoring</b> for the suppliers the room should score in this subcategory. Suppliers left out still show in the charts, in grey, but are not scored or ranked. At least one must be included.</div><div class="sup-list" id="supList"></div></div>
       </section>
   <section class="panel" aria-label="Data at a glance">
     <div class="head"><h2 id="vizTitle">Data at a glance</h2><span class="small muted">From the uploaded data. It starts the discussion; it does not settle it.</span></div>
@@ -666,7 +666,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 <div data-pagebody="scoring" hidden>
   <div class="sc-wrap" id="scWrap">
     <div class="sc-step">
-      <span class="sc-cat" title="Subcategory being scored. Pick another one in step 1."><span class="eyebrow">Subcategory</span><b id="scCat"></b></span>
+      <span class="sc-cat" title="Subcategory being scored. Pick another subcategory, or change which suppliers are scored, in step 1."><span class="eyebrow">Subcategory</span><b id="scCat"></b></span>
       <button id="scPrev" aria-label="Previous criterion">‹ Prev</button>
       <div class="sc-dots" id="scDots" role="tablist" aria-label="Criteria"></div>
       <button id="scNext" class="primary" aria-label="Next criterion">Next ›</button>
@@ -688,7 +688,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </div>
 
 <div data-pagebody="results" hidden>
-  <div class="page-intro"><p>Start with the overall picture across subcategories and check whether anything needs adjusting. Open a subcategory to see its ranking, map and comparisons below.</p><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button data-goto="scoring">← Back to scoring</button><button class="primary" id="btnFacil" aria-pressed="false">Facilitate the session</button></div></div>
+  <div class="page-intro"><p>Start with the overall picture across the subcategories included in the workshop and check whether anything needs adjusting. Only suppliers included in scoring are ranked. Open a subcategory to see its ranking, map and comparisons below.</p><div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button data-goto="scoring">← Back to scoring</button><button class="primary" id="btnFacil" aria-pressed="false">Facilitate the session</button></div></div>
   <section class="panel" aria-label="Overall picture" style="margin-top:16px">
     <div class="head"><h2>Overall picture across subcategories</h2><span class="small muted">Click a row to review that subcategory</span></div>
     <div class="body"><div class="scroll"><table class="cmp" id="overall"></table></div></div>
@@ -772,7 +772,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
 </div>
 
 <div data-pagebody="final" hidden>
-  <div class="page-intro"><p>The finalists from every subcategory, compared on the four dimensions with one shared set of weights. Decide <b>a)</b> which 1–3 suppliers to work with, <b>b)</b> who to involve internally, and <b>c)</b> the next steps. Then finish the workshop to get the summary.</p></div>
+  <div class="page-intro"><p>The finalists from every included subcategory, compared on the four dimensions with one shared set of weights. Decide <b>a)</b> which 1–3 suppliers to work with, <b>b)</b> who to involve internally, and <b>c)</b> the next steps. Then finish the workshop to get the summary.</p></div>
   <div class="layout">
     <aside class="panel" aria-label="Final weights">
       <div class="head"><h2>Final round weights</h2></div>
@@ -1557,6 +1557,7 @@ function renderScoring(){
   document.getElementById('scPrev').disabled=idx<=0;const nx=document.getElementById('scNext');nx.disabled=false;nx.textContent=idx>=o.length-1?'Finish subcategory ✓':'Next ›';
   // main: title, definition, rubric, supplier rows
   let h=`<div class="sc-title"><h2>${idx+1}. ${esc(d.name)}</h2><span class="meta"><span style="color:${col(pi)}">■</span> ${esc(p?p.name:'')} · weight ${fmtW(d.weight)} (${sumW>0?pct((+d.weight||0)/sumW):'0%'})${d.min?' · knock-out below '+d.min:''}</span></div>`;
+  h+=`<p class="small muted" style="margin:4px 0 8px">Scoring ${S.suppliers.length} supplier${S.suppliers.length===1?'':'s'} in <b>${esc(S.curCat||'')}</b>. To pick another subcategory or change which suppliers are scored, go back to step 1.</p>`;
   h+=`<div class="sc-desc"><textarea rows="1" data-k="desc" placeholder="What does this criterion measure?" aria-label="What ${esc(d.name)} measures">${esc(d.desc||'')}</textarea></div>`;
   h+=`<div class="sc-sec"><span class="n">A</span><h3>What the data says</h3></div>`;
   h+=`<div id="scViz">${critViz(d)}</div><div class="sc-sec"><span class="n">B</span><h3>Score the suppliers</h3></div>`;
