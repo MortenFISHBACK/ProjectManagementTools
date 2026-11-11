@@ -459,6 +459,7 @@ table.fin input[type=checkbox]{width:18px;height:18px;accent-color:var(--hl)}
 .mn-row .num{font-size:.76rem;font-weight:600;text-align:right}
 .mn-row .vz-track{height:9px}
 table.mn-bg td,table.mn-bg th{padding:3px 8px;font-size:.84rem}
+.mn-pair{display:grid;gap:2px}.mn-pair .vz-track{height:5px}
 /* workshop flow */
 .setup-stack{display:grid;gap:20px;margin-top:12px}
 .wide-w #weights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
@@ -980,9 +981,9 @@ function syncW(){const pw=curPW();S.dims.forEach(d=>d.weight=(+pw[d.pid]||0)/nIn
 function applyCat(){const names=catNames();if(!names.includes(S.curCat))S.curCat=names[0]||'Unassigned';ensureCat(S.curCat);
   S.suppliers=S.sup.filter(s=>catOf(s)===S.curCat);syncW();}
 // which uploaded data sits beside each criterion when scoring
-const EVDEF={'Spend and future volume':'spend','Future growth dependency':'growth','Supply risk and criticality':'single','Technical differentiation and unique capabilities':'single','Preferred-customer position, reciprocity and mutual dependence':'share'};
+const EVDEF={'Spend and future volume':'spend','Future growth dependency':'growth','Supply risk and criticality':'single','Technical differentiation and unique capabilities':'single','Relationship quality and executive engagement':'trade','Preferred-customer position, reciprocity and mutual dependence':'share'};
 function normalize(o){
-  if(!o.evV2){o.dims.forEach(d=>{if(EVDEF[d.name]&&(!d.ev||d.ev==='both'))d.ev=EVDEF[d.name];});o.evV2=1;}
+  o.dims.forEach(d=>{if(EVDEF[d.name])d.ev=EVDEF[d.name];});
   if(!o.sup)o.sup=o.suppliers||[];o.cats=o.cats||{};o.closeGap=o.closeGap===undefined?0.25:o.closeGap;
   o.scenarios=(o.scenarios||[]).map(sc=>{if(sc.pw)return sc;const pw={};o.persp.forEach(p=>{pw[p.id]=o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+((sc.weights||{})[d.id])||0),0);});return {id:sc.id,name:sc.name,pw};});
   if(!Object.keys(o.cats).length){const pw={};o.persp.forEach(p=>{pw[p.id]=Math.min(10,Math.round(o.dims.filter(d=>d.pid===p.id).reduce((t,d)=>t+(+d.weight||0),0)*10)/10);});
@@ -1440,9 +1441,15 @@ function critViz(d){
   if(d.ev==='growth')out.push(bars('# materials delivered 12m','mat12',num),bars('# materials delivered 24m','mat24',num),bars('Global Spend (EUR)','spend',eur));
   if(d.ev==='single')out.push(bars('Single-source % by spend (12m)','ssSpend',pc,{max:1}),bars('Single-source % by # materials (12m)','ssMat',pc,{max:1}),bars('# single-source materials 12m','ss12',num),
     bars('Avg # suppliers per material 12m','sup12',num),bars('Avg # suppliers per material 24m','sup24',num));
-  if(d.ev==='share'||d.ev==='both')out.push(bars('Spend-to-supplier revenue ratio','share',pc),bars('Trading Revenue (EUR)','trade',eur),bars('Trading Rank','tradeRank',rk,{rank:1}),bars('Trading Score','tradeScore',num));
-  if(d.ev==='share'||d.ev==='both'){const rv=rows.map(r=>({r,v:revEur(r.f)}));if(rv.some(x=>x.v!==null)){const mx=Math.max(1,...rv.map(x=>x.v||0));
-    out.splice(out.length-3,0,box('Supplier total Revenue',rv.map(x=>line(x.r,[{w:x.v===null?0:x.v/mx,c:col(x.r.si)}],x.v===null?'–':eurM(x.v))).join('')));}}
+  // what we buy from them against what they buy from us, on one scale
+  const pair=()=>{const pr=rows.filter(r=>n(r.f.spend)!==null||n(r.f.trade)!==null);if(!pr.some(r=>n(r.f.trade)!==null))return '';const mx=Math.max(1,...pr.map(r=>Math.max(n(r.f.spend)||0,n(r.f.trade)||0)));
+    return box('We buy from them vs they buy from us',rows.map(r=>{const a=n(r.f.spend),b=n(r.f.trade);
+      return `<div class="mn-row"><span class="nm" title="${esc(r.s.name)}">${esc(r.s.name)}</span><div class="mn-pair"><div class="vz-track"><i style="width:${((a||0)/mx*100).toFixed(1)}%;background:var(--s5)" title="We buy: ${a===null?'–':eurM(a)}"></i></div><div class="vz-track"><i style="width:${((b||0)/mx*100).toFixed(1)}%;background:var(--s2)" title="They buy: ${b===null?'–':eurM(b)}"></i></div></div><span class="num">${a&&b?(a/b>=10?Math.round(a/b):(a/b).toFixed(1))+' : 1':'–'}</span></div>`;}).join(''),
+      `<span class="legend"><span class="i"><i style="background:var(--s5)"></i>Our spend with them</span><span class="i"><i style="background:var(--s2)"></i>Their spend with us</span></span>`);};
+  const revBox=()=>{const rv=rows.map(r=>({r,v:revEur(r.f)}));if(!rv.some(x=>x.v!==null))return '';const mx=Math.max(1,...rv.map(x=>x.v||0));
+    return box('Their total revenue',rv.map(x=>line(x.r,[{w:x.v===null?0:x.v/mx,c:col(x.r.si)}],x.v===null?'–':eurM(x.v))).join(''));};
+  if(d.ev==='trade'||d.ev==='share'||d.ev==='both')out.push(bars('What they buy from us (Trading Revenue)','trade',eur),revBox(),bars('What we buy from them (Global Spend)','spend',eur),pair(),
+    d.ev==='trade'?'':bars('Our spend as a share of their revenue','share',pc),bars('Trading Rank','tradeRank',rk,{rank:1}),bars('Trading Score','tradeScore',num));
   if(!d.ev){const bg=rows.filter(r=>n(r.f.comp)!==null||(r.f.tier||'')!==''||n(r.f.rank)!==null||(r.f.comment||'').trim());
     if(bg.length)return `<div class="small muted" style="margin-bottom:6px">No uploaded figures measure this criterion directly. The background below is for the discussion; the room judges the score.</div><div class="scroll"><table class="cmp mn-bg"><thead><tr><th class="sup">Supplier</th><th>Rank</th><th>Composite Score</th><th>Tier</th><th class="sup">Comments Latest FY</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="sup">${esc(r.s.name)}</td><td>${n(r.f.rank)===null?'–':r.f.rank}</td><td>${n(r.f.comp)===null?'–':r.f.comp}</td><td>${esc(r.f.tier||'–')}</td><td class="sup small">${esc(r.f.comment||'')}</td></tr>`).join('')}</tbody></table></div>`;
     return '<div class="small muted">No uploaded data for this criterion. The room judges it from experience; note the reasons in the comments.</div>';}
