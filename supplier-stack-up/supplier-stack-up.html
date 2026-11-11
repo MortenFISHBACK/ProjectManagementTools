@@ -569,6 +569,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
     <div class="toolbar">
       <button id="btnExport">Export</button>
       <button id="btnReset" class="ghost" title="Back to the example suppliers and scores">Reset</button>
+      <button id="btnFull" aria-pressed="false" title="Show the tool on the whole screen. Press Esc to leave.">⛶ Full screen</button>
       <label class="savetog" title="When off, nothing is kept after you close or reload the tab"><input type="checkbox" id="chkSave"> Save in this browser</label>
       <button id="btnClear" class="ghost" title="Delete everything this tool has stored in this browser">Clear my data</button>
     </div>
@@ -1906,6 +1907,16 @@ document.getElementById('btnAddSup').addEventListener('click',()=>{
 document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();save();});
 
 /* ---------- saving on/off, clear my data ---------- */
+/* ---------- full screen ---------- */
+(function(){const bf=document.getElementById('btnFull'),de=document.documentElement;
+  const req=de.requestFullscreen||de.webkitRequestFullscreen,ex=document.exitFullscreen||document.webkitExitFullscreen;
+  const cur=()=>document.fullscreenElement||document.webkitFullscreenElement;
+  const sync=()=>{const on=!!cur();bf.setAttribute('aria-pressed',String(on));bf.textContent=on?'Exit full screen':'⛶ Full screen';};
+  const blocked=()=>{bf.textContent='Press F11 for full screen';bf.title='This page cannot switch to full screen by itself here. Press F11 (Windows) or Ctrl+Cmd+F (Mac), or download the tool and open the file.';};
+  bf.addEventListener('click',()=>{if(cur()){ex.call(document);return;}
+    if(!req||document.fullscreenEnabled===false){blocked();return;}
+    try{const r=req.call(de);if(r&&r.catch)r.catch(blocked);}catch(e){blocked();}});
+  document.addEventListener('fullscreenchange',sync);document.addEventListener('webkitfullscreenchange',sync);})();
 const chkSave=document.getElementById('chkSave'),btnClear=document.getElementById('btnClear');
 function showSaveNote(){chkSave.checked=persist;document.getElementById('saveNote').textContent=persist
   ?'Your data is saved only in this browser, so it is still here next time.'
