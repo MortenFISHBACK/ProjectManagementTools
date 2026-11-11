@@ -613,7 +613,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="head"><h2>Good to know</h2></div>
       <div class="body"><ul class="intro-list">
         <li><b>In the room:</b> a facilitator, and the people who know the suppliers (category, quality, R&amp;D, supply chain).</li>
-        <li><b>Scores</b> start at 3 for every supplier and are set by the room in step 2.</li>
+        <li><b>Scores</b> start empty for every supplier and are set by the room in step 2. An empty score counts as 0 until it is set.</li>
         <li><b>Your data stays in this browser.</b> Nothing is sent anywhere. Use "Clear my data" in the top bar when you are done.</li>
         <li><b>Example data</b> is loaded so you can try the flow first. Uploading your own supplier list replaces it.</li>
       </ul></div>
@@ -837,7 +837,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
   <div class="db">
     <div class="small">Copy the rows from your Excel sheet <b>including the header row</b> and paste them here. Columns are matched by name, so the order does not matter and extra columns are ignored. Only <b>Supplier</b> is required. Rows are matched to suppliers by name.</div>
     <textarea id="factsText" placeholder="Paste here (Ctrl+V)"></textarea>
-    <label class="chk"><input type="checkbox" id="factsAdd" checked> Add suppliers that aren't in the tool yet (scores start at 3)</label>
+    <label class="chk"><input type="checkbox" id="factsAdd" checked> Add suppliers that aren't in the tool yet (scores start empty)</label>
     <div class="row"><button class="primary" id="btnDoFacts">Load data</button><span id="factsMsg" class="small"></span></div>
   </div>
 </dialog>
@@ -967,6 +967,9 @@ function load(){
       if(d.ev===undefined)d.ev=EVDEF[d.name]||'';});
     // example data saved by an older version lacks the newer columns: fill them in from the current example
     if(o.example&&!o.sup.some(x=>x.facts&&x.facts.tier)){const ex=exampleState();o.sup.forEach(x=>{const e=ex.sup.find(y=>y.name===x.name);if(e&&e.facts)x.facts=Object.assign({},e.facts,x.facts||{});});}
+    // uploaded suppliers used to start at 3 on every criterion: clear rows that were never touched
+    if(!o.example&&!o.z0){o.sup.forEach(x=>{const sc=o.scores[x.id];if(!sc)return;const nt=o.notes[x.id]||{};if(o.dims.every(d=>sc[d.id]===3)&&!Object.values(nt).some(v=>v))o.dims.forEach(d=>sc[d.id]=0);});}
+    o.z0=1;
     return normalize(o);}}}catch(e){}
   return exampleState();
 }
@@ -1028,7 +1031,7 @@ function evaluate(weights,list){
   const sumW=S.dims.reduce((a,d)=>a+(+weights[d.id]||0),0);
   const rows=(list||S.suppliers).map(s=>{
     const parts={};let total=0;const failed=[];
-    S.dims.forEach(d=>{const sc=+(S.scores[s.id]||{})[d.id]||0;const nw=sumW>0?(+weights[d.id]||0)/sumW:0;parts[d.id]=nw*sc;total+=nw*sc;if(d.min>0&&sc<d.min)failed.push(d.name);});
+    S.dims.forEach(d=>{const sc=+(S.scores[s.id]||{})[d.id]||0;const nw=sumW>0?(+weights[d.id]||0)/sumW:0;parts[d.id]=nw*sc;total+=nw*sc;if(d.min>0&&sc>0&&sc<d.min)failed.push(d.name);});
     const x=axisScore(s.id,'x',weights),y=axisScore(s.id,'y',weights);
     return {s,total,parts,failed,out:failed.length>0,x,y,seg:segmentOf(x,y)};
   });
@@ -1203,7 +1206,7 @@ function buildMatrix(){
   const ordered=[];S.persp.forEach(p=>dimsOf(p.id).forEach(d=>ordered.push(d)));
   const h2=`<tr>${ordered.map(d=>`<th class="dim" title="${esc(d.name+(defText(d)?'\n\n'+defText(d):''))}">${esc(d.short||shorten(d.name))}<span class="w num" data-w="${d.id}">weight ${fmtW(d.weight)}${d.min?' · min '+d.min:''}</span></th>`).join('')}</tr>`;
   const body=`<tbody>${S.suppliers.map(s=>{const r=c.rows.find(x=>x.s===s);return `<tr data-sup="${s.id}"><td class="sup"><input value="${esc(s.name)}" aria-label="Supplier name"></td>`+
-    ordered.map(d=>{const v=S.scores[s.id][d.id];const fail=d.min>0&&v<d.min;const nt=noteOf(s.id,d.id);return `<td class="cell${fail?' fail':''}${nt?' noted':''}" data-dim="${d.id}"${nt?` title="${esc(nt)}"`:''} style="background:rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})"><input type="number" min="1" max="5" step="1" value="${v}" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
+    ordered.map(d=>{const v=+S.scores[s.id][d.id]||0;const fail=d.min>0&&v>0&&v<d.min;const nt=noteOf(s.id,d.id);return `<td class="cell${fail?' fail':''}${nt?' noted':''}" data-dim="${d.id}"${nt?` title="${esc(nt)}"`:''} style="background:rgba(var(--seq),${v?(0.05+(v-1)/4*0.4).toFixed(2):0})"><input type="number" min="1" max="5" step="1" value="${v||''}" placeholder="–" aria-label="${esc(s.name)} ${esc(d.name)}"></td>`;}).join('')+
     `<td class="total num" data-total>${r.out?'–':f2(r.total)}</td><td class="num" data-rank>${r.rank||'out'}</td><td class="small" data-seg>${r.seg?SEGMENTS[r.seg]:'–'}</td><td style="white-space:nowrap"><button class="small notes-btn" data-notes title="Comments for ${esc(s.name)}">Notes${noteCount(s.id)?`<span class="ct">${noteCount(s.id)}</span>`:''}</button> <button class="small ghost" data-remove title="Remove supplier" aria-label="Remove ${esc(s.name)}">remove</button></td></tr>`;}).join('')}</tbody>`;
   t.innerHTML=`<thead>${h1}${h2}</thead>${body}`;
   t.querySelectorAll('tbody tr').forEach(tr=>{
@@ -1211,7 +1214,7 @@ function buildMatrix(){
     tr.querySelector('td.sup input').addEventListener('change',e=>{s.name=e.target.value.trim()||s.name;e.target.value=s.name;renderAll();save();});
     tr.querySelectorAll('td.cell').forEach(td=>{
       const inp=td.querySelector('input');const d=S.dims.find(x=>x.id===td.dataset.dim);
-      const apply=()=>{let v=Math.round(+inp.value);if(!(v>=1))v=1;if(v>5)v=5;inp.value=v;S.scores[s.id][d.id]=v;
+      const apply=()=>{let v=inp.value.trim()===''?0:Math.round(+inp.value);if(inp.value.trim()!==''&&!(v>=1))v=1;if(v>5)v=5;inp.value=v||'';S.scores[s.id][d.id]=v;
         td.style.background=`rgba(var(--seq),${(0.05+(v-1)/4*0.4).toFixed(2)})`;td.classList.toggle('fail',d.min>0&&v<d.min);renderResults();save();};
       inp.addEventListener('input',apply);inp.addEventListener('change',apply);
     });
@@ -1235,7 +1238,7 @@ function renderNotes(){
   let h=`<label class="eyebrow" for="supNote">Overall note</label><textarea id="supNote" rows="3" placeholder="Overall view of this supplier: context, concerns, opportunities">${esc(supNoteOf(s.id))}</textarea>`;
   S.persp.forEach((p,pi)=>{const ds=dimsOf(p.id);if(!ds.length)return;
     h+=`<div class="note-pg" style="border-left-color:${col(pi)}">${esc(p.name)}</div>`;
-    ds.forEach(d=>{h+=`<div class="note" data-dim="${d.id}"><span class="nm">${esc(d.name)}</span><label class="small">Score <select aria-label="Score for ${esc(d.name)}">${[1,2,3,4,5].map(v=>`<option${S.scores[s.id][d.id]===v?' selected':''}>${v}</option>`).join('')}</select></label>`+
+    ds.forEach(d=>{h+=`<div class="note" data-dim="${d.id}"><span class="nm">${esc(d.name)}</span><label class="small">Score <select aria-label="Score for ${esc(d.name)}">${S.scores[s.id][d.id]?'':'<option value="0" selected>–</option>'}${[1,2,3,4,5].map(v=>`<option${S.scores[s.id][d.id]===v?' selected':''}>${v}</option>`).join('')}</select></label>`+
       (LVK.some(k=>d[k])?`<span class="scale">${LVK.map((k,i)=>d[k]?'<b>'+(i+1)+'</b> '+esc(d[k]):'').filter(Boolean).join(' · ')}</span>`:'')+
       `<textarea rows="2" placeholder="Why this score? Evidence, examples, open questions">${esc(noteOf(s.id,d.id))}</textarea></div>`;});
   });
@@ -1272,7 +1275,7 @@ function renderRadar(){
   picks.forEach(id=>{const si=S.suppliers.findIndex(s=>s.id===id);if(si<0)return;const s=S.suppliers[si];
     const pts=ordered.map((d,i)=>pt(i,S.scores[s.id][d.id]||0));
     out+=`<polygon points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${col(si)}" fill-opacity="0.12" stroke="${col(si)}" stroke-width="2" stroke-linejoin="round"/>`;
-    pts.forEach((p,i)=>{out+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col(si)}" stroke="var(--surface)" stroke-width="2"><title>${esc(s.name)} · ${esc(ordered[i].name)}: ${S.scores[s.id][ordered[i].id]}</title></circle>`;});
+    pts.forEach((p,i)=>{out+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${col(si)}" stroke="var(--surface)" stroke-width="2"><title>${esc(s.name)} · ${esc(ordered[i].name)}: ${S.scores[s.id][ordered[i].id]||'not scored'}</title></circle>`;});
   });
   svg.innerHTML=out;
 }
@@ -1383,7 +1386,7 @@ function importFacts(text,addNew){
     ['shareIn','ssMat','ssSpend'].forEach(k=>{if(f[k]!==undefined)f[k]=pctIn(f[k]);});
     if(f.revM!==undefined){if(f.revM!==''){f.rev=f.revM;f.cur='EUR';f.fx=1;}delete f.revM;}
     let s=S.sup.find(x=>x.name.trim().toLowerCase()===name.toLowerCase());
-    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.sup.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);added++;}else upd++;
+    if(!s){if(!addNew){skipped.push(name);return;}s={id:nid(),name};S.sup.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=0);added++;}else upd++;
     if(!f.cat&&s.facts&&s.facts.cat)f.cat=s.facts.cat;
     s.facts=f;});
   S.example=false;
@@ -1850,7 +1853,8 @@ const catDone=c=>!!ensureCat(c).done;
 const activeCats=()=>catNames().filter(c=>!ensureCat(c).skip);
 const allDone=()=>{const n=activeCats();return n.length>0&&n.every(catDone);};
 function startCat(c){setCat(c);const o=orderedDims();if(o[0])S.curDim=o[0].id;S.scView='crit';showPage('scoring');renderScoring();window.scrollTo(0,0);}
-function finishCat(){ensureCat(S.curCat).done=true;renderFlow();showPage('input');window.scrollTo(0,0);}
+function missingScores(){let n=0;S.suppliers.forEach(s=>S.dims.forEach(d=>{if(!(+(S.scores[s.id]||{})[d.id]>0))n++;}));return n;}
+function finishCat(){const m=missingScores();if(m&&!confirm(`${m} score${m===1?' is':'s are'} still empty in ${S.curCat}. Empty scores count as 0 in the ranking. Finish this subcategory anyway?`))return;ensureCat(S.curCat).done=true;renderFlow();showPage('input');window.scrollTo(0,0);}
 function renderFlow(){
   const names=catNames(),act=activeCats(),nd=act.filter(catDone).length,ok=allDone();
   document.querySelectorAll('nav.pages [data-lock]').forEach(b=>b.hidden=!ok);
@@ -1896,7 +1900,7 @@ document.querySelectorAll('[data-page],[data-goto]').forEach(b=>b.addEventListen
 
 /* ---------- add / reset ---------- */
 document.getElementById('btnAddSup').addEventListener('click',()=>{
-  const s={id:nid(),name:'New supplier',facts:S.curCat==='Unassigned'?{}:{cat:S.curCat}};S.sup.push(s);S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=3);renderAll();save();
+  const s={id:nid(),name:'New supplier',facts:S.curCat==='Unassigned'?{}:{cat:S.curCat}};S.sup.push(s);S.suppliers.push(s);S.scores[s.id]={};S.dims.forEach(d=>S.scores[s.id][d.id]=0);renderAll();save();
   const last=document.querySelector('#supList .sup-row:last-child input');if(last){last.focus();last.select();}
 });
 document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.page;S=exampleState();S.page=pg;applyCat();renderAll();save();});
@@ -1927,7 +1931,7 @@ function toCSV(){
   lines[0]+=','+[...ordered.map(d=>'Comment: '+d.name),'Overall note'].map(q).join(',');
   const pad=','.repeat(ordered.length+1);for(let i=1;i<4;i++)lines[i]+=pad;
   [['Definition','desc'],['Score 1 means','low'],['Score 2 means','lv2'],['Score 3 means','lv3'],['Score 4 means','lv4'],['Score 5 means','high'],['Stakeholders','__stake']].forEach(([lab,k])=>lines.push([lab,...ordered.map(d=>k==='__stake'?stakeToText(d):(d[k]||''))].map(q).join(',')+pad));
-  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id]),...ordered.map(d=>q(noteOf(s.id,d.id))),q(supNoteOf(s.id))].join(',')));
+  S.suppliers.forEach(s=>lines.push([q(s.name),...ordered.map(d=>S.scores[s.id][d.id]||''),...ordered.map(d=>q(noteOf(s.id,d.id))),q(supNoteOf(s.id))].join(',')));
   return lines.join('\n');
 }
 function parseCSV(text){
@@ -1962,7 +1966,7 @@ function importCSV(text){
     const id=nid();suppliers.push({id,name:r[0]});scores[id]={};
     cmtCols.forEach(c=>{if(c.dim&&r[c.j]){notes[id]=notes[id]||{};notes[id][c.dim.id]=r[c.j];}});
     if(noteCol>0&&r[noteCol])supNotes[id]=r[noteCol];
-    dims.forEach(d=>{let v=Math.round(+r[d.col]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
+    dims.forEach(d=>{let v=Math.round(+r[d.col]);if(!isFinite(v))throw new Error(`"${r[0]}" has no number for ${d.name}.`);v=v<=0?0:Math.max(1,Math.min(5,v));scores[id][d.id]=v;});
   });
   if(suppliers.length<2)throw new Error('Need at least two suppliers.');
   if(!persp.length){const p={id:nid(),name:'All criteria',desc:'',axis:'x'};persp.push(p);}
