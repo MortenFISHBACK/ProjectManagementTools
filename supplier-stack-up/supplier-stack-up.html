@@ -1436,13 +1436,15 @@ function critViz(d){
   const num=v=>String(Math.round(v*100)/100),eur=v=>eurM(v),pc=v=>pctS(v),rk=v=>'#'+v;
   let out=[];
   if(d.ev==='spend'||d.ev==='both'){out.push(bars('Global Spend (EUR)','spend',eur));
-    if(rows.some(r=>REG.some(g=>n(r.f[g[0]]))))out.push(box('Spend by region',rows.map(r=>{const rv=REG.map(g=>Math.max(0,n(r.f[g[0]])||0));const tot=rv.reduce((a,b)=>a+b,0);
+    out.push(regBox());
+  }
+  function regBox(){if(!rows.some(r=>REG.some(g=>n(r.f[g[0]]))))return '';return (box('Where they supply us: spend by region',rows.map(r=>{const rv=REG.map(g=>Math.max(0,n(r.f[g[0]])||0));const tot=rv.reduce((a,b)=>a+b,0);
       return line(r,tot>0?rv.map((v,i)=>({w:v/tot,c:RC[i],t:`${REG[i][1]}: ${Math.round(v/tot*100)}%`})):[],tot>0?REG[rv.indexOf(Math.max(...rv))][1]:'–');}).join(''),
-      `<span class="legend">${REG.map((g,i)=>`<span class="i"><i style="background:${RC[i]}"></i>${g[1]}</span>`).join('')}</span>`));
-    out.push(bars('Spend Rank','spendRank',rk,{rank:1}),bars('Spend Score','spendScore',num));}
-  if(d.ev==='growth')out.push(bars('# materials delivered 12m','mat12',num),bars('# materials delivered 24m','mat24',num),bars('Global Spend (EUR)','spend',eur));
+      `<span class="legend">${REG.map((g,i)=>`<span class="i"><i style="background:${RC[i]}"></i>${g[1]}</span>`).join('')}</span>`));}
+  if(d.ev==='spend'||d.ev==='both')out.push(bars('Spend Rank','spendRank',rk,{rank:1}),bars('Spend Score','spendScore',num));
+  if(d.ev==='growth')out.push(bars('# materials delivered 12m','mat12',num),bars('# materials delivered 24m','mat24',num),bars('Global Spend (EUR)','spend',eur),regBox());
   if(d.ev==='single')out.push(bars('Single-source % by spend (12m)','ssSpend',pc,{max:1}),bars('Single-source % by # materials (12m)','ssMat',pc,{max:1}),bars('# single-source materials 12m','ss12',num),
-    bars('Avg # suppliers per material 12m','sup12',num),bars('Avg # suppliers per material 24m','sup24',num));
+    bars('Avg # suppliers per material 12m','sup12',num),bars('Avg # suppliers per material 24m','sup24',num),regBox());
   // what we buy from them against what they buy from us, on one scale
   const pair=()=>{const pr=rows.filter(r=>n(r.f.spend)!==null||n(r.f.trade)!==null);if(!pr.some(r=>n(r.f.trade)!==null))return '';const mx=Math.max(1,...pr.map(r=>Math.max(n(r.f.spend)||0,n(r.f.trade)||0)));
     return box('We buy from them vs they buy from us',rows.map(r=>{const a=n(r.f.spend),b=n(r.f.trade);
