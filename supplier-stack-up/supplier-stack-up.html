@@ -602,7 +602,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
           <tr><td class="sup">Global Spend (EUR), Spend Rank, Spend Score, Europe, NA, APAC, LATAM, MEIA</td><td class="sup">Shown when scoring Spend and future volume; spend by region chart</td><td>Business importance</td></tr>
           <tr><td class="sup"># materials delivered 12m and 24m</td><td class="sup">A prompt for Future growth dependency</td><td>Business importance</td></tr>
           <tr><td class="sup"># single-source materials 12m, Single-source % by # materials and by spend, Avg # suppliers per material 12m and 24m</td><td class="sup">Shown when scoring Supply risk and criticality; single-source chart</td><td>Resilience &amp; dependency</td></tr>
-          <tr><td class="sup">Spend-to-supplier revenue ratio, Supplier total Revenue (EUR m), Trading Revenue (EUR), Trading Rank, Trading Score</td><td class="sup">Shown when scoring Reciprocity and mutual dependence; who needs whom chart</td><td>Partnership feasibility</td></tr>
+          <tr><td class="sup">Spend-to-supplier revenue ratio, Supplier total Revenue (EUR m), Trading Revenue (EUR), Trading Rank, Trading Score</td><td class="sup">Shown when scoring Reciprocity and mutual dependence; what we buy vs what they buy chart</td><td>Partnership feasibility</td></tr>
           <tr><td class="sup">Rank, Composite Score, Tier, Comments Latest FY</td><td class="sup">Background for the discussion</td><td>All</td></tr>
           <tr><td class="sup">Data Status, Revenue basis / confidence</td><td class="sup">Flags figures that are not final</td><td>Data quality</td></tr>
         </tbody></table></div>
@@ -1416,13 +1416,13 @@ function vizCards(){
   const c1=sp.length?(anyReg?leg(REG.map((g,i)=>[g[1],RC[i]])):'')+sp.map(r=>{const rv=REG.map(g=>Math.max(0,n(r.f[g[0]])||0));const tot=rv.reduce((a,b)=>a+b,0);const w=+r.f.spend/maxS;
     return row(r,[bar(tot>0?rv.map((v,i)=>({w:w*v/tot,c:RC[i],t:`${REG[i][1]}: ${Math.round(v/tot*100)}%`})):[{w,c:'var(--s0)',t:'No regional split'}],eurM(+r.f.spend))]);}).join(''):none;
   // 2 who needs whom
-  const pts=rows.map(r=>({...r,sp:n(r.f.spend),sh:shareOf(r.f)})).filter(p=>p.sp!==null&&p.sh!==null);let c2=none;
-  if(pts.length){const L=58,R=410,T=14,B=210;const mx=Math.max(1,...pts.map(p=>p.sp))*1.12,my=Math.max(.01,...pts.map(p=>p.sh))*1.18;const sx=v=>L+v/mx*(R-L),sy=v=>B-v/my*(B-T);
+  const pts=rows.map(r=>({...r,sp:n(r.f.spend),sh:n(r.f.trade)})).filter(p=>p.sp!==null&&p.sh!==null);let c2=none;
+  if(pts.length){const L=58,R=410,T=14,B=210;const mx=Math.max(1,...pts.map(p=>p.sp))*1.12,my=Math.max(1,...pts.map(p=>p.sh))*1.18;const sx=v=>L+v/mx*(R-L),sy=v=>B-v/my*(B-T);
     let o=`<rect x="${L}" y="${T}" width="${R-L}" height="${B-T}" fill="var(--surface)" stroke="var(--line)"/>`;
-    for(let k=0;k<=2;k++){o+=`<text x="${sx(mx*k/2)}" y="${B+15}" text-anchor="middle">${eurM(mx*k/2)}</text><text x="${L-6}" y="${sy(my*k/2)+4}" text-anchor="end">${pctS(my*k/2)}</text>`;}
-    o+=`<text class="axt" x="${(L+R)/2}" y="${B+32}" text-anchor="middle">Our spend →</text><text class="axt" transform="translate(12 ${(T+B)/2}) rotate(-90)" text-anchor="middle">Share of their revenue →</text>`;
-    pts.forEach(p=>{const cx=sx(p.sp),cy=sy(p.sh),right=cx<R-120;o+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${cc(p)}"><title>${esc(p.s.name)}: ${eurM(p.sp)} spend, ${pctS(p.sh)} of their revenue</title></circle><text class="pl" x="${(cx+(right?10:-10)).toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="${right?'start':'end'}">${esc(shorten(p.s.name))}</text>`;});
-    c2=`<svg class="vz-svg" viewBox="0 0 420 246" role="img" aria-label="Our spend against our share of each supplier's revenue">${o}</svg>`;}
+    for(let k=0;k<=2;k++){o+=`<text x="${sx(mx*k/2)}" y="${B+15}" text-anchor="${k===2?'end':'middle'}">${eurM(mx*k/2)}</text><text x="${L-6}" y="${sy(my*k/2)+4}" text-anchor="end">${eurM(my*k/2)}</text>`;}
+    o+=`<text class="axt" x="${(L+R)/2}" y="${B+32}" text-anchor="middle">What we buy from them →</text><text class="axt" transform="translate(12 ${(T+B)/2}) rotate(-90)" text-anchor="middle">What they buy from us →</text>`;
+    pts.forEach(p=>{const cx=sx(p.sp),cy=sy(p.sh),right=cx<R-120;o+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="${cc(p)}"><title>${esc(p.s.name)}: we buy ${eurM(p.sp)} from them, they buy ${eurM(p.sh)} from us</title></circle><text class="pl" x="${(cx+(right?10:-10)).toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="${right?'start':'end'}">${esc(shorten(p.s.name))}</text>`;});
+    c2=`<svg class="vz-svg" viewBox="0 0 420 246" role="img" aria-label="What we buy from each supplier against what they buy from us">${o}</svg>`;}
   // 3 single-source exposure
   const ss=rows.filter(r=>n(r.f.ssSpend)!==null||n(r.f.ssMat)!==null).sort((a,b)=>(n(b.f.ssSpend)||0)-(n(a.f.ssSpend)||0));
   const c3=ss.length?leg([['By spend','var(--s5)'],['By number of materials','var(--s4)']])+ss.map(r=>row(r,[bar([{w:n(r.f.ssSpend)||0,c:'var(--s5)'}],n(r.f.ssSpend)===null?'–':pctS(+r.f.ssSpend)),bar([{w:n(r.f.ssMat)||0,c:'var(--s4)'}],n(r.f.ssMat)===null?'–':pctS(+r.f.ssMat))],
@@ -1431,7 +1431,7 @@ function vizCards(){
   const mt=rows.filter(r=>n(r.f.mat12)!==null||n(r.f.mat24)!==null).sort((a,b)=>(n(b.f.mat12)||0)-(n(a.f.mat12)||0));const maxM=Math.max(1,...mt.map(r=>Math.max(n(r.f.mat12)||0,n(r.f.mat24)||0)));
   const c4=mt.length?leg([['Last 12 months','var(--s2)'],['Last 24 months','var(--s3)']])+mt.map(r=>row(r,[bar([{w:(n(r.f.mat12)||0)/maxM,c:'var(--s2)'}],n(r.f.mat12)===null?'–':r.f.mat12),bar([{w:(n(r.f.mat24)||0)/maxM,c:'var(--s3)'}],n(r.f.mat24)===null?'–':r.f.mat24)])).join(''):none;
   return {spend:card('Where the spend is','Global spend per supplier, split by region. Feeds <b>Spend and future volume</b>.',c1),
-    share:card('Who needs whom','Our spend against our share of their revenue. Feeds <b>Reciprocity and mutual dependence</b>.',c2),
+    share:card('What we buy vs what they buy','Right = we buy a lot from them (Global Spend). Up = they buy a lot from us (Trading Revenue). Feeds <b>Reciprocity and mutual dependence</b>.',c2),
     single:card('Single-source exposure','How much of what we buy from each supplier has no second source. Feeds <b>Supply risk and criticality</b>.',c3),
     growth:card('Materials delivered','Number of materials in the last 12 and 24 months. A prompt for <b>Future growth dependency</b>.',c4)};
 }
