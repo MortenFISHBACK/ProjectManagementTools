@@ -634,7 +634,7 @@ dialog label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.88rem
       <div class="body">
         <div class="small muted">Paste the supplier sheet from Excel, including the header row. Columns are matched by name: Supplier, Global Spend (EUR), the region split, materials and single-source figures, Supplier total Revenue and the rest. A <b>Subcategory</b> column splits the suppliers into subcategories; without it you can type the subcategory in the Supplier facts table.</div>
         <div class="uprow"><button class="primary" id="btnUpFacts">Paste supplier data from Excel</button><button id="btnImport">Import scores from CSV</button><button id="btnSesLoad2" title="Load a session file saved earlier and carry on where you stopped">Continue an earlier session</button></div>
-        <div class="small muted" style="margin-top:10px"><b>Score offline:</b> download an Excel sheet with every included subcategory and supplier and one column per criterion, fill in the scores (1 to 5) and comments, then upload it again.</div>
+        <div class="small muted" style="margin-top:10px"><b>Score offline:</b> download an Excel file with one sheet per criterion, each listing every included subcategory and supplier. Fill in the scores (1 to 5) and comments, then upload it again.</div>
         <div class="uprow"><button id="btnXlDown">Download scoring sheet (Excel)</button><button id="btnXlUp">Upload filled-in scoring sheet</button><input type="file" id="xlFile" accept=".xlsx" hidden aria-label="Choose a filled-in scoring sheet"></div>
         <div class="small" id="xlMsg"></div>
         <div class="small" id="upStat"></div>
@@ -1979,22 +1979,28 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
     if(opt.valid)o+=`<dataValidations count="1"><dataValidation type="whole" operator="between" allowBlank="1" showErrorMessage="1" errorTitle="Score" error="Use a whole number from 1 to 5, or leave the cell empty." sqref="${opt.valid}"><formula1>1</formula1><formula2>5</formula2></dataValidation></dataValidations>`;
     return o+'</worksheet>';}
   const crit=d=>{const o=orderedDims();return `${o.indexOf(d)+1}. ${d.name}`;};
-  function build(){const o=orderedDims();const rows=[['Subcategory','Supplier',...o.map(crit),...o.map(d=>'Comment: '+crit(d))]];
-    activeCats().forEach(c=>S.sup.filter(s=>catOf(s)===c&&!s.excl).forEach(s=>rows.push([c,s.name,...o.map(d=>{const v=+(S.scores[s.id]||{})[d.id]||0;return v>0?v:'';}),...o.map(d=>noteOf(s.id,d.id))])));
-    const n=o.length,last=Math.max(2,rows.length);
+  const shName=(d,i)=>`${i+1} ${(d.short||d.name)}`.replace(/[\[\]:*?\/\\]/g,' ').slice(0,31).trim();
+  function build(){const o=orderedDims();const sup=[];activeCats().forEach(c=>S.sup.filter(s=>catOf(s)===c&&!s.excl).forEach(s=>sup.push([c,s])));
+    const sheets=o.map((d,i)=>{const p=S.persp.find(q=>q.id===d.pid);
+      const rows=[['Subcategory','Supplier','Score: '+crit(d),'Comment: why this score?','','About this criterion']];
+      const info=[crit(d),p?'Dimension: '+p.name:'',d.desc||'',...LVK.map((k,n)=>d[k]?`${n+1} = ${d[k]}`:''),'Fill in a whole number from 1 to 5 in the Score column. Leave it empty if not scored yet.'].filter(Boolean);
+      const n=Math.max(sup.length,info.length);
+      for(let r=0;r<n;r++){const e=sup[r];const v=e?(+(S.scores[e[1].id]||{})[d.id]||0):0;rows.push([e?e[0]:'',e?e[1].name:'',v>0?v:'',e?noteOf(e[1].id,d.id):'','',info[r]||'']);}
+      return {name:shName(d,i),xml:sheetXml(rows,[26,32,14,50,3,70],{freezeCols:2,valid:`C2:C${Math.max(2,sup.length+1)}`})};});
     const guide=[['Criterion','Dimension','What it measures','1 means','2 means','3 means','4 means','5 means']];
     o.forEach(d=>{const p=S.persp.find(q=>q.id===d.pid);guide.push([crit(d),p?p.name:'',d.desc||'',...LVK.map(k=>d[k]||'')]);});
-    guide.push([]);guide.push(['How to use: fill in a whole number from 1 to 5 per supplier and criterion on the Scores sheet, and a comment where it helps. Leave a cell empty if it is not scored yet. Do not rename the header row, the suppliers or the sheet. Then upload the file in step 1 of the tool.']);
-    const wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Scores" sheetId="1" r:id="rId1"/><sheet name="Guide" sheetId="2" r:id="rId2"/></sheets></workbook>';
-    const styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF173E30"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    guide.push([]);guide.push(['How to use: each criterion has its own sheet. Fill in a whole number from 1 to 5 per supplier in the Score column, and a comment where it helps. Leave a cell empty if it is not scored yet. Do not rename the header row, the suppliers or the sheets. Then upload the file in step 1 of the tool.']);
+    sheets.push({name:'Guide',xml:sheetXml(guide,[38,26,50,34,34,34,34,34])});
+    const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',RT='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    const wb=H+`<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${RT}"><sheets>`+sheets.map((t,i)=>`<sheet name="${x(t.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>';
+    const styles=H+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF173E30"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
     return zip([
-      ['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
-      ['_rels/.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+      ['[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+sheets.map((t,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ['_rels/.rels',H+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${RT}/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
       ['xl/workbook.xml',wb],
-      ['xl/_rels/workbook.xml.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ['xl/_rels/workbook.xml.rels',H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((t,i)=>`<Relationship Id="rId${i+1}" Type="${RT}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+`<Relationship Id="rId${sheets.length+1}" Type="${RT}/styles" Target="styles.xml"/></Relationships>`],
       ['xl/styles.xml',styles],
-      ['xl/worksheets/sheet1.xml',sheetXml(rows,[26,32,...o.map(()=>16),...o.map(()=>34)],{freezeCols:2,valid:`C2:${colL(1+n)}${last}`})],
-      ['xl/worksheets/sheet2.xml',sheetXml(guide,[38,26,50,34,34,34,34,34])]]);}
+      ...sheets.map((t,i)=>[`xl/worksheets/sheet${i+1}.xml`,t.xml])]);}
   /* --- read --- */
   async function unzip(buf){const dv=new DataView(buf),u8=new Uint8Array(buf);let e=buf.byteLength-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('zip');
     const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const out={};
@@ -2009,27 +2015,32 @@ document.getElementById('btnReset').addEventListener('click',()=>{const pg=S.pag
   async function readScores(buf){const z=await unzip(buf);const P=t=>new DOMParser().parseFromString(t,'application/xml');
     if(!z['xl/workbook.xml'])throw new Error('zip');
     const wb=P(z['xl/workbook.xml']),rel=z['xl/_rels/workbook.xml.rels']?P(z['xl/_rels/workbook.xml.rels']):null;const sh=tag(wb,'sheet');
-    const pick=sh.find(k=>(k.getAttribute('name')||'').toLowerCase()==='scores')||sh[0];let path='xl/worksheets/sheet1.xml';
-    if(pick&&rel){const rid=pick.getAttribute('r:id')||[...pick.attributes].filter(a=>a.localName==='id').map(a=>a.value)[0];const r=tag(rel,'Relationship').find(k=>k.getAttribute('Id')===rid);if(r){const t=r.getAttribute('Target');path=t.startsWith('/')?t.slice(1):'xl/'+t;}}
-    if(!z[path])throw new Error('zip');
     const ss=z['xl/sharedStrings.xml']?kids(P(z['xl/sharedStrings.xml']).documentElement,'si').map(strOf):[];
-    const rows=[];tag(P(z[path]),'row').forEach(r=>{const row=[];let ci=0;kids(r,'c').forEach(c=>{const ref=c.getAttribute('r');if(ref){let n=0;for(const ch of ref.replace(/\d+/g,''))n=n*26+ch.charCodeAt(0)-64;ci=n-1;}
+    return sh.map((pick,idx)=>{let path=`xl/worksheets/sheet${idx+1}.xml`;
+    if(rel){const rid=pick.getAttribute('r:id')||[...pick.attributes].filter(a=>a.localName==='id').map(a=>a.value)[0];const r=tag(rel,'Relationship').find(k=>k.getAttribute('Id')===rid);if(r){const t=r.getAttribute('Target');path=t.startsWith('/')?t.slice(1):'xl/'+t;}}
+    const rows=[];if(z[path])tag(P(z[path]),'row').forEach(r=>{const row=[];let ci=0;kids(r,'c').forEach(c=>{const ref=c.getAttribute('r');if(ref){let n=0;for(const ch of ref.replace(/\d+/g,''))n=n*26+ch.charCodeAt(0)-64;ci=n-1;}
         const t=c.getAttribute('t'),v=kids(c,'v')[0];let val='';if(t==='inlineStr')val=strOf(c);else if(v){val=t==='s'?(ss[+v.textContent]||''):v.textContent;}row[ci]=val;ci++;});
       rows.push(Array.from(row,v=>v===undefined?'':v));});
-    return rows;}
-  function applyScores(rows){if(rows.length<2)throw new Error('The sheet has no supplier rows.');
-    const o=orderedDims();const key=h=>hkey(String(h).replace(/^\s*\d+\.\s*/,''));const H=rows[0].map(h=>String(h||''));
-    const si=H.findIndex(h=>hkey(h)==='supplier');if(si<0)throw new Error('No "Supplier" column found in the first row.');
+    return rows;});}
+  function applyScores(sheets){const o=orderedDims();const key=h=>hkey(String(h).replace(/^\s*\d+\.\s*/,''));
+    let nS=0,nC=0,found=0;const done=new Set(),unknown=[],bad=[];
+    sheets.forEach(rows=>{if(rows.length<2)return;
+    // one sheet per criterion: "Score: <criterion>" and "Comment" columns. Turn it into the wide layout.
+    const h0=rows[0].map(h=>String(h||''));const sj=h0.findIndex(h=>/^\s*score\s*:/i.test(h));
+    if(sj>=0){const cn=h0[sj].replace(/^\s*score\s*:/i,'').trim(),cj=h0.findIndex(h=>/^\s*comment/i.test(h)),nj=h0.findIndex(h=>hkey(h)==='supplier');if(nj<0)return;
+      rows=rows.map((r,i)=>i?[r[nj],r[sj],cj>=0?r[cj]:'']:['Supplier',cn,'Comment: '+cn]);}
+    const H=rows[0].map(h=>String(h||''));
+    const si=H.findIndex(h=>hkey(h)==='supplier');if(si<0)return;
     const sc={},cm={};H.forEach((h,j)=>{const isC=/^\s*comment\s*:/i.test(h);const k=key(isC?h.replace(/^\s*comment\s*:/i,''):h);const d=o.find(q=>key(q.name)===k);if(d)(isC?cm:sc)[d.id]=j;});
-    if(!Object.keys(sc).length)throw new Error('None of the criteria columns were found. Keep the header row as downloaded.');
-    let nS=0,nC=0,sup=0;const unknown=[],bad=[];
-    rows.slice(1).forEach(r=>{const name=String(r[si]||'').trim();if(!name)return;const s=S.sup.find(q=>q.name.trim().toLowerCase()===name.toLowerCase());if(!s){unknown.push(name);return;}
+    if(!Object.keys(sc).length)return;found++;
+    rows.slice(1).forEach(r=>{const name=String(r[si]||'').trim();if(!name)return;const s=S.sup.find(q=>q.name.trim().toLowerCase()===name.toLowerCase());if(!s){if(!unknown.includes(name))unknown.push(name);return;}
       S.scores[s.id]=S.scores[s.id]||{};let any=false;
       Object.keys(sc).forEach(id=>{const raw=String(r[sc[id]]===undefined?'':r[sc[id]]).trim();if(!raw)return;const v=+raw.replace(',','.');
         if(!(Number.isInteger(v)&&v>=1&&v<=5)){bad.push(`${name}: "${raw}"`);return;}if(S.scores[s.id][id]!==v){S.scores[s.id][id]=v;nS++;}any=true;});
       Object.keys(cm).forEach(id=>{const t=String(r[cm[id]]===undefined?'':r[cm[id]]).trim();if(t&&t!==noteOf(s.id,id)){setNote(s.id,id,t);nC++;}if(t)any=true;});
-      if(any)sup++;});
-    return {nS,nC,sup,unknown,bad};}
+      if(any)done.add(s.id);});});
+    if(!found)throw new Error('No criterion sheets were found. Keep the sheets and header rows as downloaded.');
+    return {nS,nC,sup:done.size,unknown,bad};}
   const msg=document.getElementById('xlMsg'),fi=document.getElementById('xlFile');
   const say=(t,cls)=>{msg.className='small '+(cls||'');msg.textContent=t;};
   document.getElementById('btnXlDown').addEventListener('click',async()=>{try{if(!activeCats().length){say('Include at least one subcategory first.','err');return;}
